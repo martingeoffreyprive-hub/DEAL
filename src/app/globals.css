@@ -1,0 +1,280 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   QUOTEVOICE BRAND - Design System
+   Bleu (#3B82F6) + Vert (#10B981) + Slate
+   ============================================ */
+
+@layer base {
+  :root {
+    /* Light mode */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 217 91% 60%; /* Bleu #3B82F6 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 160 84% 39%; /* Vert #10B981 */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 91% 60%;
+    --radius: 0.75rem;
+
+    /* QuoteVoice Custom */
+    --qv-success: 160 84% 39%;
+    --qv-gradient-start: 217 91% 60%;
+    --qv-gradient-end: 199 89% 48%;
+  }
+
+  /* Dark mode - Soft Slate (pas noir agressif) */
+  .dark {
+    --background: 222 47% 11%; /* Slate #0f172a */
+    --foreground: 210 40% 98%; /* Slate-50 #f8fafc */
+    --card: 217 33% 17%; /* Slate-800 #1e293b */
+    --card-foreground: 210 40% 98%;
+    --popover: 217 33% 17%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 91% 60%; /* Bleu #3B82F6 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217 33% 22%; /* Slate-700 */
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 22%;
+    --muted-foreground: 215 20% 65%; /* Slate-400 */
+    --accent: 160 84% 39%; /* Vert #10B981 */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 63% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 217 33% 25%; /* Plus visible */
+    --input: 217 33% 22%;
+    --ring: 217 91% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply dark; /* Force dark mode par défaut */
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* ============================================
+   ANIMATIONS - Smooth & Premium
+   ============================================ */
+
+@layer utilities {
+  /* Transitions fluides */
+  .transition-qv {
+    @apply transition-all duration-200 ease-out;
+  }
+
+  /* Hover lift effect */
+  .hover-lift {
+    @apply transition-all duration-200 ease-out;
+  }
+  .hover-lift:hover {
+    @apply -translate-y-0.5 shadow-lg;
+  }
+
+  /* Glow effect pour le bouton micro */
+  .glow-primary {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.4),
+                0 0 40px hsl(var(--primary) / 0.2),
+                0 0 60px hsl(var(--primary) / 0.1);
+  }
+
+  .glow-primary-lg {
+    box-shadow: 0 0 30px hsl(var(--primary) / 0.5),
+                0 0 60px hsl(var(--primary) / 0.3),
+                0 0 90px hsl(var(--primary) / 0.15);
+  }
+
+  /* Gradient text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(199 89% 48%) 100%);
+  }
+
+  /* Gradient background hero - plus subtil */
+  .bg-gradient-hero {
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.08) 0%, hsl(199 89% 48% / 0.05) 100%);
+  }
+
+  /* Glass effect */
+  .glass {
+    @apply bg-card/80 backdrop-blur-xl border border-white/10;
+  }
+
+  /* Noise texture overlay */
+  .noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  }
+}
+
+/* ============================================
+   KEYFRAMES - Animations
+   ============================================ */
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.4),
+                0 0 40px hsl(var(--primary) / 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px hsl(var(--primary) / 0.6),
+                0 0 60px hsl(var(--primary) / 0.3);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes recording-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes wave {
+  0% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.5);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-recording {
+  animation: recording-pulse 1.5s ease-in-out infinite;
+}
+
+/* Sound wave bars animation */
+.wave-bar {
+  animation: wave 0.5s ease-in-out infinite;
+}
+.wave-bar:nth-child(1) { animation-delay: 0s; }
+.wave-bar:nth-child(2) { animation-delay: 0.1s; }
+.wave-bar:nth-child(3) { animation-delay: 0.2s; }
+.wave-bar:nth-child(4) { animation-delay: 0.3s; }
+.wave-bar:nth-child(5) { animation-delay: 0.4s; }
+
+/* ============================================
+   COMPONENTS
+   ============================================ */
+
+/* Big stat number */
+.stat-huge {
+  @apply text-5xl md:text-6xl font-bold tracking-tight;
+  background: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(160 84% 45%) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Card hover effect */
+.card-interactive {
+  @apply transition-all duration-200 ease-out cursor-pointer border-border/50;
+}
+.card-interactive:hover {
+  @apply border-primary/60 shadow-lg shadow-primary/10 bg-card/80;
+  transform: translateY(-2px);
+}
+
+/* Better button visibility in dark mode */
+.btn-visible {
+  @apply bg-primary text-primary-foreground shadow-md hover:shadow-lg hover:bg-primary/90;
+}
+
+/* Subtle card style */
+.card-subtle {
+  @apply bg-card/50 backdrop-blur-sm border-border/30;
+}
+
+/* Mic button styles */
+.mic-button {
+  @apply relative rounded-full transition-all duration-300 ease-out shadow-lg;
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(199 89% 48%) 100%);
+}
+
+.mic-button::before {
+  content: '';
+  @apply absolute inset-0 rounded-full opacity-0 transition-opacity duration-300;
+  background: linear-gradient(135deg, hsl(199 89% 48%) 0%, hsl(var(--accent)) 100%);
+}
+
+.mic-button:hover::before {
+  @apply opacity-100;
+}
+
+.mic-button:hover {
+  transform: scale(1.05);
+  @apply shadow-xl;
+}
+
+.mic-button.recording {
+  @apply animate-pulse-glow;
+  background: linear-gradient(135deg, hsl(0 84% 60%) 0%, hsl(0 84% 50%) 100%);
+}
+
+/* Quote PDF preview */
+.quote-pdf-preview {
+  @apply bg-white shadow-lg rounded-lg overflow-hidden;
+}
+
+/* ============================================
+   RESPONSIVE & PRINT
+   ============================================ */
+
+/* Smooth scrolling */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
