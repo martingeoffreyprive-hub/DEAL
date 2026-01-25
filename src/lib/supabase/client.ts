@@ -1,4 +1,4 @@
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 export function createClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -14,5 +14,5 @@ export function createClient() {
     throw new Error(`Supabase config missing: URL=${!!supabaseUrl}, Key=${!!supabaseAnonKey}`);
   }
 
-  return createBrowserClient(supabaseUrl, supabaseAnonKey);
+  return createSupabaseClient(supabaseUrl, supabaseAnonKey);
 }
