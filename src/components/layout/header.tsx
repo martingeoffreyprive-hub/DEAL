@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { FileText, Menu, User as UserIcon, LogOut, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { LocaleSelector } from "@/components/locale/locale-selector";
 
 interface HeaderProps {
   user: User;
@@ -63,8 +64,14 @@ export function Header({ user, profile }: HeaderProps) {
           </Link>
         </div>
 
-        {/* User Menu */}
-        <DropdownMenu>
+        {/* Locale Selector & User Menu */}
+        <div className="flex items-center gap-3">
+          {/* Locale Selector - hidden on mobile, shown in mobile menu */}
+          <div className="hidden sm:block">
+            <LocaleSelector size="sm" />
+          </div>
+
+          <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
               <Avatar className="h-10 w-10">
@@ -104,12 +111,19 @@ export function Header({ user, profile }: HeaderProps) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        </div>
       </div>
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <nav className="border-t bg-white p-4 lg:hidden">
           <div className="flex flex-col space-y-2">
+            {/* Locale Selector for Mobile */}
+            <div className="px-3 py-2 border-b pb-3 mb-1">
+              <p className="text-xs text-muted-foreground mb-2">Pays / Locale</p>
+              <LocaleSelector size="sm" showLabel />
+            </div>
+
             <Link
               href="/dashboard"
               className="rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-100"

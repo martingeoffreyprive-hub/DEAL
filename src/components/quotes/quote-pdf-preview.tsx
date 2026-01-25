@@ -41,7 +41,8 @@ import {
   Globe,
   LayoutGrid,
 } from "lucide-react";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { useLocaleContext } from "@/contexts/locale-context";
+import { formatDateWithLocale } from "@/lib/utils";
 import { SECTORS, TAX_RATES, type Quote, type QuoteItem, type Profile, type SectorType } from "@/types/database";
 import {
   type PDFDensity,
@@ -57,6 +58,7 @@ import {
   formatLocaleCurrency,
   generateLegalMentions,
   getTaxRates,
+  getQuoteLocale,
   type LocaleCode,
 } from "@/lib/locale-packs";
 
@@ -400,7 +402,7 @@ const QuotePDFDocument = ({
             </View>
             <View style={styles.infoBlock}>
               <Text style={styles.infoLabel}>Date</Text>
-              <Text style={styles.infoValue}>{formatDate(quote.created_at)}</Text>
+              <Text style={styles.infoValue}>{formatDateWithLocale(quote.created_at, locale)}</Text>
             </View>
             <View style={styles.infoBlock}>
               <Text style={styles.infoLabel}>Secteur</Text>
@@ -411,7 +413,7 @@ const QuotePDFDocument = ({
             {quote.valid_until && (
               <View style={styles.infoBlock}>
                 <Text style={styles.infoLabel}>{localePack.vocabulary.validity}</Text>
-                <Text style={styles.infoValue}>{formatDate(quote.valid_until)}</Text>
+                <Text style={styles.infoValue}>{formatDateWithLocale(quote.valid_until, locale)}</Text>
               </View>
             )}
           </View>
@@ -573,8 +575,8 @@ export function QuotePDFPreview({ quote, items, profile }: Omit<QuotePDFProps, '
   const [depositPercent, setDepositPercent] = useState(0);
   const [showPDFViewer, setShowPDFViewer] = useState(false);
 
-  // New adaptive settings
-  const [locale, setLocale] = useState<LocaleCode>('fr-BE');
+  // New adaptive settings - use quote's stored locale or fallback to fr-BE
+  const [locale, setLocale] = useState<LocaleCode>(() => getQuoteLocale(quote.locale));
   const [density, setDensity] = useState<PDFDensity>(() => suggestDensity(items.length));
   const [branding, setBranding] = useState<Partial<PDFBranding>>({});
   const [showSettings, setShowSettings] = useState(false);
@@ -679,7 +681,7 @@ export function QuotePDFPreview({ quote, items, profile }: Omit<QuotePDFProps, '
           </Select>
           {depositPercent > 0 && (
             <span className="text-sm font-medium text-accent">
-              = {formatCurrency(depositAmount)}
+              = {formatLocaleCurrency(depositAmount, localePack)}
             </span>
           )}
         </div>
@@ -910,7 +912,7 @@ function QuoteHTMLPreview({
               </div>
               <div>
                 <p className="text-xs text-gray-500 uppercase">Date</p>
-                <p className="font-bold text-gray-900">{formatDate(quote.created_at)}</p>
+                <p className="font-bold text-gray-900">{formatDateWithLocale(quote.created_at, locale || 'fr-BE')}</p>
               </div>
               <div>
                 <p className="text-xs text-gray-500 uppercase">Secteur</p>
@@ -919,7 +921,7 @@ function QuoteHTMLPreview({
               {quote.valid_until && (
                 <div>
                   <p className="text-xs text-gray-500 uppercase">{localePack.vocabulary.validity}</p>
-                  <p className="font-bold text-gray-900">{formatDate(quote.valid_until)}</p>
+                  <p className="font-bold text-gray-900">{formatDateWithLocale(quote.valid_until, locale || 'fr-BE')}</p>
                 </div>
               )}
             </div>
@@ -974,10 +976,10 @@ function QuoteHTMLPreview({
                       <td className="p-2 text-center text-gray-900">{item.quantity}</td>
                       <td className="p-2 text-center text-gray-900">{item.unit}</td>
                       {config.showUnitPrices && (
-                        <td className="p-2 text-right text-gray-900">{formatCurrency(item.unit_price)}</td>
+                        <td className="p-2 text-right text-gray-900">{formatLocaleCurrency(item.unit_price, localePack)}</td>
                       )}
                       <td className="p-2 text-right font-medium text-gray-900">
-                        {formatCurrency(item.quantity * item.unit_price)}
+                        {formatLocaleCurrency(item.quantity * item.unit_price, localePack)}
                       </td>
                     </tr>
                   ))}
@@ -991,11 +993,11 @@ function QuoteHTMLPreview({
             <div className="w-64 space-y-1">
               <div className="flex justify-between py-1">
                 <span className="text-gray-500">{localePack.vocabulary.subtotal}</span>
-                <span className="font-medium text-gray-900">{formatCurrency(quote.subtotal)}</span>
+                <span className="font-medium text-gray-900">{formatLocaleCurrency(quote.subtotal, localePack)}</span>
               </div>
               <div className="flex justify-between py-1">
                 <span className="text-gray-500">{localePack.vocabulary.vat} ({quote.tax_rate}%)</span>
-                <span className="font-medium text-gray-900">{formatCurrency(quote.tax_amount)}</span>
+                <span className="font-medium text-gray-900">{formatLocaleCurrency(quote.tax_amount, localePack)}</span>
               </div>
               <div
                 className="flex justify-between py-2 border-t-2 mt-2"
@@ -1003,7 +1005,7 @@ function QuoteHTMLPreview({
               >
                 <span className="font-bold text-gray-900">{localePack.vocabulary.total}</span>
                 <span className="font-bold text-lg" style={{ color: branding.primaryColor }}>
-                  {formatCurrency(quote.total)}
+                  {formatLocaleCurrency(quote.total, localePack)}
                 </span>
               </div>
               {depositPercent > 0 && (
@@ -1012,11 +1014,11 @@ function QuoteHTMLPreview({
                     <span className="text-emerald-600 font-medium">
                       {localePack.vocabulary.deposit} ({depositPercent}%)
                     </span>
-                    <span className="font-bold text-emerald-600">{formatCurrency(depositAmount)}</span>
+                    <span className="font-bold text-emerald-600">{formatLocaleCurrency(depositAmount, localePack)}</span>
                   </div>
                   <div className="flex justify-between py-1">
                     <span className="text-gray-500">{localePack.vocabulary.balance}</span>
-                    <span className="font-medium text-gray-900">{formatCurrency(remainingAmount)}</span>
+                    <span className="font-medium text-gray-900">{formatLocaleCurrency(remainingAmount, localePack)}</span>
                   </div>
                 </>
               )}

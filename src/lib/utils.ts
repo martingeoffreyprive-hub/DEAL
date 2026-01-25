@@ -1,35 +1,84 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { getLocalePack, type LocaleCode } from "@/lib/locale-packs";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(amount);
+/**
+ * Format currency according to a specific locale.
+ * For components with locale context, use useLocaleContext().formatCurrency instead.
+ * This function is for server-side or non-React contexts.
+ */
+export function formatCurrencyWithLocale(amount: number, localeCode: LocaleCode = 'fr-BE'): string {
+  const localePack = getLocalePack(localeCode);
+  const { symbol, position, decimalSeparator, thousandsSeparator, decimals } = localePack.currency;
+
+  const formatted = amount
+    .toFixed(decimals)
+    .replace('.', decimalSeparator)
+    .replace(/\B(?=(\d{3})+(?!\d))/g, thousandsSeparator);
+
+  return position === 'before'
+    ? `${symbol}${formatted}`
+    : `${formatted} ${symbol}`;
 }
 
-export function formatDate(date: string | Date): string {
+/**
+ * Format date according to a specific locale.
+ * For components with locale context, use useLocaleContext().formatDate instead.
+ * This function is for server-side or non-React contexts.
+ */
+export function formatDateWithLocale(date: string | Date, localeCode: LocaleCode = 'fr-BE'): string {
+  const localePack = getLocalePack(localeCode);
   const d = typeof date === 'string' ? new Date(date) : date;
-  return new Intl.DateTimeFormat('fr-FR', {
+  return d.toLocaleDateString(localePack.date.locale, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
-  }).format(d);
+  });
 }
 
-export function formatDateTime(date: string | Date): string {
+/**
+ * Format date and time according to a specific locale.
+ * For components with locale context, use useLocaleContext().formatDateTime instead.
+ * This function is for server-side or non-React contexts.
+ */
+export function formatDateTimeWithLocale(date: string | Date, localeCode: LocaleCode = 'fr-BE'): string {
+  const localePack = getLocalePack(localeCode);
   const d = typeof date === 'string' ? new Date(date) : date;
-  return new Intl.DateTimeFormat('fr-FR', {
+  return d.toLocaleDateString(localePack.date.locale, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  }).format(d);
+  });
+}
+
+/**
+ * @deprecated Use useLocaleContext().formatCurrency or formatCurrencyWithLocale instead.
+ * This function is kept for backwards compatibility but defaults to fr-BE.
+ */
+export function formatCurrency(amount: number): string {
+  return formatCurrencyWithLocale(amount, 'fr-BE');
+}
+
+/**
+ * @deprecated Use useLocaleContext().formatDate or formatDateWithLocale instead.
+ * This function is kept for backwards compatibility but defaults to fr-BE.
+ */
+export function formatDate(date: string | Date): string {
+  return formatDateWithLocale(date, 'fr-BE');
+}
+
+/**
+ * @deprecated Use useLocaleContext().formatDateTime or formatDateTimeWithLocale instead.
+ * This function is kept for backwards compatibility but defaults to fr-BE.
+ */
+export function formatDateTime(date: string | Date): string {
+  return formatDateTimeWithLocale(date, 'fr-BE');
 }
 
 export function calculateTotal(quantity: number, unitPrice: number): number {

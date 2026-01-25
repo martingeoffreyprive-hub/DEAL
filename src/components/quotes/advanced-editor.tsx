@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -57,7 +57,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
-import { formatCurrency } from "@/lib/utils";
+import { useLocaleContext } from "@/contexts/locale-context";
+import { formatCurrency as formatCurrencyFallback } from "@/lib/utils";
+import { validateCompliance, getQuoteLocalePack, getQuoteLocale } from "@/lib/locale-packs";
+import { ComplianceAlert } from "./compliance-alert";
 import {
   SECTORS,
   TAX_RATES,
@@ -228,7 +231,7 @@ function InlineEdit({
       }}
       className={`cursor-pointer hover:bg-muted/50 px-1 rounded transition-colors ${className}`}
     >
-      {type === "currency" ? formatCurrency(Number(value)) : value}
+      {type === "currency" ? formatCurrencyFallback(Number(value)) : value}
       {suffix}
     </span>
   );
@@ -321,7 +324,7 @@ function SortableItem({
           />
           <span className="text-muted-foreground">=</span>
           <span className="font-semibold text-primary">
-            {formatCurrency(item.quantity * item.unit_price)}
+            {formatCurrencyFallback(item.quantity * item.unit_price)}
           </span>
         </div>
       </div>
@@ -345,11 +348,11 @@ function DragOverlayItem({ item }: { item: QuoteItem }) {
       <div className="flex-1">
         <p className="text-sm font-medium truncate">{item.description || "Sans description"}</p>
         <p className="text-xs text-muted-foreground">
-          {item.quantity} {item.unit} × {formatCurrency(item.unit_price)}
+          {item.quantity} {item.unit} × {formatCurrencyFallback(item.unit_price)}
         </p>
       </div>
       <span className="font-semibold text-primary">
-        {formatCurrency(item.quantity * item.unit_price)}
+        {formatCurrencyFallback(item.quantity * item.unit_price)}
       </span>
     </div>
   );
@@ -408,7 +411,7 @@ function DroppableSection({
         />
         <Badge variant="secondary">{section.items.length} lignes</Badge>
         <span className="font-semibold text-primary">
-          {formatCurrency(sectionTotal)}
+          {formatCurrencyFallback(sectionTotal)}
         </span>
         <Button
           variant="ghost"
@@ -837,7 +840,7 @@ function MaterialsList({
                 step="0.01"
               />
               <span className="w-20 text-right font-medium">
-                {formatCurrency(material.quantity * material.unitPrice)}
+                {formatCurrencyFallback(material.quantity * material.unitPrice)}
               </span>
               <Button
                 variant="ghost"
@@ -851,7 +854,7 @@ function MaterialsList({
           ))}
           <div className="flex justify-end pt-2 border-t">
             <span className="font-semibold">
-              Total matériaux: {formatCurrency(total)}
+              Total matériaux: {formatCurrencyFallback(total)}
             </span>
           </div>
         </div>
@@ -958,7 +961,7 @@ function LaborEstimates({
               />
               <span className="text-xs text-muted-foreground">€/h =</span>
               <span className="w-20 text-right font-medium">
-                {formatCurrency(estimate.hours * estimate.hourlyRate * estimate.workers)}
+                {formatCurrencyFallback(estimate.hours * estimate.hourlyRate * estimate.workers)}
               </span>
               <Button
                 variant="ghost"
@@ -975,7 +978,7 @@ function LaborEstimates({
               Total: {totalHours} heures
             </span>
             <span className="font-semibold">
-              Coût main d'œuvre: {formatCurrency(totalCost)}
+              Coût main d'œuvre: {formatCurrencyFallback(totalCost)}
             </span>
           </div>
         </div>
@@ -993,6 +996,33 @@ export function AdvancedQuoteEditor({
   saving,
 }: AdvancedEditorProps) {
   const { toast } = useToast();
+  const { formatCurrency: contextFormatCurrency, locale: globalLocale, localePack: globalLocalePack } = useLocaleContext();
+
+  // Use quote's stored locale for display, fall back to global locale for new quotes
+  const quoteLocale = getQuoteLocale(quote.locale);
+  const quoteLocalePack = getQuoteLocalePack(quote.locale);
+
+  // Format currency using the quote's locale (preserves historical formatting)
+  const formatCurrency = useCallback(
+    (amount: number) => {
+      const { symbol, position, decimalSeparator, thousandsSeparator, decimals } =
+        quoteLocalePack.currency;
+
+      const formatted = amount
+        .toFixed(decimals)
+        .replace('.', decimalSeparator)
+        .replace(/\B(?=(\d{3})+(?!\d))/g, thousandsSeparator);
+
+      return position === 'before'
+        ? `${symbol}${formatted}`
+        : `${formatted} ${symbol}`;
+    },
+    [quoteLocalePack]
+  );
+
+  // For compliance, use the quote's locale
+  const locale = quoteLocale;
+  const localePack = quoteLocalePack;
 
   // Get sector configuration
   const sectorConfig = getSectorConfig(quote.sector as SectorType);
@@ -1164,6 +1194,20 @@ export function AdvancedQuoteEditor({
   const taxRate = localQuote.tax_rate || 20;
   const taxAmount = (subtotal * taxRate) / 100;
   const total = subtotal + taxAmount;
+
+  // Compliance validation
+  const complianceResult = useMemo(() => {
+    const data = {
+      ...localQuote,
+      tax_rate: taxRate,
+      currency: localePack.currency.code,
+      vat_number: profile?.siret,
+      siret: profile?.siret,
+      sector: localQuote.sector,
+      notes: localQuote.notes,
+    };
+    return validateCompliance(data, locale);
+  }, [localQuote, taxRate, localePack.currency.code, profile?.siret, locale]);
 
   // Update quote field
   const updateQuote = (field: keyof Quote, value: any) => {
@@ -1463,6 +1507,12 @@ export function AdvancedQuoteEditor({
             minRows={2}
           />
         </div>
+
+        {/* Compliance Alert */}
+        <ComplianceAlert
+          result={complianceResult}
+          localeName={localePack.name}
+        />
 
         {/* Totals */}
         <div className="p-4 border rounded-lg bg-card">

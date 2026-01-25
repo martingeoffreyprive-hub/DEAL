@@ -212,3 +212,22 @@ export function getStandardTaxRate(localeCode: LocaleCode): number {
   const pack = getLocalePack(localeCode);
   return pack.tax.standard;
 }
+
+/**
+ * Récupère la locale d'un devis avec fallback vers fr-BE
+ * Utilisé pour préserver le formatage historique des devis existants
+ */
+export function getQuoteLocale(quoteLocale: string | null | undefined): LocaleCode {
+  if (quoteLocale && isValidLocaleCode(quoteLocale)) {
+    return quoteLocale;
+  }
+  // Fallback to fr-BE for existing quotes without locale
+  return DEFAULT_LOCALE;
+}
+
+/**
+ * Récupère le pack de locale pour un devis
+ */
+export function getQuoteLocalePack(quoteLocale: string | null | undefined): LocalePack {
+  return getLocalePack(getQuoteLocale(quoteLocale));
+}

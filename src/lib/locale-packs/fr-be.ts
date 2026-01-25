@@ -120,6 +120,16 @@ export const frBE: LocalePack = {
         },
         severity: 'warning',
       },
+      {
+        id: 'non_standard_vat_be',
+        description: 'Le taux TVA utilisé diffère du taux standard belge (21%). Taux disponibles: 0%, 6%, 12%, 21%',
+        check: (data) => {
+          if (!data.tax_rate && data.tax_rate !== 0) return true;
+          const validRates = [0, 6, 12, 21];
+          return validRates.includes(data.tax_rate);
+        },
+        severity: 'info',
+      },
     ],
   },
 

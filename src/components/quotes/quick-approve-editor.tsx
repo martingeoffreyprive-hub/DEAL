@@ -53,7 +53,8 @@ import {
   ThumbsDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { useLocaleContext } from "@/contexts/locale-context";
+import { formatCurrency as formatCurrencyFallback, formatDate as formatDateFallback } from "@/lib/utils";
 import { LegalRiskAlert } from "./legal-risk-alert";
 import type { Quote, QuoteItem, Profile, SectorType, SECTORS } from "@/types/database";
 import type { LocaleCode } from "@/lib/locale-packs";
@@ -156,7 +157,7 @@ function QuickItem({
             </div>
             <span className="text-sm">=</span>
             <span className="font-semibold text-primary">
-              {formatCurrency(item.quantity * editPrice)}
+              {formatCurrencyFallback(item.quantity * editPrice)}
             </span>
             <div className="flex-1" />
             <Button variant="ghost" size="sm" onClick={handleCancelEdit}>
@@ -188,9 +189,9 @@ function QuickItem({
           <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
             <span>{item.quantity} {item.unit}</span>
             <span>×</span>
-            <span>{formatCurrency(item.unit_price)}</span>
+            <span>{formatCurrencyFallback(item.unit_price)}</span>
             <span>=</span>
-            <span className="font-semibold text-foreground">{formatCurrency(total)}</span>
+            <span className="font-semibold text-foreground">{formatCurrencyFallback(total)}</span>
           </div>
           {validation.status === "modified" && (
             <p className="text-xs text-blue-600 mt-1">
@@ -298,6 +299,8 @@ export function QuickApproveEditor({
   onDownloadPDF,
   saving = false,
 }: QuickApproveEditorProps) {
+  const { formatCurrency, formatDate } = useLocaleContext();
+
   // Validation state for each item
   const [validations, setValidations] = useState<Record<string, ItemValidation>>(() => {
     const initial: Record<string, ItemValidation> = {};

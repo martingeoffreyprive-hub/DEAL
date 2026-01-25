@@ -129,6 +129,25 @@ export const frCH: LocalePack = {
         },
         severity: 'info',
       },
+      {
+        id: 'currency_mismatch_ch',
+        description: 'En Suisse, les devis doivent être en CHF (franc suisse), pas en EUR',
+        check: (data) => {
+          // Pass if currency is CHF, undefined, or not set
+          return !data.currency || data.currency === 'CHF';
+        },
+        severity: 'warning',
+      },
+      {
+        id: 'non_standard_vat_ch',
+        description: 'Le taux TVA utilisé diffère du taux standard suisse (8.1%). Taux disponibles: 0%, 2.6%, 3.8%, 8.1%',
+        check: (data) => {
+          if (!data.tax_rate && data.tax_rate !== 0) return true;
+          const validRates = [0, 2.6, 3.8, 8.1];
+          return validRates.includes(data.tax_rate);
+        },
+        severity: 'info',
+      },
     ],
   },
 

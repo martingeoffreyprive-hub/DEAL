@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Globe } from "lucide-react";
-import { useLocale } from "@/hooks/use-locale";
+import { useLocaleContext } from "@/contexts/locale-context";
 import { getAllLocalePacks, type LocaleCode } from "@/lib/locale-packs";
 
 interface LocaleSelectorProps {
@@ -22,7 +22,7 @@ export function LocaleSelector({
   size = "default",
   className = "",
 }: LocaleSelectorProps) {
-  const { locale, setLocale } = useLocale();
+  const { locale, setLocale } = useLocaleContext();
   const allLocales = getAllLocalePacks();
 
   return (

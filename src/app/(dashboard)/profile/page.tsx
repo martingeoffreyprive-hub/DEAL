@@ -17,7 +17,10 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { SECTORS, type Profile, type SectorType } from "@/types/database";
-import { Loader2, Save, Upload, Building2, CreditCard, FileText } from "lucide-react";
+import { Loader2, Save, Upload, Building2, CreditCard, FileText, Sparkles, Globe } from "lucide-react";
+import { useLocaleContext } from "@/contexts/locale-context";
+import { generateLegalMentions, detectLocale, getLocalePack } from "@/lib/locale-packs";
+import { Badge } from "@/components/ui/badge";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<Partial<Profile>>({});
@@ -26,6 +29,56 @@ export default function ProfilePage() {
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
   const supabase = createClient();
+  const { locale, localePack, setLocale } = useLocaleContext();
+  const [detectedLocale, setDetectedLocale] = useState<string | null>(null);
+
+  // Detect locale from VAT number or postal code
+  const handleDetectLocale = (vatNumber?: string, postalCode?: string) => {
+    const detected = detectLocale({
+      vatNumber: vatNumber || profile.siret || undefined,
+      postalCode: postalCode || profile.postal_code || undefined,
+    });
+
+    if (detected !== locale) {
+      setDetectedLocale(detected);
+      const detectedPack = getLocalePack(detected);
+      toast({
+        title: `${detectedPack.flag} Locale détectée`,
+        description: `Vos informations correspondent à ${detectedPack.country}. Cliquez pour appliquer.`,
+        action: (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setLocale(detected);
+              setDetectedLocale(null);
+              toast({
+                title: "Locale mise à jour",
+                description: `Locale changée vers ${detectedPack.name}`,
+              });
+            }}
+          >
+            Appliquer
+          </Button>
+        ),
+      });
+    } else {
+      setDetectedLocale(null);
+    }
+  };
+
+  // Generate legal mentions based on current locale
+  const handleGenerateLegalMentions = () => {
+    const mentions = generateLegalMentions(locale, {
+      includeDataProtection: true,
+      includeInsurance: true,
+    });
+    updateProfile("legal_mentions", mentions);
+    toast({
+      title: "Mentions générées",
+      description: `Mentions légales ${localePack.country} ajoutées`,
+    });
+  };
 
   const loadProfile = useCallback(async () => {
     try {
@@ -258,12 +311,20 @@ export default function ProfilePage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="siret">Numéro de TVA</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="siret">Numéro de TVA</Label>
+                {detectedLocale && detectedLocale !== locale && (
+                  <Badge variant="secondary" className="gap-1 text-xs">
+                    {getLocalePack(detectedLocale as any).flag} Détecté: {getLocalePack(detectedLocale as any).country}
+                  </Badge>
+                )}
+              </div>
               <Input
                 id="siret"
                 value={profile.siret || ""}
                 onChange={(e) => updateProfile("siret", e.target.value)}
-                placeholder="BE0123456789"
+                onBlur={(e) => handleDetectLocale(e.target.value, undefined)}
+                placeholder="BE0123456789, FR12345678901, CHE-123.456.789"
               />
             </div>
           </div>
@@ -285,7 +346,8 @@ export default function ProfilePage() {
                 id="postal_code"
                 value={profile.postal_code || ""}
                 onChange={(e) => updateProfile("postal_code", e.target.value)}
-                placeholder="1000"
+                onBlur={(e) => handleDetectLocale(undefined, e.target.value)}
+                placeholder="1000 (BE), 75001 (FR), 1200 (CH)"
               />
             </div>
             <div className="space-y-2">
@@ -428,16 +490,29 @@ export default function ProfilePage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="legal_mentions">Mentions légales / CGV</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="legal_mentions">Mentions légales / CGV</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleGenerateLegalMentions}
+                className="gap-2"
+              >
+                <Sparkles className="h-3 w-3" />
+                Générer ({localePack.flag} {localePack.country})
+              </Button>
+            </div>
             <Textarea
               id="legal_mentions"
               value={profile.legal_mentions || ""}
               onChange={(e) => updateProfile("legal_mentions", e.target.value)}
               placeholder="Conditions de paiement, pénalités de retard, etc."
-              rows={6}
+              rows={8}
             />
-            <p className="text-xs text-muted-foreground">
-              Ces mentions apparaîtront en bas de vos devis PDF
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <Globe className="h-3 w-3" />
+              Ces mentions apparaîtront en bas de vos devis PDF. Cliquez sur "Générer" pour obtenir les mentions légales standard de votre pays.
             </p>
           </div>
         </CardContent>

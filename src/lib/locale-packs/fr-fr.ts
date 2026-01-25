@@ -148,6 +148,16 @@ export const frFR: LocalePack = {
         },
         severity: 'warning',
       },
+      {
+        id: 'non_standard_vat_fr',
+        description: 'Le taux TVA utilisé diffère du taux standard français (20%). Taux disponibles: 0%, 2.1%, 5.5%, 10%, 20%',
+        check: (data) => {
+          if (!data.tax_rate && data.tax_rate !== 0) return true;
+          const validRates = [0, 2.1, 5.5, 10, 20];
+          return validRates.includes(data.tax_rate);
+        },
+        severity: 'info',
+      },
     ],
   },
 

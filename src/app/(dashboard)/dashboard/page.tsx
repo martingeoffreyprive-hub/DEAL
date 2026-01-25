@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { useLocaleContext } from "@/contexts/locale-context";
 import { QUOTE_STATUSES, type QuoteStatus } from "@/types/database";
 import { UsageCard } from "@/components/subscription/usage-card";
 import {
@@ -23,6 +23,7 @@ import {
 export default function DashboardPage() {
   const router = useRouter();
   const supabase = createClient();
+  const { formatCurrency, formatDate } = useLocaleContext();
 
   const [user, setUser] = useState<any>(null);
   const [quotes, setQuotes] = useState<any[]>([]);

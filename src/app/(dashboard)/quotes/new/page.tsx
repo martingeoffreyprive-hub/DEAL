@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/use-subscription";
+import { useLocaleContext } from "@/contexts/locale-context";
 import { SECTORS, PLAN_FEATURES, type SectorType } from "@/types/database";
 import { Loader2, Sparkles, FileText, AlertTriangle, Lock, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -48,6 +49,7 @@ export default function NewQuotePage() {
   const router = useRouter();
   const { toast } = useToast();
   const supabase = createClient();
+  const { locale, localePack } = useLocaleContext();
 
   const {
     plan,
@@ -133,16 +135,16 @@ export default function NewQuotePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
-      // Calculate totals
+      // Calculate totals using locale's standard tax rate
       const subtotal = generatedQuote.items.reduce(
         (sum, item) => sum + item.quantity * item.unitPrice,
         0
       );
-      const taxRate = 21; // TVA belge par défaut
+      const taxRate = localePack.tax.standard; // Use locale's standard rate
       const taxAmount = subtotal * taxRate / 100;
       const total = subtotal + taxAmount;
 
-      // Create quote in database
+      // Create quote in database with current locale
       const { data: quote, error: quoteError } = await supabase
         .from("quotes")
         .insert({
@@ -160,6 +162,7 @@ export default function NewQuotePage() {
           tax_rate: taxRate,
           tax_amount: taxAmount,
           total,
+          locale, // Store current locale with the quote
         })
         .select()
         .single();

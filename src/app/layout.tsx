@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { LocaleProvider } from "@/contexts/locale-context";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,7 +23,9 @@ export default function RootLayout({
   return (
     <html lang="fr" className="dark">
       <body className={`${inter.className} ${inter.variable}`}>
-        {children}
+        <LocaleProvider>
+          {children}
+        </LocaleProvider>
         <Toaster />
       </body>
     </html>

@@ -1,3 +1,5 @@
+import type { LocaleCode } from '@/lib/locale-packs';
+
 export type SectorType =
   | 'ELECTRICITE'
   | 'PLOMBERIE'
@@ -77,6 +79,7 @@ export interface Quote {
   total: number;
   pdf_url: string | null;
   signature_url: string | null;
+  locale: LocaleCode | null; // Locale used when creating the quote (fr-BE, fr-FR, fr-CH)
   created_at: string;
   updated_at: string;
   finalized_at: string | null;
@@ -125,7 +128,9 @@ export interface LaborEstimate {
 export type ProfileInsert = Omit<Profile, 'created_at' | 'updated_at'>;
 export type ProfileUpdate = Partial<Omit<Profile, 'id' | 'created_at' | 'updated_at'>>;
 
-export type QuoteInsert = Omit<Quote, 'id' | 'quote_number' | 'created_at' | 'updated_at' | 'finalized_at' | 'subtotal' | 'tax_amount' | 'total'>;
+export type QuoteInsert = Omit<Quote, 'id' | 'quote_number' | 'created_at' | 'updated_at' | 'finalized_at' | 'subtotal' | 'tax_amount' | 'total'> & {
+  locale?: LocaleCode; // Optional on insert, defaults to current locale
+};
 export type QuoteUpdate = Partial<Omit<Quote, 'id' | 'user_id' | 'quote_number' | 'created_at' | 'updated_at'>>;
 
 export type QuoteItemInsert = Omit<QuoteItem, 'id' | 'total' | 'created_at'>;
