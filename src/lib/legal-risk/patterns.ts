@@ -235,6 +235,76 @@ export const RISK_PATTERNS: RiskPattern[] = [
     explanation: 'Demander 100% à la commande peut être perçu négativement par les clients.',
     suggestion: 'Proposez un échéancier (ex: 30% à la commande, solde à la livraison).',
   },
+
+  // === PATTERNS SPÉCIFIQUES FRANCE ===
+  {
+    id: 'fr_decennale_claim',
+    category: 'warranty',
+    severity: 'high',
+    locales: ['fr-FR'],
+    patterns: [
+      /\bgarantie\s+décennale\s+(non\s+)?souscrite/gi,
+      /\bsans\s+garantie\s+décennale/gi,
+      /\bdécennale\s+non\s+applicable/gi,
+    ],
+    description: 'Mention garantie décennale à vérifier',
+    explanation: 'En France, la garantie décennale est obligatoire pour les travaux du bâtiment.',
+    suggestion: 'Vérifiez que votre attestation décennale est bien à jour et mentionnez votre assureur.',
+  },
+  {
+    id: 'fr_devis_validity',
+    category: 'binding_commitment',
+    severity: 'low',
+    locales: ['fr-FR'],
+    patterns: [
+      /\bdevis\s+valable\s+(\d+)\s+(jours?|mois)/gi,
+    ],
+    description: 'Durée de validité du devis',
+    explanation: 'En France, il est recommandé de limiter la validité à 3 mois maximum.',
+  },
+
+  // === PATTERNS SPÉCIFIQUES SUISSE ===
+  {
+    id: 'ch_co_reference',
+    category: 'liability',
+    severity: 'info',
+    locales: ['fr-CH'],
+    patterns: [
+      /\bcode\s+civil\s+français/gi,
+      /\bcode\s+de\s+la\s+consommation/gi,
+    ],
+    description: 'Référence au droit français',
+    explanation: 'En Suisse, le Code des Obligations (CO) s\'applique, non le Code Civil français.',
+    suggestion: 'Référez-vous au CO suisse pour les contrats en Suisse.',
+  },
+  {
+    id: 'ch_currency_mismatch',
+    category: 'ambiguity',
+    severity: 'medium',
+    locales: ['fr-CH'],
+    patterns: [
+      /\b\d+[\.,]?\d*\s*€/gi,
+      /\beuros?\b/gi,
+    ],
+    description: 'Devise EUR détectée en contexte suisse',
+    explanation: 'En Suisse, le franc suisse (CHF) est la devise usuelle.',
+    suggestion: 'Utilisez CHF ou précisez le taux de change applicable.',
+  },
+
+  // === PATTERNS SPÉCIFIQUES BELGIQUE ===
+  {
+    id: 'be_renovation_vat',
+    category: 'binding_commitment',
+    severity: 'medium',
+    locales: ['fr-BE'],
+    patterns: [
+      /\btva\s+(de\s+)?6\s*%\s+automatique/gi,
+      /\b6\s*%\s+garanti/gi,
+    ],
+    description: 'TVA 6% présentée comme automatique',
+    explanation: 'Le taux de 6% pour rénovation nécessite une attestation et des conditions (logement > 10 ans).',
+    suggestion: 'Précisez que le taux de 6% est "sous réserve de l\'attestation client".',
+  },
 ];
 
 // Mentions légales auto-injectées selon la locale

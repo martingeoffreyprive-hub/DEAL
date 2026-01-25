@@ -6,8 +6,9 @@ import type {
   DetectedRisk,
   RiskAnalysisResult,
   RiskSeverity,
-  DEFAULT_CONFIG,
+  RiskSensitivity,
 } from './types';
+import { SENSITIVITY_FILTERS } from './types';
 import { getPatternsForLocale, getMandatoryMentions } from './patterns';
 import type { LocaleCode } from '../locale-packs/types';
 
@@ -29,7 +30,7 @@ export class LegalRiskEngine {
   constructor(config: Partial<RiskEngineConfig> = {}) {
     this.config = {
       locale: 'fr-BE',
-      strictMode: false,
+      sensitivity: 'normal',
       enableAutoFix: true,
       fieldsToAnalyze: ['notes', 'description', 'title'],
       ...config,
@@ -117,32 +118,36 @@ export class LegalRiskEngine {
     const missingMentions = this.checkMissingMentions(quoteData);
     allRisks.push(...missingMentions);
 
-    // Calculer les statistiques
-    const criticalCount = allRisks.filter((r) => r.severity === 'critical').length;
-    const highCount = allRisks.filter((r) => r.severity === 'high').length;
-    const mediumCount = allRisks.filter((r) => r.severity === 'medium').length;
-    const lowCount = allRisks.filter((r) => r.severity === 'low').length;
+    // Filtrer les risques selon la sensibilité
+    const allowedSeverities = SENSITIVITY_FILTERS[this.config.sensitivity];
+    const filteredRisks = allRisks.filter((r) => allowedSeverities.includes(r.severity));
+
+    // Calculer les statistiques sur les risques filtrés
+    const criticalCount = filteredRisks.filter((r) => r.severity === 'critical').length;
+    const highCount = filteredRisks.filter((r) => r.severity === 'high').length;
+    const mediumCount = filteredRisks.filter((r) => r.severity === 'medium').length;
+    const lowCount = filteredRisks.filter((r) => r.severity === 'low').length;
 
     // Calculer le score de risque (0 = aucun risque, 100 = très risqué)
     const score = Math.min(
       100,
-      allRisks.reduce((acc, risk) => acc + SEVERITY_WEIGHTS[risk.severity], 0)
+      filteredRisks.reduce((acc, risk) => acc + SEVERITY_WEIGHTS[risk.severity], 0)
     );
 
     // Générer les recommandations
-    const recommendations = this.generateRecommendations(allRisks);
+    const recommendations = this.generateRecommendations(filteredRisks);
 
     return {
-      hasRisks: allRisks.length > 0,
-      totalRisks: allRisks.length,
+      hasRisks: filteredRisks.length > 0,
+      totalRisks: filteredRisks.length,
       criticalCount,
       highCount,
       mediumCount,
       lowCount,
-      risks: allRisks,
+      risks: filteredRisks,
       score,
       recommendations,
-      autoFixAvailable: allRisks.some((r) => r.autoFix !== undefined),
+      autoFixAvailable: filteredRisks.some((r) => r.autoFix !== undefined),
     };
   }
 
@@ -302,10 +307,17 @@ export class LegalRiskEngine {
   }
 
   /**
-   * Active/désactive le mode strict
+   * Change la sensibilité du moteur
    */
-  setStrictMode(strict: boolean): void {
-    this.config.strictMode = strict;
+  setSensitivity(sensitivity: RiskSensitivity): void {
+    this.config.sensitivity = sensitivity;
+  }
+
+  /**
+   * Récupère la sensibilité actuelle
+   */
+  getSensitivity(): RiskSensitivity {
+    return this.config.sensitivity;
   }
 }
 
@@ -340,8 +352,9 @@ export function quickAnalyze(
  */
 export function analyzeQuote(
   quoteData: any,
-  locale: LocaleCode = 'fr-BE'
+  locale: LocaleCode = 'fr-BE',
+  sensitivity: RiskSensitivity = 'normal'
 ): RiskAnalysisResult {
-  const engine = new LegalRiskEngine({ locale });
+  const engine = new LegalRiskEngine({ locale, sensitivity });
   return engine.analyzeQuote(quoteData);
 }

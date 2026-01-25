@@ -74,18 +74,28 @@ export interface LegalMention {
   condition?: (data: any) => boolean;
 }
 
+// Niveau de sensibilité du moteur
+export type RiskSensitivity = 'strict' | 'normal' | 'permissive';
+
 // Configuration du moteur
 export interface RiskEngineConfig {
   locale: LocaleCode;
-  strictMode: boolean;          // Mode strict = plus de détections
+  sensitivity: RiskSensitivity; // Niveau de sensibilité (strict/normal/permissive)
   enableAutoFix: boolean;       // Proposer des corrections auto
   fieldsToAnalyze: string[];    // Champs à analyser
   excludePatterns?: string[];   // Patterns à ignorer
 }
 
+// Mapping sensibilité -> sévérités à afficher
+export const SENSITIVITY_FILTERS: Record<RiskSensitivity, RiskSeverity[]> = {
+  strict: ['critical', 'high', 'medium', 'low', 'info'],
+  normal: ['critical', 'high', 'medium'],
+  permissive: ['critical'],
+};
+
 export const DEFAULT_CONFIG: RiskEngineConfig = {
   locale: 'fr-BE',
-  strictMode: false,
+  sensitivity: 'normal',
   enableAutoFix: true,
   fieldsToAnalyze: [
     'notes',
