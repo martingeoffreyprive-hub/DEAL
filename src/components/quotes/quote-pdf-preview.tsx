@@ -51,6 +51,9 @@ import {
   DEFAULT_BRANDING,
   getDensityConfig,
   suggestDensity,
+  generateEPCQRCode,
+  isValidEPCData,
+  type EPCQRData,
 } from "@/lib/pdf";
 import {
   getLocalePack,
@@ -82,6 +85,7 @@ interface QuotePDFProps {
   density?: PDFDensity;
   branding?: Partial<PDFBranding>;
   locale?: LocaleCode;
+  epcQRCode?: string | null;
 }
 
 // Dynamic styles based on density and branding
@@ -315,6 +319,22 @@ const createStyles = (density: PDFDensity, branding: PDFBranding) => {
       color: branding.mutedColor,
       opacity: branding.watermarkOpacity || 0.1,
     },
+    qrCodeContainer: {
+      position: "absolute",
+      bottom: 70,
+      right: config.pageMargin,
+      alignItems: "center",
+    },
+    qrCode: {
+      width: density === 'compact' ? 60 : 80,
+      height: density === 'compact' ? 60 : 80,
+    },
+    qrCodeLabel: {
+      fontSize: 6,
+      color: branding.mutedColor,
+      textAlign: "center",
+      marginTop: 2,
+    },
   });
 };
 
@@ -327,6 +347,7 @@ const QuotePDFDocument = ({
   density = "normal",
   branding = DEFAULT_BRANDING,
   locale = "fr-BE",
+  epcQRCode = null,
 }: QuotePDFProps) => {
   const finalBranding = { ...DEFAULT_BRANDING, ...branding };
   const styles = createStyles(density, finalBranding);
@@ -546,6 +567,14 @@ const QuotePDFDocument = ({
           </View>
         )}
 
+        {/* EPC QR Code for payment */}
+        {epcQRCode && density !== 'compact' && (
+          <View style={styles.qrCodeContainer}>
+            <Image src={epcQRCode} style={styles.qrCode} />
+            <Text style={styles.qrCodeLabel}>Scanner pour payer</Text>
+          </View>
+        )}
+
         {/* Footer */}
         <View style={styles.footer}>
           {config.showLegalMentions && (
@@ -570,7 +599,7 @@ const QuotePDFDocument = ({
 };
 
 // Preview Component
-export function QuotePDFPreview({ quote, items, profile }: Omit<QuotePDFProps, 'density' | 'branding' | 'locale'>) {
+export function QuotePDFPreview({ quote, items, profile }: Omit<QuotePDFProps, 'density' | 'branding' | 'locale' | 'epcQRCode'>) {
   const [isClient, setIsClient] = useState(false);
   const [depositPercent, setDepositPercent] = useState(0);
   const [showPDFViewer, setShowPDFViewer] = useState(false);
@@ -580,11 +609,46 @@ export function QuotePDFPreview({ quote, items, profile }: Omit<QuotePDFProps, '
   const [density, setDensity] = useState<PDFDensity>(() => suggestDensity(items.length));
   const [branding, setBranding] = useState<Partial<PDFBranding>>({});
   const [showSettings, setShowSettings] = useState(false);
+  const [epcQRCode, setEpcQRCode] = useState<string | null>(null);
 
   // Only render PDF on client side
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Generate EPC QR Code when profile has banking info
+  useEffect(() => {
+    async function generateQR() {
+      if (!profile?.iban || !profile?.company_name) {
+        setEpcQRCode(null);
+        return;
+      }
+
+      const currency = locale === 'fr-CH' ? 'CHF' : 'EUR';
+      const epcData: EPCQRData = {
+        beneficiaryName: profile.company_name,
+        iban: profile.iban,
+        bic: profile.bic || undefined,
+        amount: quote.total,
+        currency: currency,
+        remittanceInfo: `Devis ${quote.quote_number}`,
+      };
+
+      if (isValidEPCData(epcData)) {
+        try {
+          const qrDataUrl = await generateEPCQRCode(epcData);
+          setEpcQRCode(qrDataUrl);
+        } catch (error) {
+          console.error('Failed to generate EPC QR code:', error);
+          setEpcQRCode(null);
+        }
+      } else {
+        setEpcQRCode(null);
+      }
+    }
+
+    generateQR();
+  }, [profile, quote.total, quote.quote_number, locale]);
 
   // Auto-suggest density when items change
   useEffect(() => {
@@ -784,6 +848,7 @@ export function QuotePDFPreview({ quote, items, profile }: Omit<QuotePDFProps, '
               density={density}
               branding={branding}
               locale={locale}
+              epcQRCode={epcQRCode}
             />
           }
           fileName={fileName}
@@ -813,6 +878,7 @@ export function QuotePDFPreview({ quote, items, profile }: Omit<QuotePDFProps, '
               density={density}
               branding={branding}
               locale={locale}
+              epcQRCode={epcQRCode}
             />
           </PDFViewer>
         </div>
@@ -825,6 +891,7 @@ export function QuotePDFPreview({ quote, items, profile }: Omit<QuotePDFProps, '
           density={density}
           branding={{ ...DEFAULT_BRANDING, ...branding }}
           locale={locale}
+          epcQRCode={epcQRCode}
         />
       )}
     </div>
@@ -840,6 +907,7 @@ function QuoteHTMLPreview({
   density,
   branding,
   locale,
+  epcQRCode,
 }: QuotePDFProps & { branding: PDFBranding }) {
   const config = getDensityConfig(density || 'normal');
   const localePack = getLocalePack(locale || 'fr-BE');
@@ -1046,6 +1114,16 @@ function QuoteHTMLPreview({
                   <p className="text-xs text-gray-500 mt-1">Date et signature du client</p>
                 </div>
                 <p className="text-xs text-gray-500">Mention "Lu et approuvé"</p>
+              </div>
+            </div>
+          )}
+
+          {/* EPC QR Code */}
+          {epcQRCode && density !== 'compact' && (
+            <div className="mt-6 flex justify-end">
+              <div className="text-center">
+                <img src={epcQRCode} alt="QR Code Paiement" className="w-20 h-20" />
+                <p className="text-xs text-gray-400 mt-1">Scanner pour payer</p>
               </div>
             </div>
           )}
