@@ -60,6 +60,7 @@ export default function SubscriptionSettingsPage() {
   } = useSubscription();
   const [addingSector, setAddingSector] = useState(false);
   const [removingSector, setRemovingSector] = useState<string | null>(null);
+  const [openingPortal, setOpeningPortal] = useState(false);
   const { toast } = useToast();
   const supabase = createClient();
 
@@ -151,8 +152,6 @@ export default function SubscriptionSettingsPage() {
   }
 
   const PlanIcon = plan === "ultimate" ? Crown : plan === "pro" ? Zap : Sparkles;
-
-  const [openingPortal, setOpeningPortal] = useState(false);
 
   const handleOpenPortal = async () => {
     setOpeningPortal(true);
