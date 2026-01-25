@@ -2,26 +2,36 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+// Lazy initialization pour éviter les erreurs au build
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error("STRIPE_SECRET_KEY non configurée");
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
+}
 
 // Prix Stripe pour chaque plan (à créer dans le dashboard Stripe)
-const PLAN_PRICES: Record<string, { monthly: string; yearly: string }> = {
-  starter: {
-    monthly: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID!,
-    yearly: process.env.STRIPE_STARTER_YEARLY_PRICE_ID!,
-  },
-  pro: {
-    monthly: process.env.STRIPE_PRO_MONTHLY_PRICE_ID!,
-    yearly: process.env.STRIPE_PRO_YEARLY_PRICE_ID!,
-  },
-  ultimate: {
-    monthly: process.env.STRIPE_ULTIMATE_MONTHLY_PRICE_ID!,
-    yearly: process.env.STRIPE_ULTIMATE_YEARLY_PRICE_ID!,
-  },
-};
+function getPlanPrices(): Record<string, { monthly: string; yearly: string }> {
+  return {
+    starter: {
+      monthly: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || "",
+      yearly: process.env.STRIPE_STARTER_YEARLY_PRICE_ID || "",
+    },
+    pro: {
+      monthly: process.env.STRIPE_PRO_MONTHLY_PRICE_ID || "",
+      yearly: process.env.STRIPE_PRO_YEARLY_PRICE_ID || "",
+    },
+    ultimate: {
+      monthly: process.env.STRIPE_ULTIMATE_MONTHLY_PRICE_ID || "",
+      yearly: process.env.STRIPE_ULTIMATE_YEARLY_PRICE_ID || "",
+    },
+  };
+}
 
 export async function POST(req: NextRequest) {
   try {
+    const stripe = getStripe();
+    const PLAN_PRICES = getPlanPrices();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 

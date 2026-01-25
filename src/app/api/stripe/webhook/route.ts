@@ -3,31 +3,41 @@ import { headers } from "next/headers";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+// Lazy initialization pour éviter les erreurs au build
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error("STRIPE_SECRET_KEY non configurée");
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
+}
 
 // Client Supabase avec service role pour bypass RLS
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  }
-);
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
+  );
+}
 
-const PLAN_MAPPING: Record<string, string> = {
-  [process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || ""]: "starter",
-  [process.env.STRIPE_STARTER_YEARLY_PRICE_ID || ""]: "starter",
-  [process.env.STRIPE_PRO_MONTHLY_PRICE_ID || ""]: "pro",
-  [process.env.STRIPE_PRO_YEARLY_PRICE_ID || ""]: "pro",
-  [process.env.STRIPE_ULTIMATE_MONTHLY_PRICE_ID || ""]: "ultimate",
-  [process.env.STRIPE_ULTIMATE_YEARLY_PRICE_ID || ""]: "ultimate",
-};
+function getPlanMapping(): Record<string, string> {
+  return {
+    [process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || ""]: "starter",
+    [process.env.STRIPE_STARTER_YEARLY_PRICE_ID || ""]: "starter",
+    [process.env.STRIPE_PRO_MONTHLY_PRICE_ID || ""]: "pro",
+    [process.env.STRIPE_PRO_YEARLY_PRICE_ID || ""]: "pro",
+    [process.env.STRIPE_ULTIMATE_MONTHLY_PRICE_ID || ""]: "ultimate",
+    [process.env.STRIPE_ULTIMATE_YEARLY_PRICE_ID || ""]: "ultimate",
+  };
+}
 
 // Idempotency: Check if event was already processed
-async function isEventProcessed(eventId: string): Promise<boolean> {
+async function isEventProcessed(supabaseAdmin: ReturnType<typeof getSupabaseAdmin>, eventId: string): Promise<boolean> {
   const { data } = await supabaseAdmin
     .from("processed_stripe_events")
     .select("id")
@@ -38,7 +48,7 @@ async function isEventProcessed(eventId: string): Promise<boolean> {
 }
 
 // Mark event as processed for idempotency
-async function markEventProcessed(eventId: string, eventType: string): Promise<void> {
+async function markEventProcessed(supabaseAdmin: ReturnType<typeof getSupabaseAdmin>, eventId: string, eventType: string): Promise<void> {
   await supabaseAdmin.from("processed_stripe_events").insert({
     event_id: eventId,
     event_type: eventType,
@@ -46,6 +56,10 @@ async function markEventProcessed(eventId: string, eventType: string): Promise<v
 }
 
 export async function POST(req: NextRequest) {
+  const stripe = getStripe();
+  const supabaseAdmin = getSupabaseAdmin();
+  const PLAN_MAPPING = getPlanMapping();
+
   const body = await req.text();
   const headersList = await headers();
   const signature = headersList.get("stripe-signature");
@@ -79,7 +93,7 @@ export async function POST(req: NextRequest) {
 
   // Idempotency check: Skip if already processed (replay attack protection)
   try {
-    const alreadyProcessed = await isEventProcessed(event.id);
+    const alreadyProcessed = await isEventProcessed(supabaseAdmin, event.id);
     if (alreadyProcessed) {
       console.log(`[IDEMPOTENCY] Skipping already processed event: ${event.id}`);
       return NextResponse.json({ received: true, skipped: true });
@@ -93,25 +107,25 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        await handleCheckoutComplete(session);
+        await handleCheckoutComplete(stripe, supabaseAdmin, session);
         break;
       }
 
       case "customer.subscription.updated": {
         const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionUpdated(subscription);
+        await handleSubscriptionUpdated(supabaseAdmin, PLAN_MAPPING, subscription);
         break;
       }
 
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionCanceled(subscription);
+        await handleSubscriptionCanceled(supabaseAdmin, subscription);
         break;
       }
 
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
-        await handlePaymentFailed(invoice);
+        await handlePaymentFailed(supabaseAdmin, invoice);
         break;
       }
 
@@ -121,7 +135,7 @@ export async function POST(req: NextRequest) {
 
     // Mark event as processed for idempotency
     try {
-      await markEventProcessed(event.id, event.type);
+      await markEventProcessed(supabaseAdmin, event.id, event.type);
     } catch (error) {
       console.warn("[IDEMPOTENCY] Could not mark event as processed:", error);
     }
@@ -136,7 +150,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
+async function handleCheckoutComplete(stripe: Stripe, supabaseAdmin: ReturnType<typeof getSupabaseAdmin>, session: Stripe.Checkout.Session) {
   const userId = session.metadata?.user_id;
   const planName = session.metadata?.plan_name;
 
@@ -176,7 +190,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   console.log(`Subscription activated for user ${userId}: ${planName}`);
 }
 
-async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
+async function handleSubscriptionUpdated(supabaseAdmin: ReturnType<typeof getSupabaseAdmin>, PLAN_MAPPING: Record<string, string>, subscription: Stripe.Subscription) {
   const sub = subscription as any;
 
   // Essayer de trouver l'utilisateur via le customer ID
@@ -221,7 +235,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   }
 }
 
-async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
+async function handleSubscriptionCanceled(supabaseAdmin: ReturnType<typeof getSupabaseAdmin>, subscription: Stripe.Subscription) {
   const { error } = await supabaseAdmin
     .from("subscriptions")
     .update({
@@ -238,7 +252,7 @@ async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
   }
 }
 
-async function handlePaymentFailed(invoice: Stripe.Invoice) {
+async function handlePaymentFailed(supabaseAdmin: ReturnType<typeof getSupabaseAdmin>, invoice: Stripe.Invoice) {
   const inv = invoice as any;
   const subscriptionId = inv.subscription as string;
 
