@@ -26,10 +26,39 @@ const PLAN_MAPPING: Record<string, string> = {
   [process.env.STRIPE_ULTIMATE_YEARLY_PRICE_ID || ""]: "ultimate",
 };
 
+// Idempotency: Check if event was already processed
+async function isEventProcessed(eventId: string): Promise<boolean> {
+  const { data } = await supabaseAdmin
+    .from("processed_stripe_events")
+    .select("id")
+    .eq("event_id", eventId)
+    .single();
+
+  return !!data;
+}
+
+// Mark event as processed for idempotency
+async function markEventProcessed(eventId: string, eventType: string): Promise<void> {
+  await supabaseAdmin.from("processed_stripe_events").insert({
+    event_id: eventId,
+    event_type: eventType,
+  });
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const headersList = await headers();
-  const signature = headersList.get("stripe-signature")!;
+  const signature = headersList.get("stripe-signature");
+
+  // Security: Reject requests without signature header
+  if (!signature) {
+    const ip = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "unknown";
+    console.warn(`[SECURITY] Webhook request without signature from IP: ${ip}`);
+    return NextResponse.json(
+      { error: "Missing signature" },
+      { status: 400 }
+    );
+  }
 
   let event: Stripe.Event;
 
@@ -40,11 +69,24 @@ export async function POST(req: NextRequest) {
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (err: any) {
-    console.error("Webhook signature verification failed:", err.message);
+    const ip = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "unknown";
+    console.error(`[SECURITY] Webhook signature verification failed from IP ${ip}:`, err.message);
     return NextResponse.json(
       { error: "Signature invalide" },
       { status: 400 }
     );
+  }
+
+  // Idempotency check: Skip if already processed (replay attack protection)
+  try {
+    const alreadyProcessed = await isEventProcessed(event.id);
+    if (alreadyProcessed) {
+      console.log(`[IDEMPOTENCY] Skipping already processed event: ${event.id}`);
+      return NextResponse.json({ received: true, skipped: true });
+    }
+  } catch (error) {
+    // If idempotency check fails, continue processing but log warning
+    console.warn("[IDEMPOTENCY] Could not check event status, proceeding:", error);
   }
 
   try {
@@ -75,6 +117,13 @@ export async function POST(req: NextRequest) {
 
       default:
         console.log(`Unhandled event type: ${event.type}`);
+    }
+
+    // Mark event as processed for idempotency
+    try {
+      await markEventProcessed(event.id, event.type);
+    } catch (error) {
+      console.warn("[IDEMPOTENCY] Could not mark event as processed:", error);
     }
 
     return NextResponse.json({ received: true });

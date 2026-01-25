@@ -10,8 +10,9 @@ import { useSubscription } from "@/hooks/use-subscription";
 import { SECTORS, SECTOR_CONFIGS, type SectorType, PLAN_FEATURES } from "@/types/database";
 import {
   Crown, Zap, Sparkles, Check, Plus, Trash2, Loader2,
-  ArrowRight, AlertTriangle, Calendar
+  ArrowRight, AlertTriangle, Calendar, CreditCard, ExternalLink
 } from "lucide-react";
+import { SubscriptionAlert } from "@/components/subscription/subscription-alert";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
@@ -151,8 +152,40 @@ export default function SubscriptionSettingsPage() {
 
   const PlanIcon = plan === "ultimate" ? Crown : plan === "pro" ? Zap : Sparkles;
 
+  const [openingPortal, setOpeningPortal] = useState(false);
+
+  const handleOpenPortal = async () => {
+    setOpeningPortal(true);
+    try {
+      const response = await fetch("/api/stripe/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Erreur");
+      }
+
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible d'accéder au portail",
+        variant: "destructive",
+      });
+      setOpeningPortal(false);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      {/* Payment Alert */}
+      <SubscriptionAlert />
+
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Abonnement</h1>
@@ -327,18 +360,69 @@ export default function SubscriptionSettingsPage() {
         </CardContent>
       </Card>
 
-      {/* Historique / Facturation (placeholder pour Stripe) */}
-      {plan !== "free" && (
+      {/* Facturation et gestion d'abonnement */}
+      {plan !== "free" && subscription?.stripe_customer_id && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
+              <CreditCard className="h-5 w-5" />
               Facturation
             </CardTitle>
+            <CardDescription>
+              Gérez votre moyen de paiement et consultez vos factures
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              L'historique de facturation sera disponible prochainement avec l'intégration Stripe.
+          <CardContent className="space-y-4">
+            {/* Période actuelle */}
+            {subscription.current_period_end && (
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">Prochaine facturation</span>
+                </div>
+                <span className="text-sm font-medium">
+                  {new Date(subscription.current_period_end).toLocaleDateString("fr-BE", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </span>
+              </div>
+            )}
+
+            {/* Annulation programmée */}
+            {subscription.cancel_at_period_end && (
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800">
+                <AlertTriangle className="h-5 w-5 text-orange-600" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-orange-800 dark:text-orange-200">
+                    Annulation programmée
+                  </p>
+                  <p className="text-xs text-orange-600 dark:text-orange-400">
+                    Votre abonnement prendra fin le{" "}
+                    {subscription.current_period_end &&
+                      new Date(subscription.current_period_end).toLocaleDateString("fr-BE")}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Bouton portail Stripe */}
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleOpenPortal}
+              disabled={openingPortal}
+            >
+              {openingPortal ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <ExternalLink className="h-4 w-4 mr-2" />
+              )}
+              Gérer l'abonnement sur Stripe
+            </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              Modifiez votre moyen de paiement, téléchargez vos factures ou annulez votre abonnement
             </p>
           </CardContent>
         </Card>
