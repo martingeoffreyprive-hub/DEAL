@@ -3,11 +3,16 @@ import { createClient } from "@/lib/supabase/server";
 import Stripe from "stripe";
 
 // Lazy initialization pour éviter les erreurs au build
-function getStripe() {
-  if (!process.env.STRIPE_SECRET_KEY) {
-    throw new Error("STRIPE_SECRET_KEY non configurée");
+let stripeInstance: Stripe | null = null;
+function getStripe(): Stripe {
+  if (!stripeInstance) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) {
+      throw new Error("STRIPE_SECRET_KEY non configurée");
+    }
+    stripeInstance = new Stripe(key);
   }
-  return new Stripe(process.env.STRIPE_SECRET_KEY);
+  return stripeInstance;
 }
 
 // Prix Stripe pour chaque plan (à créer dans le dashboard Stripe)
