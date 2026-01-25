@@ -102,11 +102,10 @@ class PDFCache {
    * Invalidate cache for a specific quote
    */
   invalidateQuote(quoteId: string): void {
-    for (const key of this.cache.keys()) {
-      if (key.startsWith(`${quoteId}-`)) {
-        this.delete(key);
-      }
-    }
+    const keysToDelete = Array.from(this.cache.keys()).filter((key) =>
+      key.startsWith(`${quoteId}-`)
+    );
+    keysToDelete.forEach((key) => this.delete(key));
   }
 
   /**

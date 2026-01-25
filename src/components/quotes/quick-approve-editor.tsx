@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +28,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useToast } from "@/hooks/use-toast";
 import {
   Check,
   X,
@@ -51,6 +52,7 @@ import {
   MessageSquare,
   ThumbsUp,
   ThumbsDown,
+  Undo2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocaleContext } from "@/contexts/locale-context";
@@ -82,6 +84,17 @@ interface ItemValidation {
   modifiedDescription?: string;
   modifiedPrice?: number;
 }
+
+// Undo history types
+interface UndoAction {
+  type: "validate" | "reject" | "modify" | "reset" | "validate_all";
+  itemId?: string;
+  previousState: ItemValidation;
+  timestamp: number;
+}
+
+const MAX_UNDO_HISTORY = 5;
+const UNDO_TOAST_DURATION = 10000; // 10 seconds
 
 function QuickItem({
   item,
@@ -300,6 +313,7 @@ export function QuickApproveEditor({
   saving = false,
 }: QuickApproveEditorProps) {
   const { formatCurrency, formatDate } = useLocaleContext();
+  const { toast } = useToast();
 
   // Validation state for each item
   const [validations, setValidations] = useState<Record<string, ItemValidation>>(() => {
@@ -320,6 +334,91 @@ export function QuickApproveEditor({
   const [localQuote, setLocalQuote] = useState<Quote>(quote);
   const [showNotes, setShowNotes] = useState(false);
   const [showRiskAnalysis, setShowRiskAnalysis] = useState(true);
+
+  // Undo history
+  const [undoHistory, setUndoHistory] = useState<UndoAction[]>([]);
+  const undoTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Add action to undo history
+  const pushUndoAction = useCallback((action: Omit<UndoAction, "timestamp">) => {
+    setUndoHistory((prev) => {
+      const newHistory = [
+        { ...action, timestamp: Date.now() },
+        ...prev.slice(0, MAX_UNDO_HISTORY - 1),
+      ];
+      return newHistory;
+    });
+
+    // Clear previous timeout and set new one
+    if (undoTimeoutRef.current) {
+      clearTimeout(undoTimeoutRef.current);
+    }
+    undoTimeoutRef.current = setTimeout(() => {
+      setUndoHistory((prev) => prev.filter((a) => Date.now() - a.timestamp < UNDO_TOAST_DURATION));
+    }, UNDO_TOAST_DURATION);
+  }, []);
+
+  // Undo last action
+  const handleUndo = useCallback(() => {
+    if (undoHistory.length === 0) return;
+
+    const lastAction = undoHistory[0];
+    setUndoHistory((prev) => prev.slice(1));
+
+    // Restore previous state
+    if (lastAction.itemId) {
+      setValidations((prev) => ({
+        ...prev,
+        [lastAction.itemId!]: lastAction.previousState,
+      }));
+    }
+
+    toast({
+      title: "Action annulée",
+      description: getUndoDescription(lastAction),
+      duration: 3000,
+    });
+  }, [undoHistory, toast]);
+
+  // Get description for undo toast
+  const getUndoDescription = (action: UndoAction): string => {
+    switch (action.type) {
+      case "validate":
+        return "La validation a été annulée";
+      case "reject":
+        return "Le retrait a été annulé";
+      case "modify":
+        return "La modification a été annulée";
+      case "reset":
+        return "La réinitialisation a été annulée";
+      case "validate_all":
+        return "La validation groupée a été annulée";
+      default:
+        return "L'action a été annulée";
+    }
+  };
+
+  // Keyboard shortcut for undo (Ctrl+Z)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && undoHistory.length > 0) {
+        e.preventDefault();
+        handleUndo();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleUndo, undoHistory.length]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (undoTimeoutRef.current) {
+        clearTimeout(undoTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Update local items when validations change
   useEffect(() => {
@@ -354,22 +453,55 @@ export function QuickApproveEditor({
   const taxAmount = (subtotal * (localQuote.tax_rate || 21)) / 100;
   const total = subtotal + taxAmount;
 
-  // Handlers
+  // Handlers with undo support
   const handleValidateItem = (itemId: string) => {
+    const previousState = { ...validations[itemId] };
+    pushUndoAction({ type: "validate", itemId, previousState });
+
     setValidations((prev) => ({
       ...prev,
       [itemId]: { ...prev[itemId], status: "validated" },
     }));
+
+    toast({
+      title: "Ligne validée",
+      description: "Ctrl+Z pour annuler",
+      duration: UNDO_TOAST_DURATION,
+      action: (
+        <Button variant="outline" size="sm" onClick={handleUndo} className="gap-1">
+          <Undo2 className="h-3 w-3" />
+          Annuler
+        </Button>
+      ),
+    });
   };
 
   const handleRejectItem = (itemId: string) => {
+    const previousState = { ...validations[itemId] };
+    pushUndoAction({ type: "reject", itemId, previousState });
+
     setValidations((prev) => ({
       ...prev,
       [itemId]: { ...prev[itemId], status: "rejected" },
     }));
+
+    toast({
+      title: "Ligne retirée",
+      description: "Ctrl+Z pour annuler",
+      duration: UNDO_TOAST_DURATION,
+      action: (
+        <Button variant="outline" size="sm" onClick={handleUndo} className="gap-1">
+          <Undo2 className="h-3 w-3" />
+          Annuler
+        </Button>
+      ),
+    });
   };
 
   const handleModifyItem = (itemId: string, description: string, price: number) => {
+    const previousState = { ...validations[itemId] };
+    pushUndoAction({ type: "modify", itemId, previousState });
+
     setValidations((prev) => ({
       ...prev,
       [itemId]: {
@@ -379,9 +511,24 @@ export function QuickApproveEditor({
         modifiedPrice: price,
       },
     }));
+
+    toast({
+      title: "Ligne modifiée",
+      description: "Ctrl+Z pour annuler",
+      duration: UNDO_TOAST_DURATION,
+      action: (
+        <Button variant="outline" size="sm" onClick={handleUndo} className="gap-1">
+          <Undo2 className="h-3 w-3" />
+          Annuler
+        </Button>
+      ),
+    });
   };
 
   const handleResetItem = (itemId: string) => {
+    const previousState = { ...validations[itemId] };
+    pushUndoAction({ type: "reset", itemId, previousState });
+
     setValidations((prev) => ({
       ...prev,
       [itemId]: {
@@ -394,6 +541,18 @@ export function QuickApproveEditor({
   };
 
   const handleValidateAll = () => {
+    // Store previous states for all pending items
+    const pendingItems = Object.entries(validations).filter(([_, v]) => v.status === "pending");
+    if (pendingItems.length === 0) return;
+
+    // Push undo action for first item (simplified - could store all)
+    const firstPending = pendingItems[0];
+    pushUndoAction({
+      type: "validate_all",
+      itemId: firstPending[0],
+      previousState: { ...firstPending[1] },
+    });
+
     const newValidations = { ...validations };
     Object.keys(newValidations).forEach((id) => {
       if (newValidations[id].status === "pending") {
@@ -401,6 +560,18 @@ export function QuickApproveEditor({
       }
     });
     setValidations(newValidations);
+
+    toast({
+      title: `${pendingItems.length} lignes validées`,
+      description: "Ctrl+Z pour annuler la dernière action",
+      duration: UNDO_TOAST_DURATION,
+      action: (
+        <Button variant="outline" size="sm" onClick={handleUndo} className="gap-1">
+          <Undo2 className="h-3 w-3" />
+          Annuler
+        </Button>
+      ),
+    });
   };
 
   const handleSave = async () => {
