@@ -564,7 +564,7 @@ export function getSectorMaterialCategories(sector: SectorType): string[] {
 // SYSTÈME D'ABONNEMENTS
 // =============================================
 
-export type SubscriptionPlan = 'free' | 'starter' | 'pro' | 'ultimate';
+export type SubscriptionPlan = 'free' | 'pro' | 'business';
 export type SubscriptionStatus = 'active' | 'cancelled' | 'past_due' | 'trialing';
 
 export interface Plan {
@@ -630,20 +630,9 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, {
     maxSectors: 1,
     maxQuotes: 5,
     features: [
-      '1 secteur d\'activité',
-      '5 devis par mois',
+      '1 secteur',
+      '5 devis/mois',
       'Export PDF basique',
-    ],
-  },
-  starter: {
-    displayName: 'Starter',
-    maxSectors: 3,
-    maxQuotes: 30,
-    features: [
-      '3 secteurs d\'activité',
-      '30 devis par mois',
-      'Assistant IA',
-      'Export PDF',
     ],
   },
   pro: {
@@ -651,21 +640,19 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, {
     maxSectors: 10,
     maxQuotes: 100,
     features: [
-      '10 secteurs d\'activité',
-      '100 devis par mois',
-      'Assistant IA complet',
-      'Protection PDF',
-      'Modèles personnalisés',
+      '10 secteurs',
+      '100 devis/mois',
+      'Assistant IA',
+      'Templates personnalisés',
     ],
   },
-  ultimate: {
-    displayName: 'Ultime',
+  business: {
+    displayName: 'Business',
     maxSectors: -1,
     maxQuotes: -1,
     features: [
-      'Tous les secteurs',
+      'Secteurs illimités',
       'Devis illimités',
-      'Toutes les fonctionnalités',
       'Support prioritaire',
       'API access',
     ],

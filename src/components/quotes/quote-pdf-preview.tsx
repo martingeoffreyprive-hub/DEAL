@@ -40,15 +40,20 @@ import {
   Palette,
   Globe,
   LayoutGrid,
+  Star,
 } from "lucide-react";
 import { useLocaleContext } from "@/contexts/locale-context";
+import { useSubscription } from "@/hooks/use-subscription";
 import { formatDateWithLocale } from "@/lib/utils";
 import { SECTORS, TAX_RATES, type Quote, type QuoteItem, type Profile, type SectorType } from "@/types/database";
 import {
   type PDFDensity,
   type PDFBranding,
+  type ClientReview,
   DENSITY_CONFIGS,
   DEFAULT_BRANDING,
+  LOGO_SIZES,
+  SAMPLE_REVIEWS,
   getDensityConfig,
   suggestDensity,
   generateEPCQRCode,
@@ -64,6 +69,12 @@ import {
   getQuoteLocale,
   type LocaleCode,
 } from "@/lib/locale-packs";
+import {
+  PDF_TEMPLATES,
+  getTemplate,
+  type PDFTemplateId,
+} from "@/lib/pdf-templates";
+import { PDFTemplateSelector } from "@/components/quotes/pdf-template-selector";
 
 // Register fonts
 Font.register({
@@ -105,9 +116,15 @@ const createStyles = (density: PDFDensity, branding: PDFBranding) => {
       marginBottom: config.sectionSpacing,
     },
     logo: {
-      width: branding.logoSize === 'small' ? 60 : branding.logoSize === 'large' ? 100 : 80,
-      height: branding.logoSize === 'small' ? 60 : branding.logoSize === 'large' ? 100 : 80,
+      width: LOGO_SIZES[branding.logoSize]?.width || 80,
+      height: LOGO_SIZES[branding.logoSize]?.height || 80,
       objectFit: "contain",
+    },
+    clientLogo: {
+      width: LOGO_SIZES[branding.clientLogoSize || 'medium']?.width || 60,
+      height: LOGO_SIZES[branding.clientLogoSize || 'medium']?.height || 60,
+      objectFit: "contain",
+      marginTop: 10,
     },
     companyInfo: {
       textAlign: branding.logoPosition === 'left' ? "right" : "left",
@@ -335,11 +352,90 @@ const createStyles = (density: PDFDensity, branding: PDFBranding) => {
       textAlign: "center",
       marginTop: 2,
     },
+    // Section avis clients
+    reviewsSection: {
+      marginTop: config.sectionSpacing,
+      padding: 15,
+      backgroundColor: "#f0fdf4",
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: "#bbf7d0",
+    },
+    reviewsTitle: {
+      fontSize: config.bodySize + 2,
+      fontWeight: "bold",
+      marginBottom: 10,
+      color: "#166534",
+    },
+    reviewItem: {
+      marginBottom: 10,
+      paddingBottom: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: "#dcfce7",
+    },
+    reviewText: {
+      fontSize: config.smallSize,
+      color: "#15803d",
+      fontStyle: "italic",
+      marginBottom: 4,
+    },
+    reviewAuthor: {
+      fontSize: config.smallSize - 1,
+      color: "#166534",
+      fontWeight: "bold",
+    },
+    reviewStars: {
+      fontSize: config.smallSize,
+      color: "#eab308",
+      marginBottom: 2,
+    },
+    // Section CTA
+    ctaSection: {
+      marginTop: config.sectionSpacing,
+      padding: 20,
+      backgroundColor: branding.primaryColor,
+      borderRadius: 8,
+      alignItems: "center",
+    },
+    ctaText: {
+      fontSize: config.headerSize + 2,
+      fontWeight: "bold",
+      color: "#ffffff",
+      marginBottom: 6,
+      textAlign: "center",
+    },
+    ctaSubtext: {
+      fontSize: config.bodySize,
+      color: "#ffffff",
+      opacity: 0.9,
+      textAlign: "center",
+    },
+    // Coordonnées agrandies
+    enlargedCompanyName: {
+      fontSize: config.headerSize + 8,
+      fontWeight: "bold",
+      marginBottom: 6,
+      color: branding.primaryColor,
+    },
+    enlargedCompanyDetail: {
+      fontSize: config.bodySize + 2,
+      color: branding.mutedColor,
+      marginBottom: 4,
+    },
+    enlargedClientName: {
+      fontSize: config.bodySize + 4,
+      fontWeight: "bold",
+      marginBottom: 6,
+    },
+    enlargedClientDetail: {
+      fontSize: config.bodySize + 1,
+      lineHeight: 1.6,
+    },
   });
 };
 
-// PDF Document Component
-const QuotePDFDocument = ({
+// PDF Document Component - Exported for server-side rendering
+export const QuotePDFDocument = ({
   quote,
   items,
   profile,
@@ -567,6 +663,34 @@ const QuotePDFDocument = ({
           </View>
         )}
 
+        {/* Client Reviews Section */}
+        {finalBranding.showClientReviews && finalBranding.clientReviews && finalBranding.clientReviews.length > 0 && (
+          <View style={styles.reviewsSection}>
+            <Text style={styles.reviewsTitle}>Ce que disent nos clients</Text>
+            {finalBranding.clientReviews.slice(0, 2).map((review, index) => (
+              <View key={index} style={styles.reviewItem}>
+                <Text style={styles.reviewStars}>
+                  {"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}
+                </Text>
+                <Text style={styles.reviewText}>"{review.text}"</Text>
+                <Text style={styles.reviewAuthor}>
+                  — {review.author}{review.company ? `, ${review.company}` : ''}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Call to Action Section */}
+        {finalBranding.showCTA && finalBranding.ctaText && (
+          <View style={styles.ctaSection}>
+            <Text style={styles.ctaText}>{finalBranding.ctaText}</Text>
+            {finalBranding.ctaSubtext && (
+              <Text style={styles.ctaSubtext}>{finalBranding.ctaSubtext}</Text>
+            )}
+          </View>
+        )}
+
         {/* EPC QR Code for payment */}
         {epcQRCode && density !== 'compact' && (
           <View style={styles.qrCodeContainer}>
@@ -604,12 +728,38 @@ export function QuotePDFPreview({ quote, items, profile }: Omit<QuotePDFProps, '
   const [depositPercent, setDepositPercent] = useState(0);
   const [showPDFViewer, setShowPDFViewer] = useState(false);
 
+  // Subscription check for logo and pro features
+  const { plan, canShowLogoOnPDF, canUseProFeatures } = useSubscription();
+
   // New adaptive settings - use quote's stored locale or fallback to fr-BE
   const [locale, setLocale] = useState<LocaleCode>(() => getQuoteLocale(quote.locale));
   const [density, setDensity] = useState<PDFDensity>(() => suggestDensity(items.length));
-  const [branding, setBranding] = useState<Partial<PDFBranding>>({});
+  const [selectedTemplate, setSelectedTemplate] = useState<PDFTemplateId>("classic-pro");
+  const [branding, setBranding] = useState<Partial<PDFBranding>>({
+    showLogo: true, // Will be overridden based on subscription
+  });
   const [showSettings, setShowSettings] = useState(false);
   const [epcQRCode, setEpcQRCode] = useState<string | null>(null);
+
+  // Apply template colors to branding
+  const handleTemplateChange = (templateId: PDFTemplateId) => {
+    setSelectedTemplate(templateId);
+    const template = getTemplate(templateId);
+    setBranding(prev => ({
+      ...prev,
+      primaryColor: template.colors.primary,
+      textColor: template.colors.text,
+      mutedColor: template.colors.muted,
+    }));
+  };
+
+  // Update branding based on subscription
+  useEffect(() => {
+    setBranding(prev => ({
+      ...prev,
+      showLogo: canShowLogoOnPDF(),
+    }));
+  }, [canShowLogoOnPDF]);
 
   // Only render PDF on client side
   useEffect(() => {
@@ -672,10 +822,16 @@ export function QuotePDFPreview({ quote, items, profile }: Omit<QuotePDFProps, '
   return (
     <div className="space-y-6">
       {/* Controls */}
-      <div className="flex flex-wrap items-center gap-4 p-4 bg-muted/30 rounded-lg">
+      <div className="flex flex-wrap items-center gap-4 p-4 bg-[#1E3A5F]/5 rounded-lg border border-[#C9A962]/10">
+        {/* Template Selector */}
+        <PDFTemplateSelector
+          selectedTemplate={selectedTemplate}
+          onSelectTemplate={handleTemplateChange}
+        />
+
         {/* Locale Selector */}
         <div className="flex items-center gap-2">
-          <Globe className="h-4 w-4 text-muted-foreground" />
+          <Globe className="h-4 w-4 text-[#C9A962]" />
           <Select value={locale} onValueChange={(v) => setLocale(v as LocaleCode)}>
             <SelectTrigger className="w-40">
               <SelectValue />
@@ -695,7 +851,7 @@ export function QuotePDFPreview({ quote, items, profile }: Omit<QuotePDFProps, '
 
         {/* Density Selector */}
         <div className="flex items-center gap-2">
-          <LayoutGrid className="h-4 w-4 text-muted-foreground" />
+          <LayoutGrid className="h-4 w-4 text-[#C9A962]" />
           <Select value={density} onValueChange={(v) => setDensity(v as PDFDensity)}>
             <SelectTrigger className="w-32">
               <SelectValue />
@@ -725,7 +881,7 @@ export function QuotePDFPreview({ quote, items, profile }: Omit<QuotePDFProps, '
 
         {/* Deposit Calculator */}
         <div className="flex items-center gap-2">
-          <Calculator className="h-4 w-4 text-muted-foreground" />
+          <Calculator className="h-4 w-4 text-[#C9A962]" />
           <Label className="text-sm">{localePack.vocabulary.deposit}:</Label>
           <Select
             value={depositPercent.toString()}
@@ -753,12 +909,12 @@ export function QuotePDFPreview({ quote, items, profile }: Omit<QuotePDFProps, '
         {/* Advanced Settings */}
         <Popover open={showSettings} onOpenChange={setShowSettings}>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Settings2 className="h-4 w-4" />
+            <Button variant="outline" size="sm" className="gap-2 border-[#C9A962]/30 hover:bg-[#C9A962]/10">
+              <Settings2 className="h-4 w-4 text-[#C9A962]" />
               Options
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80">
+          <PopoverContent className="w-96 max-h-[80vh] overflow-y-auto">
             <div className="space-y-4">
               <h4 className="font-medium">Options du PDF</h4>
 
@@ -782,6 +938,25 @@ export function QuotePDFPreview({ quote, items, profile }: Omit<QuotePDFProps, '
 
               <Separator />
 
+              {/* Logo Size */}
+              <div className="space-y-2">
+                <Label className="text-xs">Taille du logo</Label>
+                <Select
+                  value={branding.logoSize || 'medium'}
+                  onValueChange={(v) => setBranding({ ...branding, logoSize: v as any })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="small">Petit (50px)</SelectItem>
+                    <SelectItem value="medium">Moyen (80px)</SelectItem>
+                    <SelectItem value="large">Grand (120px)</SelectItem>
+                    <SelectItem value="extra-large">Très grand (160px)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Logo Position */}
               <div className="space-y-2">
                 <Label className="text-xs">Position du logo</Label>
@@ -798,6 +973,79 @@ export function QuotePDFPreview({ quote, items, profile }: Omit<QuotePDFProps, '
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Enlarged Info */}
+              <div className="flex items-center justify-between">
+                <Label className="text-xs">Coordonnées agrandies</Label>
+                <Switch
+                  checked={branding.enlargedCompanyInfo || false}
+                  onCheckedChange={(v) => setBranding({
+                    ...branding,
+                    enlargedCompanyInfo: v,
+                    enlargedClientInfo: v,
+                  })}
+                />
+              </div>
+
+              <Separator />
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium text-sm text-primary">Sections Pro</h4>
+                {!canUseProFeatures() && (
+                  <Badge variant="outline" className="text-xs">
+                    <Lock className="h-3 w-3 mr-1" />
+                    Pro
+                  </Badge>
+                )}
+              </div>
+
+              {/* Logo on PDF - Pro+ */}
+              <div className="flex items-center justify-between">
+                <Label className="text-xs">Logo sur le devis</Label>
+                <Switch
+                  checked={branding.showLogo !== false && canShowLogoOnPDF()}
+                  disabled={!canShowLogoOnPDF()}
+                  onCheckedChange={(v) => setBranding({
+                    ...branding,
+                    showLogo: v,
+                  })}
+                />
+              </div>
+              {!canShowLogoOnPDF() && (
+                <p className="text-xs text-muted-foreground -mt-2">
+                  Passez au plan Pro pour afficher votre logo
+                </p>
+              )}
+
+              {/* Show Client Reviews */}
+              <div className="flex items-center justify-between">
+                <Label className="text-xs">Avis clients</Label>
+                <Switch
+                  checked={branding.showClientReviews || false}
+                  disabled={!canUseProFeatures()}
+                  onCheckedChange={(v) => setBranding({
+                    ...branding,
+                    showClientReviews: v,
+                    clientReviews: v ? SAMPLE_REVIEWS : [],
+                  })}
+                />
+              </div>
+
+              {/* Show CTA */}
+              <div className="flex items-center justify-between">
+                <Label className="text-xs">Appel à l'action</Label>
+                <Switch
+                  checked={branding.showCTA || false}
+                  disabled={!canUseProFeatures()}
+                  onCheckedChange={(v) => setBranding({
+                    ...branding,
+                    showCTA: v,
+                    ctaText: v ? 'Prêt à démarrer votre projet ?' : '',
+                    ctaSubtext: v ? 'Contactez-nous dès aujourd\'hui pour planifier votre intervention.' : '',
+                  })}
+                />
+              </div>
+
+              <Separator />
 
               {/* Show Watermark */}
               <div className="flex items-center justify-between">
@@ -832,9 +1080,9 @@ export function QuotePDFPreview({ quote, items, profile }: Omit<QuotePDFProps, '
           variant="outline"
           size="sm"
           onClick={() => setShowPDFViewer(!showPDFViewer)}
-          className="gap-2"
+          className="gap-2 border-[#C9A962]/30 hover:bg-[#C9A962]/10"
         >
-          <Eye className="h-4 w-4" />
+          <Eye className="h-4 w-4 text-[#C9A962]" />
           {showPDFViewer ? "Aperçu simple" : "Aperçu PDF"}
         </Button>
 
@@ -854,7 +1102,7 @@ export function QuotePDFPreview({ quote, items, profile }: Omit<QuotePDFProps, '
           fileName={fileName}
         >
           {({ loading }) => (
-            <Button disabled={loading} className="gap-2">
+            <Button disabled={loading} className="gap-2 bg-[#C9A962] text-[#0D1B2A] hover:bg-[#D4B872]">
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -922,26 +1170,47 @@ function QuoteHTMLPreview({
           {config.showCompanyLogo && (
             <div className="flex justify-between mb-8">
               <div>
-                {profile?.logo_url && branding.logoPosition === 'left' && (
+                {profile?.logo_url && branding.logoPosition === 'left' && branding.showLogo !== false && (
                   <img
                     src={profile.logo_url}
                     alt="Logo"
-                    className="h-16 w-16 object-contain"
+                    style={{
+                      width: LOGO_SIZES[branding.logoSize]?.width || 80,
+                      height: LOGO_SIZES[branding.logoSize]?.height || 80,
+                    }}
+                    className="object-contain"
                   />
                 )}
               </div>
               <div className="text-right">
-                <p className="font-bold text-lg" style={{ color: branding.primaryColor }}>
+                <p
+                  className={`font-bold ${branding.enlargedCompanyInfo ? 'text-2xl' : 'text-lg'}`}
+                  style={{ color: branding.primaryColor }}
+                >
                   {profile?.company_name || "Mon Entreprise"}
                 </p>
-                {profile?.address && <p className="text-gray-500 text-xs">{profile.address}</p>}
-                {(profile?.postal_code || profile?.city) && (
-                  <p className="text-gray-500 text-xs">{profile.postal_code} {profile.city}</p>
+                {profile?.address && (
+                  <p className={`text-gray-500 ${branding.enlargedCompanyInfo ? 'text-sm' : 'text-xs'}`}>
+                    {profile.address}
+                  </p>
                 )}
-                {profile?.phone && <p className="text-gray-500 text-xs">Tél: {profile.phone}</p>}
-                {profile?.email && <p className="text-gray-500 text-xs">{profile.email}</p>}
+                {(profile?.postal_code || profile?.city) && (
+                  <p className={`text-gray-500 ${branding.enlargedCompanyInfo ? 'text-sm' : 'text-xs'}`}>
+                    {profile.postal_code} {profile.city}
+                  </p>
+                )}
+                {profile?.phone && (
+                  <p className={`text-gray-500 ${branding.enlargedCompanyInfo ? 'text-sm' : 'text-xs'}`}>
+                    Tél: {profile.phone}
+                  </p>
+                )}
+                {profile?.email && (
+                  <p className={`text-gray-500 ${branding.enlargedCompanyInfo ? 'text-sm' : 'text-xs'}`}>
+                    {profile.email}
+                  </p>
+                )}
                 {profile?.siret && (
-                  <p className="text-gray-500 text-xs">
+                  <p className={`text-gray-500 ${branding.enlargedCompanyInfo ? 'text-sm' : 'text-xs'}`}>
                     {localePack.vocabulary.vatNumber}: {profile.siret}
                   </p>
                 )}
@@ -1001,13 +1270,29 @@ function QuoteHTMLPreview({
               <h2 className="font-bold border-b border-gray-200 pb-2 mb-2 text-gray-900">
                 {localePack.vocabulary.client.toUpperCase()}
               </h2>
-              <p className="font-semibold text-gray-900">{quote.client_name}</p>
-              {quote.client_address && <p className="text-gray-600">{quote.client_address}</p>}
-              {(quote.client_postal_code || quote.client_city) && (
-                <p className="text-gray-600">{quote.client_postal_code} {quote.client_city}</p>
+              <p className={`font-semibold text-gray-900 ${branding.enlargedClientInfo ? 'text-lg' : ''}`}>
+                {quote.client_name}
+              </p>
+              {quote.client_address && (
+                <p className={`text-gray-600 ${branding.enlargedClientInfo ? 'text-base' : ''}`}>
+                  {quote.client_address}
+                </p>
               )}
-              {quote.client_email && <p className="text-gray-600">{quote.client_email}</p>}
-              {quote.client_phone && <p className="text-gray-600">Tél: {quote.client_phone}</p>}
+              {(quote.client_postal_code || quote.client_city) && (
+                <p className={`text-gray-600 ${branding.enlargedClientInfo ? 'text-base' : ''}`}>
+                  {quote.client_postal_code} {quote.client_city}
+                </p>
+              )}
+              {quote.client_email && (
+                <p className={`text-gray-600 ${branding.enlargedClientInfo ? 'text-base' : ''}`}>
+                  {quote.client_email}
+                </p>
+              )}
+              {quote.client_phone && (
+                <p className={`text-gray-600 ${branding.enlargedClientInfo ? 'text-base' : ''}`}>
+                  Tél: {quote.client_phone}
+                </p>
+              )}
             </div>
           )}
 
@@ -1115,6 +1400,39 @@ function QuoteHTMLPreview({
                 </div>
                 <p className="text-xs text-gray-500">Mention "Lu et approuvé"</p>
               </div>
+            </div>
+          )}
+
+          {/* Client Reviews Section */}
+          {branding.showClientReviews && branding.clientReviews && branding.clientReviews.length > 0 && (
+            <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <h3 className="font-bold text-green-800 text-sm mb-3">Ce que disent nos clients</h3>
+              <div className="space-y-3">
+                {branding.clientReviews.slice(0, 2).map((review, index) => (
+                  <div key={index} className="pb-3 border-b border-green-100 last:border-0 last:pb-0">
+                    <div className="text-yellow-500 text-xs mb-1">
+                      {"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}
+                    </div>
+                    <p className="text-green-700 text-xs italic mb-1">"{review.text}"</p>
+                    <p className="text-green-800 text-xs font-semibold">
+                      — {review.author}{review.company ? `, ${review.company}` : ''}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Call to Action Section */}
+          {branding.showCTA && branding.ctaText && (
+            <div
+              className="mt-6 p-5 rounded-lg text-center text-white"
+              style={{ backgroundColor: branding.primaryColor }}
+            >
+              <p className="font-bold text-base mb-1">{branding.ctaText}</p>
+              {branding.ctaSubtext && (
+                <p className="text-sm opacity-90">{branding.ctaSubtext}</p>
+              )}
             </div>
           )}
 

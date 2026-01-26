@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { DealLogo } from "@/components/brand";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -27,12 +28,13 @@ function LoginForm() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error("Login Error Details:", error);
         toast({
           title: "Erreur de connexion",
           description: error.message === "Invalid login credentials"
@@ -40,6 +42,16 @@ function LoginForm() {
             : error.message,
           variant: "destructive",
         });
+        return;
+      }
+
+      // Check if MFA is required
+      const { data: factorsData } = await supabase.auth.mfa.listFactors();
+      const hasMFA = factorsData?.totp?.some(f => f.status === "verified");
+
+      if (hasMFA) {
+        // Redirect to MFA verification
+        router.push(`/mfa-verify?redirectTo=${encodeURIComponent(redirectTo)}`);
         return;
       }
 
@@ -63,11 +75,16 @@ function LoginForm() {
 
   return (
     <Card className="w-full max-w-md">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-center">Connexion</CardTitle>
-        <CardDescription className="text-center">
-          Entrez vos identifiants pour accéder à votre compte
-        </CardDescription>
+      <CardHeader className="space-y-4">
+        <div className="flex justify-center">
+          <DealLogo type="combined" size="md" variant="primary" />
+        </div>
+        <div className="space-y-1">
+          <CardTitle className="text-2xl text-center">Connexion</CardTitle>
+          <CardDescription className="text-center">
+            Entrez vos identifiants pour accéder à votre compte
+          </CardDescription>
+        </div>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
@@ -84,7 +101,15 @@ function LoginForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Mot de passe</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Mot de passe</Label>
+              <Link
+                href="/forgot-password"
+                className="text-sm text-primary hover:underline"
+              >
+                Mot de passe oublié ?
+              </Link>
+            </div>
             <Input
               id="password"
               type="password"

@@ -12,6 +12,13 @@ function getStripe() {
 
 export async function POST(req: NextRequest) {
   try {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json(
+        { error: "Les paiements ne sont pas encore configurés." },
+        { status: 503 }
+      );
+    }
+
     const stripe = getStripe();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

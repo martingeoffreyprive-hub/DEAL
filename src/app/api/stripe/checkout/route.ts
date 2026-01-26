@@ -18,23 +18,27 @@ function getStripe(): Stripe {
 // Prix Stripe pour chaque plan (à créer dans le dashboard Stripe)
 function getPlanPrices(): Record<string, { monthly: string; yearly: string }> {
   return {
-    starter: {
-      monthly: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || "",
-      yearly: process.env.STRIPE_STARTER_YEARLY_PRICE_ID || "",
-    },
     pro: {
       monthly: process.env.STRIPE_PRO_MONTHLY_PRICE_ID || "",
       yearly: process.env.STRIPE_PRO_YEARLY_PRICE_ID || "",
     },
-    ultimate: {
-      monthly: process.env.STRIPE_ULTIMATE_MONTHLY_PRICE_ID || "",
-      yearly: process.env.STRIPE_ULTIMATE_YEARLY_PRICE_ID || "",
+    business: {
+      monthly: process.env.STRIPE_BUSINESS_MONTHLY_PRICE_ID || "",
+      yearly: process.env.STRIPE_BUSINESS_YEARLY_PRICE_ID || "",
     },
   };
 }
 
 export async function POST(req: NextRequest) {
   try {
+    // Vérifier si Stripe est configuré AVANT de créer le client
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json(
+        { error: "Les paiements ne sont pas encore configurés. Contactez l'administrateur." },
+        { status: 503 }
+      );
+    }
+
     const stripe = getStripe();
     const PLAN_PRICES = getPlanPrices();
     const supabase = await createClient();

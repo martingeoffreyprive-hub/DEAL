@@ -28,6 +28,8 @@ interface SubscriptionActions {
   canUseAI: () => boolean;
   canExportPDF: () => boolean;
   canProtectPDF: () => boolean;
+  canShowLogoOnPDF: () => boolean; // Logo sur devis (Pro+)
+  canUseProFeatures: () => boolean; // Reviews, CTA, etc.
   getRemainingQuotes: () => number;
   getMaxSectors: () => number;
   refresh: () => Promise<void>;
@@ -44,11 +46,11 @@ export function useSubscription(): SubscriptionState & SubscriptionActions {
     error: null,
   });
 
-  const supabase = createClient();
-
   const fetchData = useCallback(async () => {
     try {
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
+
       if (!user) {
         setState(prev => ({ ...prev, loading: false, error: "Non authentifié" }));
         return;
@@ -78,7 +80,7 @@ export function useSubscription(): SubscriptionState & SubscriptionActions {
 
       const subscription = subscriptionRes.data as Subscription | null;
       const planName = subscription?.plan_name || "free";
-      const planDetails = plansRes.data?.find(p => p.name === planName) as Plan | null;
+      const planDetails = plansRes.data?.find((p: Plan) => p.name === planName) as Plan | null;
 
       setState({
         plan: planName,
@@ -97,7 +99,7 @@ export function useSubscription(): SubscriptionState & SubscriptionActions {
         error: "Erreur lors du chargement",
       }));
     }
-  }, [supabase]);
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -105,7 +107,7 @@ export function useSubscription(): SubscriptionState & SubscriptionActions {
 
   // Actions
   const canCreateQuote = useCallback(() => {
-    if (state.plan === "ultimate") return true;
+    if (state.plan === "business") return true;
     const maxQuotes = state.planDetails?.max_quotes_per_month ?? PLAN_FEATURES[state.plan].maxQuotes;
     if (maxQuotes === -1) return true;
     const currentCount = state.usage?.quotes_created ?? 0;
@@ -113,7 +115,7 @@ export function useSubscription(): SubscriptionState & SubscriptionActions {
   }, [state.plan, state.planDetails, state.usage]);
 
   const canUseSector = useCallback((sector: SectorType) => {
-    if (state.plan === "ultimate") return true;
+    if (state.plan === "business") return true;
     return state.userSectors.some(s => s.sector === sector);
   }, [state.plan, state.userSectors]);
 
@@ -129,9 +131,19 @@ export function useSubscription(): SubscriptionState & SubscriptionActions {
     return state.planDetails?.pdf_protection_enabled ?? false;
   }, [state.planDetails]);
 
+  // Logo sur devis: disponible à partir du plan Pro
+  const canShowLogoOnPDF = useCallback(() => {
+    return state.plan === "pro" || state.plan === "business";
+  }, [state.plan]);
+
+  // Fonctionnalités Pro (Reviews, CTA, etc.): disponibles à partir du plan Pro
+  const canUseProFeatures = useCallback(() => {
+    return state.plan === "pro" || state.plan === "business";
+  }, [state.plan]);
+
   const getRemainingQuotes = useCallback(() => {
     const maxQuotes = state.planDetails?.max_quotes_per_month ?? PLAN_FEATURES[state.plan].maxQuotes;
-    if (maxQuotes === -1) return -1; // Illimité
+    if (maxQuotes === -1) return -1;
     const currentCount = state.usage?.quotes_created ?? 0;
     return Math.max(0, maxQuotes - currentCount);
   }, [state.plan, state.planDetails, state.usage]);
@@ -147,6 +159,8 @@ export function useSubscription(): SubscriptionState & SubscriptionActions {
     canUseAI,
     canExportPDF,
     canProtectPDF,
+    canShowLogoOnPDF,
+    canUseProFeatures,
     getRemainingQuotes,
     getMaxSectors,
     refresh: fetchData,

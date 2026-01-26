@@ -16,9 +16,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { FileText, Menu, User as UserIcon, LogOut, Settings } from "lucide-react";
+import { Menu, User as UserIcon, LogOut, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { LocaleSelector } from "@/components/locale/locale-selector";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { CommandPalette, CommandPaletteTrigger } from "@/components/command-palette";
+import { NotificationBell } from "@/components/notifications/notification-bell";
+import { DealLogo, DealIconD } from "@/components/brand";
 
 interface HeaderProps {
   user: User;
@@ -46,7 +50,7 @@ export function Header({ user, profile }: HeaderProps) {
     : user.email?.slice(0, 2).toUpperCase() || "QV";
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-white">
+    <header className="sticky top-0 z-40 border-b bg-background">
       <div className="flex h-16 items-center justify-between px-4 lg:px-6">
         {/* Logo */}
         <div className="flex items-center gap-4">
@@ -59,17 +63,30 @@ export function Header({ user, profile }: HeaderProps) {
             <Menu className="h-6 w-6" />
           </Button>
           <Link href="/dashboard" className="flex items-center gap-2">
-            <FileText className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold hidden sm:inline">QuoteVoice</span>
+            <DealIconD size="sm" variant="primary" animated className="block sm:hidden" />
+            <div className="hidden sm:block">
+              <DealLogo type="combined" size="sm" variant="primary" animated />
+            </div>
           </Link>
         </div>
 
-        {/* Locale Selector & User Menu */}
-        <div className="flex items-center gap-3">
+        {/* Command Palette, Locale Selector, Theme Toggle & User Menu */}
+        <div className="flex items-center gap-2">
+          {/* Command Palette Trigger - hidden on mobile */}
+          <div className="hidden md:block">
+            <CommandPaletteTrigger />
+          </div>
+
           {/* Locale Selector - hidden on mobile, shown in mobile menu */}
           <div className="hidden sm:block">
             <LocaleSelector size="sm" />
           </div>
+
+          {/* Notifications */}
+          <NotificationBell />
+
+          {/* Theme Toggle */}
+          <ThemeToggle />
 
           <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -116,7 +133,7 @@ export function Header({ user, profile }: HeaderProps) {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <nav className="border-t bg-white p-4 lg:hidden">
+        <nav className="border-t bg-background p-4 lg:hidden">
           <div className="flex flex-col space-y-2">
             {/* Locale Selector for Mobile */}
             <div className="px-3 py-2 border-b pb-3 mb-1">
@@ -126,28 +143,28 @@ export function Header({ user, profile }: HeaderProps) {
 
             <Link
               href="/dashboard"
-              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-100"
+              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
               onClick={() => setMobileMenuOpen(false)}
             >
               Tableau de bord
             </Link>
             <Link
               href="/quotes"
-              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-100"
+              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
               onClick={() => setMobileMenuOpen(false)}
             >
               Mes devis
             </Link>
             <Link
               href="/quotes/new"
-              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-100"
+              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
               onClick={() => setMobileMenuOpen(false)}
             >
               Nouveau devis
             </Link>
             <Link
               href="/profile"
-              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-100"
+              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
               onClick={() => setMobileMenuOpen(false)}
             >
               Profil
@@ -155,6 +172,9 @@ export function Header({ user, profile }: HeaderProps) {
           </div>
         </nav>
       )}
+
+      {/* Command Palette (global) */}
+      <CommandPalette />
     </header>
   );
 }

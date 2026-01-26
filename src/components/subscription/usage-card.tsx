@@ -40,7 +40,7 @@ export function UsageCard() {
   const quotesPercentage = maxQuotes === -1 ? 0 : (usedQuotes / maxQuotes) * 100;
   const sectorsPercentage = maxSectors === -1 ? 0 : (usedSectors / maxSectors) * 100;
 
-  const PlanIcon = plan === "ultimate" ? Crown : plan === "pro" ? Zap : Sparkles;
+  const PlanIcon = plan === "business" ? Crown : plan === "pro" ? Zap : Sparkles;
 
   return (
     <Card>
@@ -50,7 +50,7 @@ export function UsageCard() {
             <PlanIcon className="h-5 w-5 text-primary" />
             Plan {planInfo.displayName}
           </CardTitle>
-          {plan !== "ultimate" && (
+          {plan !== "business" && (
             <Button variant="outline" size="sm" asChild>
               <Link href="/pricing">
                 Upgrader <ArrowRight className="ml-1 h-4 w-4" />
@@ -110,12 +110,12 @@ export function UsageCard() {
               Assistant IA
             </Badge>
           )}
-          {plan === "pro" || plan === "ultimate" ? (
+          {plan === "pro" || plan === "business" ? (
             <Badge variant="secondary" className="text-xs">
               Protection PDF
             </Badge>
           ) : null}
-          {plan === "ultimate" && (
+          {plan === "business" && (
             <Badge variant="secondary" className="text-xs">
               <Crown className="h-3 w-3 mr-1" />
               Support prioritaire

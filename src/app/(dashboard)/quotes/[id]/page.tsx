@@ -3,11 +3,14 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
+import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DealIconD, DealLoadingSpinner } from "@/components/brand";
+import { staggerContainer, staggerItem } from "@/components/animations/page-transition";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,6 +66,11 @@ const AdvancedQuoteEditor = dynamic(
 const QuickApproveEditor = dynamic(
   () => import("@/components/quotes/quick-approve-editor").then((mod) => mod.QuickApproveEditor),
   { ssr: false, loading: () => <div className="flex items-center justify-center h-96"><Loader2 className="h-8 w-8 animate-spin" /></div> }
+);
+
+const QuoteComments = dynamic(
+  () => import("@/components/quotes/quote-comments").then((mod) => mod.QuoteComments),
+  { ssr: false, loading: () => <div className="flex items-center justify-center h-32"><Loader2 className="h-6 w-6 animate-spin" /></div> }
 );
 
 interface QuoteWithItems extends Quote {
@@ -279,10 +287,7 @@ export default function QuoteEditorPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="text-center space-y-4">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
-          <p className="text-muted-foreground">Chargement du devis...</p>
-        </div>
+        <DealLoadingSpinner size="lg" text="Chargement du devis..." />
       </div>
     );
   }
@@ -365,16 +370,16 @@ export default function QuoteEditorPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="quick" className="gap-2">
+        <TabsList className="grid w-full grid-cols-3 bg-[#1E3A5F]/5 p-1">
+          <TabsTrigger value="quick" className="gap-2 data-[state=active]:bg-[#C9A962] data-[state=active]:text-[#0D1B2A]">
             <Zap className="h-4 w-4" />
             Validation rapide
           </TabsTrigger>
-          <TabsTrigger value="edit" className="gap-2">
+          <TabsTrigger value="edit" className="gap-2 data-[state=active]:bg-[#C9A962] data-[state=active]:text-[#0D1B2A]">
             <Edit3 className="h-4 w-4" />
             Édition avancée
           </TabsTrigger>
-          <TabsTrigger value="preview" className="gap-2">
+          <TabsTrigger value="preview" className="gap-2 data-[state=active]:bg-[#C9A962] data-[state=active]:text-[#0D1B2A]">
             <Eye className="h-4 w-4" />
             Aperçu PDF
           </TabsTrigger>
@@ -405,10 +410,13 @@ export default function QuoteEditorPage() {
         </TabsContent>
 
         <TabsContent value="preview">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Eye className="h-5 w-5" />
+          <Card className="border-[#C9A962]/10 shadow-sm overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-[#C9A962] to-[#D4B872]" />
+            <CardHeader className="bg-gradient-to-r from-[#1E3A5F]/5 to-transparent">
+              <CardTitle className="flex items-center gap-2 text-[#1E3A5F]">
+                <div className="p-2 rounded-lg bg-[#C9A962]/10">
+                  <Eye className="h-5 w-5 text-[#C9A962]" />
+                </div>
                 Aperçu du PDF
               </CardTitle>
               <CardDescription>
@@ -425,6 +433,9 @@ export default function QuoteEditorPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Real-time Comments */}
+      <QuoteComments quoteId={quoteId} />
     </div>
   );
 }

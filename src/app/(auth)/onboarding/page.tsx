@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+export const dynamic = "force-dynamic";
+
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -57,10 +59,16 @@ export default function OnboardingPage() {
   const [saving, setSaving] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const supabase = createClient();
+
+  // Create Supabase client lazily to avoid SSR issues
+  const supabase = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    return createClient();
+  }, []);
 
   useEffect(() => {
     const checkUser = async () => {
+      if (!supabase) return;
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
@@ -96,7 +104,7 @@ export default function OnboardingPage() {
     };
 
     checkUser();
-  }, [router, supabase]);
+  }, [router, supabase, setPlan, setMaxSectors]);
 
   const toggleSector = (sector: SectorType) => {
     if (selectedSectors.includes(sector)) {
@@ -124,6 +132,8 @@ export default function OnboardingPage() {
       });
       return;
     }
+
+    if (!supabase) return;
 
     setSaving(true);
 

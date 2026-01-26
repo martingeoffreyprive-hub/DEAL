@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+export const dynamic = "force-dynamic";
+
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -10,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { DealLogo } from "@/components/brand";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -18,7 +21,12 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const supabase = createClient();
+
+  // Create Supabase client lazily to avoid SSR issues
+  const supabase = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    return createClient();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +49,15 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!supabase) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de se connecter au service",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -50,6 +67,7 @@ export default function RegisterPage() {
       });
 
       if (error) {
+        console.error("Registration Error Details:", error);
         toast({
           title: "Erreur d'inscription",
           description: error.message,
@@ -78,11 +96,16 @@ export default function RegisterPage() {
 
   return (
     <Card className="w-full max-w-md">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-center">Créer un compte</CardTitle>
-        <CardDescription className="text-center">
-          Inscrivez-vous pour commencer à créer des devis
-        </CardDescription>
+      <CardHeader className="space-y-4">
+        <div className="flex justify-center">
+          <DealLogo type="combined" size="md" variant="primary" />
+        </div>
+        <div className="space-y-1">
+          <CardTitle className="text-2xl text-center">Créer un compte</CardTitle>
+          <CardDescription className="text-center">
+            Inscrivez-vous pour commencer à créer des devis
+          </CardDescription>
+        </div>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">

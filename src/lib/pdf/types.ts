@@ -10,10 +10,16 @@ export interface PDFBranding {
   textColor: string;         // Couleur du texte principal
   mutedColor: string;        // Couleur du texte secondaire
 
-  // Logo
+  // Logo entreprise
   logoUrl?: string;
   logoPosition: 'left' | 'right' | 'center';
-  logoSize: 'small' | 'medium' | 'large';
+  logoSize: 'small' | 'medium' | 'large' | 'extra-large';
+  showLogo?: boolean;        // Basé sur l'abonnement
+
+  // Logo client
+  clientLogoUrl?: string;
+  clientLogoSize: 'small' | 'medium' | 'large';
+  showClientLogo?: boolean;
 
   // Typography
   fontFamily: 'helvetica' | 'times' | 'courier';
@@ -28,6 +34,25 @@ export interface PDFBranding {
   // Footer
   customFooterText?: string;
   showPageNumbers?: boolean;
+
+  // Sections professionnelles (Enterprise)
+  showClientReviews?: boolean;
+  clientReviews?: ClientReview[];
+  showCTA?: boolean;
+  ctaText?: string;
+  ctaSubtext?: string;
+
+  // Coordonnées agrandies
+  enlargedClientInfo?: boolean;
+  enlargedCompanyInfo?: boolean;
+}
+
+// Avis client pour le devis
+export interface ClientReview {
+  author: string;
+  company?: string;
+  text: string;
+  rating: number; // 1-5
 }
 
 export interface PDFDensityConfig {
@@ -146,12 +171,46 @@ export const DEFAULT_BRANDING: PDFBranding = {
   mutedColor: '#94a3b8',        // Slate-400
   logoPosition: 'left',
   logoSize: 'medium',
+  showLogo: true,
+  clientLogoSize: 'medium',
+  showClientLogo: false,
   fontFamily: 'helvetica',
   headerSize: 12,
   bodySize: 10,
   showWatermark: false,
   showPageNumbers: true,
+  showClientReviews: false,
+  clientReviews: [],
+  showCTA: false,
+  ctaText: '',
+  ctaSubtext: '',
+  enlargedClientInfo: false,
+  enlargedCompanyInfo: false,
 };
+
+// Tailles de logo en pixels
+export const LOGO_SIZES = {
+  small: { width: 50, height: 50 },
+  medium: { width: 80, height: 80 },
+  large: { width: 120, height: 120 },
+  'extra-large': { width: 160, height: 160 },
+};
+
+// Exemples d'avis clients
+export const SAMPLE_REVIEWS: ClientReview[] = [
+  {
+    author: 'Marie D.',
+    company: 'Boulangerie du Coin',
+    text: 'Service impeccable et rapide. Je recommande !',
+    rating: 5,
+  },
+  {
+    author: 'Jean-Pierre L.',
+    company: 'Garage Auto+',
+    text: 'Professionnel et à l\'écoute. Devis clair et précis.',
+    rating: 5,
+  },
+];
 
 // Helper pour merger les configs
 export function mergeBranding(

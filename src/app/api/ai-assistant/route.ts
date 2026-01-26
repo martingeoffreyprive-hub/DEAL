@@ -1,5 +1,11 @@
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { createClient } from "@/lib/supabase/server";
+import { checkRateLimit, rateLimitedResponse, addRateLimitHeaders } from "@/lib/rate-limit";
+import { logQuoteAction } from "@/lib/audit";
+import { withAICache, isCachingEnabled } from "@/lib/ai/cache";
 import { Quote, QuoteItem, SectorType, getSectorConfig, SECTORS } from "@/types/database";
 
 const anthropic = new Anthropic({
@@ -8,8 +14,9 @@ const anthropic = new Anthropic({
 
 interface AssistantRequest {
   action: string;
-  quote: Quote;
-  items: QuoteItem[];
+  quoteId: string;
+  quote?: Quote;
+  items?: QuoteItem[];
 }
 
 // Get sector context for AI prompts
@@ -198,13 +205,62 @@ Limite-toi à 5 suggestions maximum, les plus pertinentes. Réponds en français
 
 export async function POST(req: NextRequest) {
   try {
-    const body: AssistantRequest = await req.json();
-    const { action, quote, items } = body;
+    // 1. Authenticate user
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    if (!action || !quote) {
+    if (authError || !user) {
       return NextResponse.json(
-        { error: "Action et devis requis" },
+        { error: "Non authentifié" },
+        { status: 401 }
+      );
+    }
+
+    // 2. Check rate limit (5 requests per minute for AI)
+    const rateLimitResult = await checkRateLimit(user.id, "ai");
+    if (!rateLimitResult.success) {
+      return rateLimitedResponse(
+        rateLimitResult,
+        "Limite de requêtes IA atteinte. Veuillez réessayer dans une minute."
+      );
+    }
+
+    const body: AssistantRequest = await req.json();
+    const { action, quoteId, quote: clientQuote, items: clientItems } = body;
+
+    if (!action || !quoteId) {
+      return NextResponse.json(
+        { error: "Action et ID du devis requis" },
         { status: 400 }
+      );
+    }
+
+    // 3. Verify quote ownership - fetch from database
+    const { data: quote, error: quoteError } = await supabase
+      .from("quotes")
+      .select("*")
+      .eq("id", quoteId)
+      .eq("user_id", user.id) // Critical: verify ownership
+      .single();
+
+    if (quoteError || !quote) {
+      return NextResponse.json(
+        { error: "Devis non trouvé ou accès non autorisé" },
+        { status: 403 }
+      );
+    }
+
+    // 4. Fetch quote items from database
+    const { data: items, error: itemsError } = await supabase
+      .from("quote_items")
+      .select("*")
+      .eq("quote_id", quoteId)
+      .order("order_index");
+
+    if (itemsError) {
+      return NextResponse.json(
+        { error: "Erreur lors de la récupération des éléments du devis" },
+        { status: 500 }
       );
     }
 
@@ -216,23 +272,62 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const prompt = promptGenerator(quote, items);
+    const prompt = promptGenerator(quote as Quote, (items || []) as QuoteItem[]);
 
-    const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 2048,
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
+    // 5. Use AI cache to reduce costs and improve response time
+    const cacheParams = {
+      quoteId,
+      sector: quote.sector,
+      itemCount: items?.length || 0,
+      total: quote.total,
+    };
+
+    const { result, cached } = await withAICache(
+      action,
+      prompt,
+      cacheParams,
+      async () => {
+        const message = await anthropic.messages.create({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 2048,
+          messages: [
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+        });
+
+        const textContent = message.content.find((block) => block.type === "text");
+        return textContent ? textContent.text : "";
+      }
+    );
+
+    // 6. Log AI usage for analytics (only if not cached)
+    if (!cached) {
+      try {
+        await supabase.rpc("increment_ai_usage", { p_user_id: user.id });
+      } catch {
+        // Non-blocking: don't fail if usage tracking fails
+        console.warn("Failed to increment AI usage stats");
+      }
+    }
+
+    // Log audit trail
+    await logQuoteAction(user.id, "API_CALL", quoteId, {
+      action,
+      sector: quote.sector,
+      itemCount: items?.length || 0,
+      cached,
+    }, req);
+
+    // 7. Return response with rate limit headers and cache info
+    const response = NextResponse.json({
+      result,
+      cached,
+      cacheEnabled: isCachingEnabled(),
     });
-
-    const textContent = message.content.find((block) => block.type === "text");
-    const result = textContent ? textContent.text : "";
-
-    return NextResponse.json({ result });
+    return addRateLimitHeaders(response, rateLimitResult);
   } catch (error: any) {
     console.error("AI Assistant error:", error);
     return NextResponse.json(

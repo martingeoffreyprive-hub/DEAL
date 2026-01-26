@@ -1,0 +1,48 @@
+{
+  "name": "DEAL - Devis Enterprise Automatisés en Ligne",
+  "short_name": "DEAL",
+  "description": "Plateforme enterprise de gestion et génération de devis professionnels avec IA",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#0D1B2A",
+  "theme_color": "#1E3A5F",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["business", "productivity", "finance"],
+  "shortcuts": [
+    {
+      "name": "Nouveau devis",
+      "short_name": "Nouveau",
+      "description": "Créer un nouveau devis",
+      "url": "/quotes/new"
+    },
+    {
+      "name": "Mes devis",
+      "short_name": "Devis",
+      "description": "Voir tous mes devis",
+      "url": "/quotes"
+    },
+    {
+      "name": "Tableau de bord",
+      "short_name": "Dashboard",
+      "description": "Accéder au tableau de bord",
+      "url": "/dashboard"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

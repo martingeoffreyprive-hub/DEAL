@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,10 +18,12 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { SECTORS, type Profile, type SectorType } from "@/types/database";
-import { Loader2, Save, Upload, Building2, CreditCard, FileText, Sparkles, Globe } from "lucide-react";
+import { Save, Upload, Building2, CreditCard, FileText, Sparkles, Globe, User, Loader2 } from "lucide-react";
 import { useLocaleContext } from "@/contexts/locale-context";
 import { generateLegalMentions, detectLocale, getLocalePack } from "@/lib/locale-packs";
 import { Badge } from "@/components/ui/badge";
+import { DealIconD, DealLoadingSpinner } from "@/components/brand";
+import { staggerContainer, staggerItem, cardHover } from "@/components/animations/page-transition";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<Partial<Profile>>({});
@@ -229,35 +232,65 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <DealLoadingSpinner size="lg" text="Chargement du profil..." />
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Profil entreprise</h1>
-          <p className="text-muted-foreground">
-            Ces informations apparaîtront sur vos devis
-          </p>
+    <motion.div
+      className="max-w-3xl mx-auto space-y-6"
+      initial="initial"
+      animate="animate"
+      variants={staggerContainer}
+    >
+      {/* Hero Header */}
+      <motion.div
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1E3A5F] via-[#2D4A6F] to-[#0D1B2A] p-6 md:p-8"
+        variants={staggerItem}
+      >
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#C9A962]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#C9A962]/5 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-[#C9A962]/20 flex items-center justify-center">
+              <User className="h-6 w-6 text-[#C9A962]" />
+            </div>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+                Profil entreprise
+              </h1>
+              <p className="text-white/70">
+                Ces informations apparaitront sur vos devis
+              </p>
+            </div>
+          </div>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button
+              onClick={handleSave}
+              disabled={saving}
+              className="gap-2 bg-[#C9A962] text-[#0D1B2A] hover:bg-[#D4B872] font-semibold"
+            >
+              {saving ? <DealLoadingSpinner size="sm" /> : <Save className="h-4 w-4" />}
+              Sauvegarder
+            </Button>
+          </motion.div>
         </div>
-        <Button onClick={handleSave} disabled={saving} className="gap-2">
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          Sauvegarder
-        </Button>
-      </div>
+      </motion.div>
 
       {/* Company Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building2 className="h-5 w-5" />
-            Informations entreprise
-          </CardTitle>
-        </CardHeader>
+      <motion.div variants={staggerItem} {...cardHover}>
+        <Card className="border-[#C9A962]/10 shadow-sm overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-[#1E3A5F] to-[#2D4A6F]" />
+          <CardHeader className="bg-gradient-to-r from-[#1E3A5F]/5 to-transparent">
+            <CardTitle className="flex items-center gap-3 text-[#1E3A5F]">
+              <div className="p-2 rounded-lg bg-[#1E3A5F]/10">
+                <Building2 className="h-5 w-5 text-[#1E3A5F]" />
+              </div>
+              Informations entreprise
+            </CardTitle>
+          </CardHeader>
         <CardContent className="space-y-4">
           {/* Logo */}
           <div className="space-y-2">
@@ -394,18 +427,23 @@ export default function ProfilePage() {
           </div>
         </CardContent>
       </Card>
+    </motion.div>
 
       {/* Banking Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5" />
-            Informations bancaires
-          </CardTitle>
-          <CardDescription>
-            Pour générer un QR code de paiement sur vos devis
-          </CardDescription>
-        </CardHeader>
+      <motion.div variants={staggerItem} {...cardHover}>
+        <Card className="border-[#C9A962]/10 shadow-sm overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-[#C9A962] to-[#D4B872]" />
+          <CardHeader className="bg-gradient-to-r from-[#C9A962]/5 to-transparent">
+            <CardTitle className="flex items-center gap-3 text-[#1E3A5F]">
+              <div className="p-2 rounded-lg bg-[#C9A962]/10">
+                <CreditCard className="h-5 w-5 text-[#C9A962]" />
+              </div>
+              Informations bancaires
+            </CardTitle>
+            <CardDescription>
+              Pour generer un QR code de paiement sur vos devis
+            </CardDescription>
+          </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="iban">IBAN</Label>
@@ -445,15 +483,18 @@ export default function ProfilePage() {
           </p>
         </CardContent>
       </Card>
+    </motion.div>
 
       {/* Quote Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Paramètres des devis
-          </CardTitle>
-        </CardHeader>
+      <motion.div variants={staggerItem} {...cardHover}>
+        <Card className="border-[#C9A962]/10 shadow-sm overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-[#1E3A5F] via-[#C9A962] to-[#1E3A5F]" />
+          <CardHeader className="bg-gradient-to-r from-[#1E3A5F]/5 to-transparent">
+            <CardTitle className="flex items-center gap-3 text-[#1E3A5F]">
+              <DealIconD size="xs" variant="primary" />
+              Parametres des devis
+            </CardTitle>
+          </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
@@ -517,6 +558,7 @@ export default function ProfilePage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
+    </motion.div>
   );
 }

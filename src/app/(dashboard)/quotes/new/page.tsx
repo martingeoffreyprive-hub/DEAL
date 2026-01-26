@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,8 +21,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/use-subscription";
 import { useLocaleContext } from "@/contexts/locale-context";
 import { SECTORS, PLAN_FEATURES, type SectorType } from "@/types/database";
-import { Loader2, Sparkles, FileText, AlertTriangle, Lock, ArrowRight } from "lucide-react";
+import { Sparkles, FileText, AlertTriangle, Lock, ArrowRight, Mic } from "lucide-react";
 import Link from "next/link";
+import { DealIconD, DealLoadingSpinner } from "@/components/brand";
+import { staggerContainer, staggerItem, cardHover } from "@/components/animations/page-transition";
 
 interface GeneratedQuote {
   sector: SectorType;
@@ -69,7 +72,7 @@ export default function NewQuotePage() {
   const maxQuotes = planInfo.maxQuotes;
 
   // Secteurs disponibles pour l'utilisateur
-  const availableSectors = plan === "ultimate"
+  const availableSectors = plan === "business"
     ? (Object.keys(SECTORS) as SectorType[])
     : userSectors.map(s => s.sector);
 
@@ -124,7 +127,7 @@ export default function NewQuotePage() {
       const generatedQuote: GeneratedQuote = await response.json();
 
       // Vérifier si le secteur généré est accessible
-      if (!canUseSector(generatedQuote.sector) && plan !== "ultimate") {
+      if (!canUseSector(generatedQuote.sector) && plan !== "business") {
         // Utiliser le premier secteur disponible de l'utilisateur
         if (availableSectors.length > 0) {
           generatedQuote.sector = availableSectors[0];
@@ -215,67 +218,96 @@ export default function NewQuotePage() {
   if (subLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <DealLoadingSpinner size="lg" text="Chargement..." />
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Nouveau devis</h1>
-        <p className="text-muted-foreground">
-          Collez votre transcription pour générer un devis automatiquement
-        </p>
-      </div>
+    <motion.div
+      className="max-w-3xl mx-auto space-y-6"
+      initial="initial"
+      animate="animate"
+      variants={staggerContainer}
+    >
+      {/* Hero Header */}
+      <motion.div
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1E3A5F] via-[#2D4A6F] to-[#0D1B2A] p-6 md:p-8"
+        variants={staggerItem}
+      >
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#C9A962]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#C9A962]/5 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+
+        <div className="relative flex items-center gap-4">
+          <div className="w-14 h-14 rounded-xl bg-[#C9A962]/20 flex items-center justify-center">
+            <Sparkles className="h-7 w-7 text-[#C9A962]" />
+          </div>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+              Nouveau devis
+            </h1>
+            <p className="text-white/70">
+              Collez votre transcription pour generer un devis automatiquement
+            </p>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Usage Stats */}
-      <Card className={!canCreate ? "border-red-300 bg-red-50 dark:bg-red-950/20" : ""}>
-        <CardContent className="pt-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">
-              Devis ce mois : {usedQuotes} / {maxQuotes === -1 ? "∞" : maxQuotes}
-            </span>
-            <Badge variant={canCreate ? "secondary" : "destructive"}>
-              {remainingQuotes === -1 ? "Illimité" : `${remainingQuotes} restant${remainingQuotes > 1 ? "s" : ""}`}
-            </Badge>
-          </div>
-          {maxQuotes !== -1 && (
-            <Progress
-              value={(usedQuotes / maxQuotes) * 100}
-              className={!canCreate ? "bg-red-200" : ""}
-            />
-          )}
-          {!canCreate && (
-            <div className="flex items-center justify-between mt-3 p-3 rounded-lg bg-red-100 dark:bg-red-900/30">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-red-600" />
-                <span className="text-sm text-red-700 dark:text-red-300">
-                  Limite atteinte pour ce mois
-                </span>
-              </div>
-              <Button size="sm" asChild>
-                <Link href="/pricing">
-                  Upgrader <ArrowRight className="ml-1 h-4 w-4" />
-                </Link>
-              </Button>
+      <motion.div variants={staggerItem}>
+        <Card className={`border-[#C9A962]/10 shadow-sm ${!canCreate ? "border-red-300 bg-red-50 dark:bg-red-950/20" : ""}`}>
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-[#1E3A5F]">
+                Devis ce mois : {usedQuotes} / {maxQuotes === -1 ? "Illimite" : maxQuotes}
+              </span>
+              <Badge
+                variant={canCreate ? "secondary" : "destructive"}
+                className={canCreate ? "bg-[#C9A962]/20 text-[#B89952] border-[#C9A962]/30" : ""}
+              >
+                {remainingQuotes === -1 ? "Illimite" : `${remainingQuotes} restant${remainingQuotes > 1 ? "s" : ""}`}
+              </Badge>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            {maxQuotes !== -1 && (
+              <Progress
+                value={(usedQuotes / maxQuotes) * 100}
+                className={!canCreate ? "bg-red-200" : "bg-[#1E3A5F]/10"}
+              />
+            )}
+            {!canCreate && (
+              <div className="flex items-center justify-between mt-3 p-3 rounded-lg bg-red-100 dark:bg-red-900/30">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-red-600" />
+                  <span className="text-sm text-red-700 dark:text-red-300">
+                    Limite atteinte pour ce mois
+                  </span>
+                </div>
+                <Button size="sm" className="bg-[#C9A962] text-[#0D1B2A] hover:bg-[#D4B872]" asChild>
+                  <Link href="/pricing">
+                    Upgrader <ArrowRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Transcription Input */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Transcription
-          </CardTitle>
-          <CardDescription>
-            Collez ici le texte de votre transcription vocale
-          </CardDescription>
-        </CardHeader>
+      <motion.div variants={staggerItem} {...cardHover}>
+        <Card className="border-[#C9A962]/10 shadow-sm overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-[#C9A962] to-[#D4B872]" />
+          <CardHeader className="bg-gradient-to-r from-[#1E3A5F]/5 to-transparent">
+            <CardTitle className="flex items-center gap-3 text-[#1E3A5F]">
+              <div className="p-2 rounded-lg bg-[#C9A962]/10">
+                <Mic className="h-5 w-5 text-[#C9A962]" />
+              </div>
+              Transcription
+            </CardTitle>
+            <CardDescription>
+              Collez ici le texte de votre transcription vocale
+            </CardDescription>
+          </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Textarea
@@ -312,7 +344,7 @@ Ma maison fait environ 120m². J'habite au 15 rue des Lilas à Bruxelles.'"
                     {SECTORS[key]}
                   </SelectItem>
                 ))}
-                {plan !== "ultimate" && availableSectors.length < Object.keys(SECTORS).length && (
+                {plan !== "business" && availableSectors.length < Object.keys(SECTORS).length && (
                   <div className="px-2 py-1.5 text-xs text-muted-foreground border-t mt-1">
                     <Lock className="inline h-3 w-3 mr-1" />
                     {Object.keys(SECTORS).length - availableSectors.length} secteurs verrouillés
@@ -320,7 +352,7 @@ Ma maison fait environ 120m². J'habite au 15 rue des Lilas à Bruxelles.'"
                 )}
               </SelectContent>
             </Select>
-            {plan !== "ultimate" && (
+            {plan !== "business" && (
               <p className="text-xs text-muted-foreground">
                 <Link href="/settings/subscription" className="text-primary hover:underline">
                   Gérer mes secteurs
@@ -329,58 +361,66 @@ Ma maison fait environ 120m². J'habite au 15 rue des Lilas à Bruxelles.'"
             )}
           </div>
 
-          <Button
-            onClick={handleGenerate}
-            disabled={loading || !transcription.trim() || !canCreate}
-            className="w-full gap-2"
-            size="lg"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                Génération en cours...
-              </>
-            ) : !canCreate ? (
-              <>
-                <Lock className="h-5 w-5" />
-                Limite atteinte
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-5 w-5" />
-                Générer le devis
-              </>
-            )}
-          </Button>
+          <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+            <Button
+              onClick={handleGenerate}
+              disabled={loading || !transcription.trim() || !canCreate}
+              className="w-full gap-2 bg-[#C9A962] text-[#0D1B2A] hover:bg-[#D4B872] font-semibold shadow-lg"
+              size="lg"
+            >
+              {loading ? (
+                <>
+                  <DealLoadingSpinner size="sm" />
+                  Generation en cours...
+                </>
+              ) : !canCreate ? (
+                <>
+                  <Lock className="h-5 w-5" />
+                  Limite atteinte
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-5 w-5" />
+                  Generer le devis
+                </>
+              )}
+            </Button>
+          </motion.div>
         </CardContent>
       </Card>
+    </motion.div>
 
       {/* Tips */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Conseils pour de meilleurs résultats</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li className="flex items-start gap-2">
-              <span className="text-primary">•</span>
-              Incluez le nom et les coordonnées du client si mentionnés
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-primary">•</span>
-              Décrivez les prestations demandées avec le plus de détails possible
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-primary">•</span>
-              Mentionnez les quantités et dimensions si applicable
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-primary">•</span>
-              Les prix seront estimés et pourront être ajustés ensuite
-            </li>
-          </ul>
-        </CardContent>
-      </Card>
-    </div>
+      <motion.div variants={staggerItem} {...cardHover}>
+        <Card className="border-[#C9A962]/10 shadow-sm">
+          <CardHeader className="bg-gradient-to-r from-[#1E3A5F]/5 to-transparent">
+            <CardTitle className="text-base flex items-center gap-2 text-[#1E3A5F]">
+              <DealIconD size="xs" variant="primary" />
+              Conseils pour de meilleurs resultats
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-start gap-2">
+                <span className="text-[#C9A962] font-bold">1</span>
+                Incluez le nom et les coordonnees du client si mentionnes
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#C9A962] font-bold">2</span>
+                Decrivez les prestations demandees avec le plus de details possible
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#C9A962] font-bold">3</span>
+                Mentionnez les quantites et dimensions si applicable
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#C9A962] font-bold">4</span>
+                Les prix seront estimes et pourront etre ajustes ensuite
+              </li>
+            </ul>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </motion.div>
   );
 }

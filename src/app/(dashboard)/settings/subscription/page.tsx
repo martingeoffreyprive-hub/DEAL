@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,8 @@ import {
 import { SubscriptionAlert } from "@/components/subscription/subscription-alert";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { DealIconD, DealLoadingSpinner } from "@/components/brand";
+import { staggerContainer, staggerItem, cardHover } from "@/components/animations/page-transition";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -146,12 +149,12 @@ export default function SubscriptionSettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <DealLoadingSpinner size="lg" text="Chargement..." />
       </div>
     );
   }
 
-  const PlanIcon = plan === "ultimate" ? Crown : plan === "pro" ? Zap : Sparkles;
+  const PlanIcon = plan === "business" ? Crown : plan === "pro" ? Zap : Sparkles;
 
   const handleOpenPortal = async () => {
     setOpeningPortal(true);
@@ -181,77 +184,106 @@ export default function SubscriptionSettingsPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <motion.div
+      className="max-w-4xl mx-auto space-y-6"
+      initial="initial"
+      animate="animate"
+      variants={staggerContainer}
+    >
       {/* Payment Alert */}
       <SubscriptionAlert />
 
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Abonnement</h1>
-        <p className="text-muted-foreground">
-          Gérez votre plan et vos secteurs d'activité
-        </p>
-      </div>
+      {/* Hero Header */}
+      <motion.div
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1E3A5F] via-[#2D4A6F] to-[#0D1B2A] p-6 md:p-8"
+        variants={staggerItem}
+      >
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#C9A962]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#C9A962]/5 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+
+        <div className="relative flex items-center gap-4">
+          <div className="w-14 h-14 rounded-xl bg-[#C9A962]/20 flex items-center justify-center">
+            <Crown className="h-7 w-7 text-[#C9A962]" />
+          </div>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+              Abonnement
+            </h1>
+            <p className="text-white/70">
+              Gérez votre plan et vos secteurs d'activité
+            </p>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Plan actuel */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <PlanIcon className="h-6 w-6 text-primary" />
+      <motion.div variants={staggerItem} {...cardHover}>
+        <Card className="border-[#C9A962]/10 shadow-sm overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-[#C9A962] to-[#D4B872]" />
+          <CardHeader className="bg-gradient-to-r from-[#1E3A5F]/5 to-transparent">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-[#C9A962]/10">
+                  <PlanIcon className="h-6 w-6 text-[#C9A962]" />
+                </div>
+                <div>
+                  <CardTitle className="text-[#1E3A5F]">Plan {planInfo.displayName}</CardTitle>
+                  <CardDescription>
+                    {plan === "free" ? "Gratuit" : `${subscription?.status === "active" ? "Actif" : "Inactif"}`}
+                  </CardDescription>
+                </div>
               </div>
-              <div>
-                <CardTitle>Plan {planInfo.displayName}</CardTitle>
-                <CardDescription>
-                  {plan === "free" ? "Gratuit" : `${subscription?.status === "active" ? "Actif" : "Inactif"}`}
-                </CardDescription>
-              </div>
+              {plan !== "business" && (
+                <Button className="bg-[#C9A962] text-[#0D1B2A] hover:bg-[#D4B872]" asChild>
+                  <Link href="/pricing">
+                    Changer de plan <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              )}
             </div>
-            {plan !== "ultimate" && (
-              <Button asChild>
-                <Link href="/pricing">
-                  Changer de plan <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            )}
-          </div>
-        </CardHeader>
+          </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-3 rounded-lg bg-muted/50">
-              <p className="text-2xl font-bold">{usage?.quotes_created ?? 0}</p>
+            <div className="text-center p-3 rounded-lg bg-[#1E3A5F]/5">
+              <p className="text-2xl font-bold text-[#1E3A5F]">{usage?.quotes_created ?? 0}</p>
               <p className="text-xs text-muted-foreground">
                 Devis ce mois / {planInfo.maxQuotes === -1 ? "∞" : planInfo.maxQuotes}
               </p>
             </div>
-            <div className="text-center p-3 rounded-lg bg-muted/50">
-              <p className="text-2xl font-bold">{userSectors.length}</p>
+            <div className="text-center p-3 rounded-lg bg-[#1E3A5F]/5">
+              <p className="text-2xl font-bold text-[#1E3A5F]">{userSectors.length}</p>
               <p className="text-xs text-muted-foreground">
                 Secteurs / {maxSectors === -1 ? "∞" : maxSectors}
               </p>
             </div>
-            <div className="text-center p-3 rounded-lg bg-muted/50">
-              <p className="text-2xl font-bold">{planInfo.features.includes("Assistant IA") || plan !== "free" ? "✓" : "✗"}</p>
+            <div className="text-center p-3 rounded-lg bg-[#1E3A5F]/5">
+              <p className="text-2xl font-bold text-[#C9A962]">{planInfo.features.includes("Assistant IA") || plan !== "free" ? "✓" : "✗"}</p>
               <p className="text-xs text-muted-foreground">Assistant IA</p>
             </div>
-            <div className="text-center p-3 rounded-lg bg-muted/50">
-              <p className="text-2xl font-bold">{plan === "pro" || plan === "ultimate" ? "✓" : "✗"}</p>
+            <div className="text-center p-3 rounded-lg bg-[#1E3A5F]/5">
+              <p className="text-2xl font-bold text-[#C9A962]">{plan === "pro" || plan === "business" ? "✓" : "✗"}</p>
               <p className="text-xs text-muted-foreground">Protection PDF</p>
             </div>
           </div>
         </CardContent>
       </Card>
+      </motion.div>
 
       {/* Secteurs actifs */}
-      <Card>
-        <CardHeader>
+      <motion.div variants={staggerItem} {...cardHover}>
+      <Card className="border-[#C9A962]/10 shadow-sm">
+        <CardHeader className="bg-gradient-to-r from-[#1E3A5F]/5 to-transparent">
           <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Mes secteurs d'activité</CardTitle>
-              <CardDescription>
-                {userSectors.length} / {maxSectors === -1 ? "illimité" : maxSectors} secteurs
-              </CardDescription>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-[#C9A962]/10">
+                <DealIconD size="sm" variant="primary" />
+              </div>
+              <div>
+                <CardTitle className="text-[#1E3A5F]">Mes secteurs d'activité</CardTitle>
+                <CardDescription>
+                  {userSectors.length} / {maxSectors === -1 ? "illimité" : maxSectors} secteurs
+                </CardDescription>
+              </div>
             </div>
           </div>
         </CardHeader>
@@ -266,7 +298,7 @@ export default function SubscriptionSettingsPage() {
                   className="flex items-center justify-between p-3 rounded-lg border bg-card"
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className="h-5 w-5 text-primary" />
+                    <Icon className="h-5 w-5 text-[#C9A962]" />
                     <div>
                       <p className="font-medium">{SECTORS[userSector.sector]}</p>
                       {userSector.is_primary && (
@@ -340,7 +372,7 @@ export default function SubscriptionSettingsPage() {
           )}
 
           {/* Message si limite atteinte */}
-          {!canAddSector && plan !== "ultimate" && (
+          {!canAddSector && plan !== "business" && (
             <div className="flex items-center gap-3 p-4 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800">
               <AlertTriangle className="h-5 w-5 text-orange-600" />
               <div className="flex-1">
@@ -358,13 +390,17 @@ export default function SubscriptionSettingsPage() {
           )}
         </CardContent>
       </Card>
+      </motion.div>
 
       {/* Facturation et gestion d'abonnement */}
       {plan !== "free" && subscription?.stripe_customer_id && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
+        <motion.div variants={staggerItem} {...cardHover}>
+        <Card className="border-[#C9A962]/10 shadow-sm">
+          <CardHeader className="bg-gradient-to-r from-[#1E3A5F]/5 to-transparent">
+            <CardTitle className="flex items-center gap-2 text-[#1E3A5F]">
+              <div className="p-2 rounded-lg bg-[#C9A962]/10">
+                <CreditCard className="h-5 w-5 text-[#C9A962]" />
+              </div>
               Facturation
             </CardTitle>
             <CardDescription>
@@ -425,7 +461,8 @@ export default function SubscriptionSettingsPage() {
             </p>
           </CardContent>
         </Card>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }

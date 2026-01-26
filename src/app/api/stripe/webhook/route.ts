@@ -27,12 +27,10 @@ function getSupabaseAdmin() {
 
 function getPlanMapping(): Record<string, string> {
   return {
-    [process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || ""]: "starter",
-    [process.env.STRIPE_STARTER_YEARLY_PRICE_ID || ""]: "starter",
     [process.env.STRIPE_PRO_MONTHLY_PRICE_ID || ""]: "pro",
     [process.env.STRIPE_PRO_YEARLY_PRICE_ID || ""]: "pro",
-    [process.env.STRIPE_ULTIMATE_MONTHLY_PRICE_ID || ""]: "ultimate",
-    [process.env.STRIPE_ULTIMATE_YEARLY_PRICE_ID || ""]: "ultimate",
+    [process.env.STRIPE_BUSINESS_MONTHLY_PRICE_ID || ""]: "business",
+    [process.env.STRIPE_BUSINESS_YEARLY_PRICE_ID || ""]: "business",
   };
 }
 
