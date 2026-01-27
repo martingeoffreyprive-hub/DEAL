@@ -22,7 +22,6 @@ import { LocaleSelector } from "@/components/locale/locale-selector";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { CommandPalette, CommandPaletteTrigger } from "@/components/command-palette";
 import { NotificationBell } from "@/components/notifications/notification-bell";
-import { DealLogo, DealIconD } from "@/components/brand";
 
 interface HeaderProps {
   user: User;
@@ -62,11 +61,11 @@ export function Header({ user, profile }: HeaderProps) {
           >
             <Menu className="h-6 w-6" />
           </Button>
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <DealIconD size="sm" variant="primary" animated className="block sm:hidden" />
-            <div className="hidden sm:block">
-              <DealLogo type="combined" size="sm" variant="primary" animated />
-            </div>
+          <Link href="/dashboard" className="flex items-baseline gap-0.5">
+            <span className="text-xl font-extrabold tracking-[0.12em] text-foreground" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+              DEAL
+            </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#E85A5A] mb-0.5"></span>
           </Link>
         </div>
 

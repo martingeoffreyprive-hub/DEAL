@@ -4,35 +4,36 @@ import { cn } from "@/lib/utils";
 
 interface DealLogoFullProps {
   size?: "xs" | "sm" | "md" | "lg" | "xl";
-  variant?: "primary" | "white" | "dark" | "gold";
+  variant?: "primary" | "white" | "dark" | "light";
   className?: string;
   showTagline?: boolean;
 }
 
 const sizeMap = {
-  xs: { width: 80, height: 24, fontSize: 14, taglineSize: 8 },
-  sm: { width: 100, height: 32, fontSize: 18, taglineSize: 9 },
-  md: { width: 140, height: 44, fontSize: 24, taglineSize: 10 },
-  lg: { width: 180, height: 56, fontSize: 32, taglineSize: 12 },
-  xl: { width: 240, height: 72, fontSize: 42, taglineSize: 14 },
+  xs: { width: 180, height: 24, fontSize: 14, taglineSize: 8, dotSize: 4 },
+  sm: { width: 220, height: 32, fontSize: 18, taglineSize: 9, dotSize: 5 },
+  md: { width: 280, height: 44, fontSize: 24, taglineSize: 10, dotSize: 6 },
+  lg: { width: 340, height: 56, fontSize: 32, taglineSize: 12, dotSize: 8 },
+  xl: { width: 420, height: 72, fontSize: 42, taglineSize: 14, dotSize: 10 },
 };
 
+// New DEAL brand colors
 const colorMap = {
   primary: {
-    main: "#1E3A5F",
-    accent: "#C9A962",
+    text: "#FFFFFF",
+    accent: "#E85A5A",
   },
   white: {
-    main: "#FFFFFF",
-    accent: "#C9A962",
+    text: "#FFFFFF",
+    accent: "#E85A5A",
   },
   dark: {
-    main: "#0D1B2A",
-    accent: "#C9A962",
+    text: "#151833",
+    accent: "#E85A5A",
   },
-  gold: {
-    main: "#C9A962",
-    accent: "#1E3A5F",
+  light: {
+    text: "#252B4A",
+    accent: "#E85A5A",
   },
 };
 
@@ -44,7 +45,11 @@ export function DealLogoFull({
 }: DealLogoFullProps) {
   const dimensions = sizeMap[size];
   const colors = colorMap[variant];
-  const totalHeight = showTagline ? dimensions.height + dimensions.taglineSize + 4 : dimensions.height;
+  const totalHeight = showTagline ? dimensions.height + dimensions.taglineSize + 8 : dimensions.height;
+
+  // Calculate dot position based on font size
+  const dotX = dimensions.fontSize * 3.2; // After "DEAL" text
+  const dotY = dimensions.height * 0.55;
 
   return (
     <svg
@@ -54,36 +59,26 @@ export function DealLogoFull({
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={cn("shrink-0", className)}
-      aria-label="DEAL - Devis Enterprise Automatisés en Ligne"
+      aria-label="DEAL - Votre voix a de la valeur"
     >
-      <defs>
-        <linearGradient id={`wordmarkGradient-${variant}`} x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor={colors.main} />
-          <stop offset="100%" stopColor={colors.main} stopOpacity="0.9" />
-        </linearGradient>
-      </defs>
-
-      {/* Main DEAL text */}
+      {/* Main DEAL text - all same color */}
       <text
         x="0"
         y={dimensions.height * 0.75}
         fontFamily="Inter, system-ui, -apple-system, sans-serif"
         fontSize={dimensions.fontSize}
-        fontWeight="700"
-        letterSpacing="0.05em"
-        fill={`url(#wordmarkGradient-${variant})`}
+        fontWeight="800"
+        letterSpacing="0.08em"
+        fill={colors.text}
       >
-        <tspan fill={colors.accent}>D</tspan>
-        <tspan fill={colors.main}>EAL</tspan>
+        DEAL
       </text>
 
-      {/* Underline accent */}
-      <rect
-        x="0"
-        y={dimensions.height * 0.85}
-        width={dimensions.width * 0.3}
-        height="2"
-        rx="1"
+      {/* Red dot after DEAL */}
+      <circle
+        cx={dotX}
+        cy={dotY}
+        r={dimensions.dotSize / 2}
         fill={colors.accent}
       />
 
@@ -91,15 +86,15 @@ export function DealLogoFull({
       {showTagline && (
         <text
           x="0"
-          y={dimensions.height + dimensions.taglineSize + 2}
+          y={dimensions.height + dimensions.taglineSize + 4}
           fontFamily="Inter, system-ui, -apple-system, sans-serif"
           fontSize={dimensions.taglineSize}
           fontWeight="400"
           letterSpacing="0.02em"
-          fill={colors.main}
+          fill={colors.text}
           opacity="0.7"
         >
-          Devis Enterprise Automatisés
+          Votre voix a de la valeur, Deal lui donne un prix
         </text>
       )}
     </svg>

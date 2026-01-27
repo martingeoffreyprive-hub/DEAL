@@ -78,7 +78,8 @@ export function SplashScreen({ onComplete, duration = 2500 }: SplashScreenProps)
                     ease: "easeOut",
                   }}
                 >
-                  <DealLogoFull size="xl" variant="white" showTagline />
+                  {/* PAS de slogan sur le splash screen - guidelines branding */}
+                  <DealLogoFull size="xl" variant="white" showTagline={false} />
                 </motion.div>
               )}
             </AnimatePresence>
