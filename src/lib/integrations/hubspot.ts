@@ -399,7 +399,7 @@ export class HubSpotClient implements CRMClient {
   }
 
   private mapDealStage(stage: string): string {
-    // Map QuoteVoice status to HubSpot deal stages
+    // Map DEAL status to HubSpot deal stages
     const stageMap: Record<string, string> = {
       draft: 'appointmentscheduled',
       sent: 'qualifiedtobuy',

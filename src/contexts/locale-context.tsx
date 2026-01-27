@@ -29,14 +29,14 @@ function safeGetLocale(): LocaleCode | null {
 
     // Invalid locale in storage - clean it up and warn
     console.warn(
-      `[QuoteVoice] Invalid locale "${saved}" found in localStorage, resetting to default (${DEFAULT_LOCALE})`
+      `[DEAL] Invalid locale "${saved}" found in localStorage, resetting to default (${DEFAULT_LOCALE})`
     );
     localStorage.removeItem(LOCALE_STORAGE_KEY);
     return null;
   } catch (error) {
     // localStorage unavailable (private browsing, quota exceeded, etc.)
     console.warn(
-      '[QuoteVoice] localStorage unavailable, using default locale:',
+      '[DEAL] localStorage unavailable, using default locale:',
       error instanceof Error ? error.message : 'Unknown error'
     );
     return null;
@@ -50,7 +50,7 @@ function safeSaveLocale(locale: LocaleCode): void {
     localStorage.setItem(LOCALE_STORAGE_KEY, locale);
   } catch (error) {
     console.warn(
-      '[QuoteVoice] Failed to save locale to localStorage:',
+      '[DEAL] Failed to save locale to localStorage:',
       error instanceof Error ? error.message : 'Unknown error'
     );
   }
@@ -98,13 +98,13 @@ export function LocaleProvider({ children, defaultLocale = DEFAULT_LOCALE }: Loc
 
         // Log if we fell back to browser detection
         if (detected !== DEFAULT_LOCALE) {
-          console.info(`[QuoteVoice] Detected locale from browser: ${detected}`);
+          console.info(`[DEAL] Detected locale from browser: ${detected}`);
         }
       }
     } catch (error) {
       // Ultimate fallback - use default locale
       console.warn(
-        '[QuoteVoice] Error during locale initialization, using default:',
+        '[DEAL] Error during locale initialization, using default:',
         error instanceof Error ? error.message : 'Unknown error'
       );
       setLocaleState(DEFAULT_LOCALE);
@@ -118,7 +118,7 @@ export function LocaleProvider({ children, defaultLocale = DEFAULT_LOCALE }: Loc
   const setLocale = useCallback((newLocale: LocaleCode) => {
     // Validate the locale before setting
     if (!isValidLocaleCode(newLocale)) {
-      console.warn(`[QuoteVoice] Attempted to set invalid locale: ${newLocale}`);
+      console.warn(`[DEAL] Attempted to set invalid locale: ${newLocale}`);
       return;
     }
 

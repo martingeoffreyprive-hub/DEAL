@@ -34,10 +34,10 @@
     --ring: 217 91% 60%;
     --radius: 0.75rem;
 
-    /* QuoteVoice Custom */
-    --qv-success: 160 84% 39%;
-    --qv-gradient-start: 217 91% 60%;
-    --qv-gradient-end: 199 89% 48%;
+    /* DEAL Custom */
+    --deal-success: 160 84% 39%;
+    --deal-gradient-start: 217 91% 60%;
+    --deal-gradient-end: 199 89% 48%;
 
     /* Enterprise status colors */
     --success: 160 84% 39%;

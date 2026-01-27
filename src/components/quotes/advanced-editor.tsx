@@ -573,7 +573,7 @@ function AIAssistantDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            Assistant IA QuoteVoice
+            Assistant IA DEAL
           </DialogTitle>
           <DialogDescription>
             Utilisez l'IA pour optimiser et enrichir votre devis

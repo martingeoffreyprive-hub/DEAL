@@ -214,7 +214,7 @@ export function CommandPalette() {
     {
       id: "logout",
       label: "Déconnexion",
-      description: "Se déconnecter de QuoteVoice",
+      description: "Se déconnecter de DEAL",
       icon: <LogOut className="w-4 h-4" />,
       action: () => navigate("/auth/logout"),
       group: "Compte",
@@ -321,7 +321,7 @@ export function CommandPalette() {
           </div>
           <div className="flex items-center gap-1">
             <Zap className="w-3 h-3" />
-            QuoteVoice
+            DEAL
           </div>
         </div>
       </Command>

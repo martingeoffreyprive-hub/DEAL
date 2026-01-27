@@ -88,7 +88,7 @@ export default function AdminDashboardPage() {
       <div>
         <h1 className="text-2xl font-bold">Tableau de bord Admin</h1>
         <p className="text-muted-foreground">
-          Vue d'ensemble de la plateforme QuoteVoice
+          Vue d'ensemble de la plateforme DEAL
         </p>
       </div>
 

@@ -1,5 +1,5 @@
 // Third-party Integrations Hub
-// Enterprise-grade integrations for QuoteVoice
+// Enterprise-grade integrations for DEAL
 
 export * from './types';
 export * from './docusign';

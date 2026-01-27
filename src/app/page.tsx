@@ -1,18 +1,28 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Mic, Sparkles, Download, ArrowRight, Check } from "lucide-react";
-import { DealLogo, DealIconD } from "@/components/brand";
 import { motion } from "framer-motion";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0D1B2A] via-[#1E3A5F] to-[#0D1B2A]">
+    <div className="min-h-screen bg-gradient-to-br from-[#1E2144] via-[#151833] to-[#1E2144]">
       {/* Header */}
       <header className="container mx-auto px-4 py-6">
         <nav className="flex items-center justify-between">
-          <DealLogo type="combined" size="sm" variant="white" animated />
+          <Link href="/" className="flex items-center gap-3">
+            <Image
+              src="/logos/deal-icon-d.svg"
+              alt="DEAL"
+              width={40}
+              height={40}
+              className="rounded-xl"
+            />
+            <span className="text-2xl font-black text-white tracking-wide">DEAL</span>
+            <span className="w-2 h-2 rounded-full bg-[#E85A5A]"></span>
+          </Link>
           <div className="flex items-center gap-4">
             <Link href="/login">
               <Button variant="ghost" className="text-white hover:text-white hover:bg-white/10">
@@ -20,7 +30,7 @@ export default function HomePage() {
               </Button>
             </Link>
             <Link href="/register">
-              <Button className="bg-[#C9A962] text-[#0D1B2A] hover:bg-[#C9A962]/90">
+              <Button className="bg-[#E85A5A] text-white hover:bg-[#E85A5A]/90">
                 Commencer
               </Button>
             </Link>
@@ -41,26 +51,25 @@ export default function HomePage() {
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-2 rounded-full bg-[#C9A962]/20 px-4 py-2 text-sm text-[#C9A962] mb-8"
+            className="inline-flex items-center gap-2 rounded-full bg-[#E85A5A]/20 px-4 py-2 text-sm text-[#E85A5A] mb-8"
           >
             <Sparkles className="h-4 w-4" />
             <span>Propulsé par l'Intelligence Artificielle</span>
           </motion.div>
 
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl">
-            Devis Enterprise{" "}
-            <span className="text-[#C9A962]">Automatisés</span>{" "}
-            en Ligne
+            Votre voix a de la valeur,{" "}
+            <span className="text-[#E85A5A]">Deal lui donne un prix</span>
           </h1>
           <p className="mt-6 text-lg leading-8 text-gray-300 max-w-2xl mx-auto">
-            DEAL transforme vos notes vocales en devis professionnels grâce à l'IA.
-            Gagnez du temps, impressionnez vos clients.
+            DEAL transforme vos descriptions vocales en devis professionnels en 60 secondes.
+            Conçu pour les artisans et indépendants wallons.
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/register">
-              <Button size="lg" className="gap-2 bg-[#C9A962] text-[#0D1B2A] hover:bg-[#C9A962]/90 px-8">
-                <Sparkles className="h-5 w-5" />
+              <Button size="lg" className="gap-2 bg-[#E85A5A] text-white hover:bg-[#E85A5A]/90 px-8">
+                <Mic className="h-5 w-5" />
                 Essayer gratuitement
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -74,9 +83,9 @@ export default function HomePage() {
 
           {/* Trust Badges */}
           <div className="mt-12 flex flex-wrap justify-center gap-6 text-sm text-gray-400">
-            {["Essai gratuit 14 jours", "Sans carte bancaire", "Annulation facile"].map((item) => (
+            {["Plan gratuit disponible", "Sans carte bancaire", "Made in Belgium"].map((item) => (
               <span key={item} className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-[#C9A962]" />
+                <Check className="h-4 w-4 text-[#E85A5A]" />
                 {item}
               </span>
             ))}
@@ -91,33 +100,33 @@ export default function HomePage() {
           className="mx-auto mt-24 max-w-5xl"
         >
           <div className="grid gap-8 md:grid-cols-3">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm hover:border-[#C9A962]/30 transition-colors">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#C9A962]/20">
-                <Mic className="h-6 w-6 text-[#C9A962]" />
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm hover:border-[#E85A5A]/30 transition-colors">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#E85A5A]/20">
+                <Mic className="h-6 w-6 text-[#E85A5A]" />
               </div>
-              <h3 className="mb-2 text-lg font-semibold text-white">Import simple</h3>
+              <h3 className="mb-2 text-lg font-semibold text-white">Parlez naturellement</h3>
               <p className="text-gray-400">
-                Collez directement votre transcription depuis Plaud Note Pro ou tout autre outil.
+                Décrivez le travail à faire comme vous le feriez à un client. L'IA comprend tout.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm hover:border-[#C9A962]/30 transition-colors">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#C9A962]/20">
-                <Sparkles className="h-6 w-6 text-[#C9A962]" />
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm hover:border-[#E85A5A]/30 transition-colors">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#E85A5A]/20">
+                <Sparkles className="h-6 w-6 text-[#E85A5A]" />
               </div>
-              <h3 className="mb-2 text-lg font-semibold text-white">Analyse IA</h3>
+              <h3 className="mb-2 text-lg font-semibold text-white">IA spécialisée</h3>
               <p className="text-gray-400">
-                Notre IA détecte automatiquement le secteur et génère un devis avec le bon vocabulaire.
+                26 secteurs d'activité avec vocabulaire et tarification adaptés à votre métier.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm hover:border-[#C9A962]/30 transition-colors">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#C9A962]/20">
-                <Download className="h-6 w-6 text-[#C9A962]" />
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm hover:border-[#E85A5A]/30 transition-colors">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#E85A5A]/20">
+                <Download className="h-6 w-6 text-[#E85A5A]" />
               </div>
-              <h3 className="mb-2 text-lg font-semibold text-white">Export PDF Premium</h3>
+              <h3 className="mb-2 text-lg font-semibold text-white">PDF professionnel</h3>
               <p className="text-gray-400">
-                Téléchargez un PDF professionnel avec votre logo et vos mentions légales.
+                Export PDF avec TVA belge, mentions légales et QR code de paiement inclus.
               </p>
             </div>
           </div>
@@ -136,15 +145,18 @@ export default function HomePage() {
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             {[
-              "BTP / Construction",
-              "Services IT",
-              "Conseil",
-              "Artisanat",
-              "Services à la personne",
+              "Électricité",
+              "Plomberie",
+              "Menuiserie",
+              "Peinture",
+              "Carrelage",
+              "Toiture",
+              "HVAC",
+              "+19 autres",
             ].map((sector) => (
               <span
                 key={sector}
-                className="rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-[#C9A962]/20 hover:text-[#C9A962] transition-colors cursor-default"
+                className="rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-[#E85A5A]/20 hover:text-[#E85A5A] transition-colors cursor-default"
               >
                 {sector}
               </span>
@@ -159,16 +171,22 @@ export default function HomePage() {
           transition={{ delay: 0.8, duration: 0.6 }}
           className="mx-auto mt-24 max-w-2xl text-center"
         >
-          <div className="rounded-3xl border border-[#C9A962]/30 bg-gradient-to-br from-[#C9A962]/10 to-transparent p-12 backdrop-blur-sm">
-            <DealIconD size="xl" variant="gold" className="mx-auto mb-6" />
+          <div className="rounded-3xl border border-[#E85A5A]/30 bg-gradient-to-br from-[#E85A5A]/10 to-transparent p-12 backdrop-blur-sm">
+            <Image
+              src="/logos/deal-icon-d.svg"
+              alt="DEAL"
+              width={80}
+              height={80}
+              className="mx-auto mb-6 rounded-2xl"
+            />
             <h2 className="text-3xl font-bold text-white mb-4">
-              Prêt à transformer vos devis ?
+              Prêt à gagner du temps ?
             </h2>
             <p className="text-gray-400 mb-8">
-              Rejoignez des milliers de professionnels qui gagnent du temps avec DEAL.
+              Rejoignez les artisans wallons qui créent leurs devis en 60 secondes.
             </p>
             <Link href="/register">
-              <Button size="lg" className="bg-[#C9A962] text-[#0D1B2A] hover:bg-[#C9A962]/90 px-8">
+              <Button size="lg" className="bg-[#E85A5A] text-white hover:bg-[#E85A5A]/90 px-8">
                 Commencer maintenant
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -181,9 +199,19 @@ export default function HomePage() {
       <footer className="border-t border-white/10 py-8 mt-24">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <DealLogo type="icon" size="sm" variant="white" />
+            <div className="flex items-center gap-2">
+              <Image
+                src="/logos/deal-icon-d.svg"
+                alt="DEAL"
+                width={32}
+                height={32}
+                className="rounded-lg"
+              />
+              <span className="text-white font-bold">DEAL</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E85A5A]"></span>
+            </div>
             <p className="text-sm text-gray-500">
-              &copy; {new Date().getFullYear()} DEAL - Devis Enterprise Automatisés en Ligne. Tous droits réservés.
+              &copy; {new Date().getFullYear()} DEAL - dealofficialapp.com | Made in Wallonia
             </p>
           </div>
         </div>
