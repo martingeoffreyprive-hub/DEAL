@@ -5,6 +5,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { LocaleProvider } from "@/contexts/locale-context";
 import { CommandPalette } from "@/components/command-palette";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeVariantProvider } from "@/contexts/theme-context";
+import { AccessibilityProvider } from "@/contexts/accessibility-context";
+import { DemoModeProvider } from "@/contexts/DemoModeContext";
+import { DemoModeSwitcher } from "@/components/demo/DemoModeSwitcher";
 // import { WebVitals } from "@/components/performance/web-vitals"; // Disabled - requires web-vitals package
 
 const inter = Inter({
@@ -25,34 +29,34 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "QuoteVoice - Devis Intelligents",
-    template: "%s | QuoteVoice",
+    default: "DEAL - Devis Intelligents pour Artisans Belges",
+    template: "%s | DEAL",
   },
-  description: "Plateforme de gestion et de génération de devis professionnels avec IA. Créez, gérez et envoyez vos devis en quelques clics.",
-  keywords: ["devis", "transcription", "IA", "automatisation", "PDF", "facturation", "entreprise"],
-  authors: [{ name: "QuoteVoice" }],
-  creator: "QuoteVoice",
-  publisher: "QuoteVoice",
+  description: "Plateforme de gestion et de génération de devis professionnels avec IA. Créez, gérez et envoyez vos devis en quelques clics. Conforme TVA belge et RGPD.",
+  keywords: ["devis", "transcription", "IA", "automatisation", "PDF", "facturation", "entreprise", "artisan", "belgique", "TVA"],
+  authors: [{ name: "DEAL" }],
+  creator: "DEAL",
+  publisher: "DEAL",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://quotevoice.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://deal.be"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
-    locale: "fr_FR",
+    locale: "fr_BE",
     url: "/",
-    title: "QuoteVoice - Devis Intelligents",
-    description: "Plateforme de gestion et de génération de devis professionnels avec IA",
-    siteName: "QuoteVoice",
+    title: "DEAL - Devis Intelligents pour Artisans",
+    description: "Plateforme de gestion et de génération de devis professionnels avec IA. Made in Belgium.",
+    siteName: "DEAL",
   },
   twitter: {
     card: "summary_large_image",
-    title: "QuoteVoice - Devis Intelligents",
+    title: "DEAL - Devis Intelligents",
     description: "Plateforme de gestion et de génération de devis professionnels avec IA",
   },
   robots: {
@@ -79,7 +83,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "QuoteVoice",
+    title: "DEAL",
   },
   other: {
     "mobile-web-app-capable": "yes",
@@ -114,10 +118,17 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <LocaleProvider>
-            {children}
-            <CommandPalette />
-          </LocaleProvider>
+          <ThemeVariantProvider>
+            <AccessibilityProvider>
+              <DemoModeProvider>
+                <LocaleProvider>
+                  {children}
+                  <CommandPalette />
+                  <DemoModeSwitcher />
+                </LocaleProvider>
+              </DemoModeProvider>
+            </AccessibilityProvider>
+          </ThemeVariantProvider>
           <Toaster />
         </ThemeProvider>
       </body>

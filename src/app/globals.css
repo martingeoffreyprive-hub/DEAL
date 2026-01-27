@@ -2,9 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import DEAL Theme Variants */
+@import "../styles/themes.css";
+
 /* ============================================
-   QUOTEVOICE BRAND - Design System
-   Bleu (#3B82F6) + Vert (#10B981) + Slate
+   DEAL BRAND - Design System
+   Navy (#1E3A5F) + Gold (#C9A962) + Dark (#0D1B2A)
    ============================================ */
 
 @layer base {

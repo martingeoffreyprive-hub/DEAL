@@ -1,0 +1,340 @@
+/**
+ * DEAL Themes & Accessibility Styles
+ * Thèmes: Classic, Chantier, Nuit, Nature
+ * Mode Chantier: Gros boutons, haute visibilité
+ */
+
+/* ==================== */
+/* CSS VARIABLES */
+/* ==================== */
+
+:root {
+  /* Button sizes */
+  --button-height: 40px;
+  --touch-target: 44px;
+  --spacing-multiplier: 1;
+
+  /* Text sizes (overridable) */
+  --text-base: 16px;
+  --text-sm: 14px;
+  --text-lg: 18px;
+}
+
+/* ==================== */
+/* HIGH CONTRAST MODE */
+/* ==================== */
+
+.high-contrast {
+  --contrast-multiplier: 1.2;
+}
+
+.high-contrast * {
+  border-color: currentColor !important;
+}
+
+.high-contrast .text-muted-foreground {
+  opacity: 0.9;
+}
+
+.high-contrast button,
+.high-contrast a {
+  font-weight: 600;
+}
+
+/* ==================== */
+/* REDUCED MOTION */
+/* ==================== */
+
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* ==================== */
+/* MODE CHANTIER */
+/* ==================== */
+
+.chantier-mode {
+  --button-height: 64px;
+  --touch-target: 64px;
+  --spacing-multiplier: 1.5;
+  --text-base: 18px;
+  --text-sm: 16px;
+  --text-lg: 22px;
+}
+
+/* Buttons */
+.chantier-mode button,
+.chantier-mode [role="button"],
+.chantier-mode .btn {
+  min-height: var(--button-height) !important;
+  min-width: var(--touch-target) !important;
+  padding: 16px 24px !important;
+  font-size: var(--text-base) !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chantier-mode button:active,
+.chantier-mode [role="button"]:active {
+  transform: scale(0.97);
+}
+
+/* Inputs */
+.chantier-mode input,
+.chantier-mode select,
+.chantier-mode textarea {
+  min-height: 56px !important;
+  padding: 16px !important;
+  font-size: var(--text-base) !important;
+  border-radius: 12px !important;
+  border-width: 2px !important;
+}
+
+.chantier-mode input:focus,
+.chantier-mode select:focus,
+.chantier-mode textarea:focus {
+  border-width: 3px !important;
+  outline-width: 3px !important;
+}
+
+/* Labels */
+.chantier-mode label {
+  font-size: var(--text-base) !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+  display: block;
+}
+
+/* Cards */
+.chantier-mode .card,
+.chantier-mode [data-card] {
+  padding: calc(16px * var(--spacing-multiplier)) !important;
+  border-radius: 16px !important;
+}
+
+/* Navigation tabs */
+.chantier-mode [role="tablist"] button,
+.chantier-mode .tab {
+  min-height: 64px !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  padding: 16px 24px !important;
+}
+
+/* Links */
+.chantier-mode a {
+  padding: 8px !important;
+  min-height: 44px !important;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Checkboxes & Radios */
+.chantier-mode input[type="checkbox"],
+.chantier-mode input[type="radio"] {
+  min-width: 28px !important;
+  min-height: 28px !important;
+  transform: scale(1.4);
+}
+
+/* Select dropdowns */
+.chantier-mode [data-radix-select-trigger],
+.chantier-mode .select-trigger {
+  min-height: 56px !important;
+  font-size: var(--text-base) !important;
+}
+
+/* Tables */
+.chantier-mode table th,
+.chantier-mode table td {
+  padding: 16px !important;
+  font-size: var(--text-base) !important;
+}
+
+/* Icons */
+.chantier-mode svg {
+  min-width: 24px;
+  min-height: 24px;
+}
+
+/* Spacing */
+.chantier-mode .space-y-2 > * + * {
+  margin-top: calc(0.5rem * var(--spacing-multiplier)) !important;
+}
+
+.chantier-mode .space-y-4 > * + * {
+  margin-top: calc(1rem * var(--spacing-multiplier)) !important;
+}
+
+.chantier-mode .gap-2 {
+  gap: calc(0.5rem * var(--spacing-multiplier)) !important;
+}
+
+.chantier-mode .gap-4 {
+  gap: calc(1rem * var(--spacing-multiplier)) !important;
+}
+
+/* ==================== */
+/* THEME: CLASSIC (Default) */
+/* ==================== */
+
+[data-deal-theme="classic"] {
+  --deal-primary: 210 59% 25%; /* #1E3A5F */
+  --deal-gold: 42 47% 60%; /* #C9A962 */
+  --deal-dark: 210 60% 11%; /* #0D1B2A */
+}
+
+/* ==================== */
+/* THEME: CHANTIER */
+/* ==================== */
+
+[data-deal-theme="chantier"] {
+  --deal-primary: 21 90% 48%; /* #EA580C */
+  --deal-gold: 21 90% 55%; /* #F97316 */
+  --deal-dark: 217 19% 27%; /* #374151 */
+}
+
+[data-deal-theme="chantier"] .bg-primary {
+  background-color: hsl(21 90% 48%) !important;
+}
+
+[data-deal-theme="chantier"] .text-primary {
+  color: hsl(21 90% 48%) !important;
+}
+
+[data-deal-theme="chantier"] .border-primary {
+  border-color: hsl(21 90% 48%) !important;
+}
+
+/* ==================== */
+/* THEME: NUIT (OLED) */
+/* ==================== */
+
+[data-deal-theme="nuit"] {
+  --deal-primary: 217 91% 60%; /* #3B82F6 */
+  --deal-gold: 217 91% 69%; /* #60A5FA */
+  --deal-dark: 0 0% 4%; /* #0A0A0A */
+}
+
+[data-deal-theme="nuit"].dark {
+  --background: 0 0% 4%;
+  --card: 0 0% 9%;
+}
+
+/* ==================== */
+/* THEME: NATURE */
+/* ==================== */
+
+[data-deal-theme="nature"] {
+  --deal-primary: 160 84% 39%; /* #059669 */
+  --deal-gold: 36 77% 49%; /* #D97706 */
+  --deal-dark: 144 61% 10%; /* #052E16 */
+}
+
+[data-deal-theme="nature"] {
+  background-color: hsl(138 76% 97%); /* Light green tint */
+}
+
+[data-deal-theme="nature"].dark {
+  background-color: hsl(144 61% 10%);
+}
+
+/* ==================== */
+/* UTILITY CLASSES */
+/* ==================== */
+
+/* Touch-friendly class */
+.touch-friendly {
+  min-height: var(--touch-target);
+  min-width: var(--touch-target);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Large button class */
+.btn-large {
+  min-height: 56px;
+  padding: 16px 24px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 12px;
+}
+
+.btn-xlarge {
+  min-height: 64px;
+  padding: 20px 32px;
+  font-size: 20px;
+  font-weight: 700;
+  border-radius: 16px;
+}
+
+/* Visibility helpers */
+.visibility-high {
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Outdoor visibility (sunlight) */
+@media (prefers-contrast: more) {
+  .outdoor-visible {
+    filter: contrast(1.1) saturate(1.1);
+  }
+}
+
+/* ==================== */
+/* PRINT STYLES */
+/* ==================== */
+
+@media print {
+  .chantier-mode button,
+  .chantier-mode input {
+    min-height: auto !important;
+    padding: 8px !important;
+  }
+}
+
+/* ==================== */
+/* ANIMATIONS */
+/* ==================== */
+
+/* Button press animation */
+@keyframes button-press {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.chantier-mode button:active {
+  animation: button-press 0.15s ease-out;
+}
+
+/* Focus ring for accessibility */
+.chantier-mode *:focus-visible {
+  outline: 4px solid hsl(var(--ring));
+  outline-offset: 4px;
+}
+
+/* Skip to content link */
+.skip-to-content {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 16px 24px;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-radius: 8px;
+  z-index: 9999;
+  font-weight: 600;
+}
+
+.skip-to-content:focus {
+  top: 16px;
+}

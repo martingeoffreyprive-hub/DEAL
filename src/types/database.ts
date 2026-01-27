@@ -564,7 +564,7 @@ export function getSectorMaterialCategories(sector: SectorType): string[] {
 // SYSTÈME D'ABONNEMENTS
 // =============================================
 
-export type SubscriptionPlan = 'free' | 'pro' | 'business';
+export type SubscriptionPlan = 'free' | 'pro' | 'business' | 'corporate';
 export type SubscriptionStatus = 'active' | 'cancelled' | 'past_due' | 'trialing';
 
 export interface Plan {
@@ -655,6 +655,18 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, {
       'Devis illimités',
       'Support prioritaire',
       'API access',
+    ],
+  },
+  corporate: {
+    displayName: 'Corporate (All-In)',
+    maxSectors: -1,
+    maxQuotes: -1,
+    features: [
+      'Tout illimité',
+      'White label',
+      'Support dédié',
+      'API access',
+      'Développement sur mesure',
     ],
   },
 };

@@ -30,7 +30,7 @@ export function UsageCard() {
     );
   }
 
-  const planInfo = PLAN_FEATURES[plan];
+  const planInfo = PLAN_FEATURES[plan as keyof typeof PLAN_FEATURES] || PLAN_FEATURES.free;
   const maxQuotes = planInfo.maxQuotes;
   const usedQuotes = usage?.quotes_created ?? 0;
   const remainingQuotes = getRemainingQuotes();
@@ -40,7 +40,7 @@ export function UsageCard() {
   const quotesPercentage = maxQuotes === -1 ? 0 : (usedQuotes / maxQuotes) * 100;
   const sectorsPercentage = maxSectors === -1 ? 0 : (usedSectors / maxSectors) * 100;
 
-  const PlanIcon = plan === "business" ? Crown : plan === "pro" ? Zap : Sparkles;
+  const PlanIcon = plan === "corporate" ? Crown : plan === "business" ? Crown : plan === "pro" ? Zap : Sparkles;
 
   return (
     <Card>
@@ -50,7 +50,7 @@ export function UsageCard() {
             <PlanIcon className="h-5 w-5 text-primary" />
             Plan {planInfo.displayName}
           </CardTitle>
-          {plan !== "business" && (
+          {plan !== "business" && plan !== "corporate" && (
             <Button variant="outline" size="sm" asChild>
               <Link href="/pricing">
                 Upgrader <ArrowRight className="ml-1 h-4 w-4" />
@@ -110,15 +110,20 @@ export function UsageCard() {
               Assistant IA
             </Badge>
           )}
-          {plan === "pro" || plan === "business" ? (
+          {(plan === "pro" || plan === "business" || plan === "corporate") && (
             <Badge variant="secondary" className="text-xs">
               Protection PDF
             </Badge>
-          ) : null}
-          {plan === "business" && (
+          )}
+          {(plan === "business" || plan === "corporate") && (
             <Badge variant="secondary" className="text-xs">
               <Crown className="h-3 w-3 mr-1" />
               Support prioritaire
+            </Badge>
+          )}
+          {plan === "corporate" && (
+            <Badge variant="secondary" className="text-xs bg-gradient-to-r from-[#C9A962] to-[#1E3A5F] text-white">
+              White Label
             </Badge>
           )}
         </div>

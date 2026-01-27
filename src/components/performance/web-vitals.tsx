@@ -36,7 +36,7 @@ export function WebVitals() {
     if (typeof window === "undefined") return;
 
     // Dynamically import web-vitals to avoid SSR issues
-    import("web-vitals").then(({ onCLS, onFID, onLCP, onFCP, onTTFB, onINP }) => {
+    import("web-vitals").then(({ onCLS, onLCP, onFCP, onTTFB, onINP }) => {
       const handleMetric = (metric: any) => {
         const rating = getRating(metric.name, metric.value);
 
@@ -64,7 +64,6 @@ export function WebVitals() {
 
       // Register all vital metrics
       onCLS(handleMetric);
-      onFID(handleMetric);
       onLCP(handleMetric);
       onFCP(handleMetric);
       onTTFB(handleMetric);

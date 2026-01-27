@@ -61,6 +61,7 @@ const PLAN_ICONS: Record<SubscriptionPlan, any> = {
   free: Sparkles,
   pro: Building2,
   business: Crown,
+  corporate: Crown,
 };
 
 export default function PricingPage() {
