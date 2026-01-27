@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://deal.be"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://dealofficialapp.com"),
   alternates: {
     canonical: "/",
   },

@@ -1,37 +1,15 @@
-<svg width="400" height="100" viewBox="0 0 400 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="200" height="50" viewBox="0 0 200 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- DEAL Logo Full - Style officiel -->
   <defs>
-    <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1E3A5F"/>
-      <stop offset="100%" stop-color="#0D1B2A"/>
-    </linearGradient>
-    <linearGradient id="goldAccent" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#C9A962"/>
-      <stop offset="100%" stop-color="#B89952"/>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#A0A0A0"/>
     </linearGradient>
   </defs>
 
-  <!-- D -->
-  <path d="M10 15H40C62 15 78 31 78 50C78 69 62 85 40 85H10V15Z" fill="url(#primaryGradient)"/>
-  <path d="M18 23H38C54 23 66 35 66 50C66 65 54 77 38 77H18V23Z" fill="url(#goldAccent)" opacity="0.15"/>
-  <circle cx="52" cy="50" r="4" fill="url(#goldAccent)"/>
+  <!-- DEAL Text -->
+  <text x="0" y="38" font-family="Arial Black, Arial, sans-serif" font-size="42" font-weight="900" fill="url(#textGradient)" letter-spacing="3">DEAL</text>
 
-  <!-- E -->
-  <path d="M90 15H145V27H102V44H140V56H102V73H145V85H90V15Z" fill="url(#primaryGradient)"/>
-
-  <!-- A -->
-  <path d="M155 85L185 15H205L235 85H220L213 67H177L170 85H155ZM182 55H208L195 25L182 55Z" fill="url(#primaryGradient)"/>
-  <circle cx="195" cy="42" r="3" fill="url(#goldAccent)"/>
-
-  <!-- L -->
-  <path d="M250 15H262V73H310V85H250V15Z" fill="url(#primaryGradient)"/>
-
-  <!-- Underline accent -->
-  <rect x="10" y="92" width="300" height="3" rx="1.5" fill="url(#goldAccent)"/>
-
-  <!-- Tagline (optional) -->
-  <text x="320" y="55" font-family="Inter, sans-serif" font-size="10" fill="#64748B" font-weight="300" letter-spacing="1">
-    <tspan>DIGITAL</tspan>
-    <tspan x="320" dy="12">ESTIMATE</tspan>
-    <tspan x="320" dy="12">PLATFORM</tspan>
-  </text>
+  <!-- Red dot accent after L -->
+  <circle cx="168" cy="38" r="5" fill="#E85A5A"/>
 </svg>

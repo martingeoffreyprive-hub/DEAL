@@ -3,22 +3,22 @@
  * Centralized brand tokens for consistent styling across the application
  */
 
-// Color Palette - Primary
+// Color Palette - Primary (DEAL Official Brand)
 export const BRAND_COLORS = {
   primary: {
-    DEFAULT: "#1E3A5F",
-    light: "#2D4A6F",
-    dark: "#0D1B2A",
+    DEFAULT: "#1E2144",
+    light: "#2A2D52",
+    dark: "#151833",
   },
   secondary: {
-    DEFAULT: "#C9A962",
-    light: "#D4B872",
-    dark: "#B89952",
+    DEFAULT: "#E85A5A",
+    light: "#F07070",
+    dark: "#D04040",
   },
   accent: {
-    gold: "#C9A962",
-    goldLight: "#D4B872",
-    goldDark: "#B89952",
+    red: "#E85A5A",
+    redLight: "#F07070",
+    redDark: "#D04040",
   },
   neutral: {
     white: "#FFFFFF",

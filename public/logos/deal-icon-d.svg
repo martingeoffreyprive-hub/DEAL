@@ -1,24 +1,22 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1E3A5F"/>
-      <stop offset="100%" stop-color="#0D1B2A"/>
-    </linearGradient>
-    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#C9A962"/>
-      <stop offset="100%" stop-color="#B89952"/>
-    </linearGradient>
-  </defs>
-  <!-- Background Circle -->
-  <circle cx="256" cy="256" r="240" fill="url(#bgGradient)"/>
-  <!-- Outer Ring -->
-  <circle cx="256" cy="256" r="230" fill="none" stroke="url(#goldGradient)" stroke-width="4"/>
-  <!-- Letter D -->
-  <path d="M176 128H272C326.772 128 370 171.228 370 226V286C370 340.772 326.772 384 272 384H176V128Z" fill="none" stroke="url(#goldGradient)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- Inner D fill -->
-  <path d="M200 152H272C313.421 152 346 184.579 346 226V286C346 327.421 313.421 360 272 360H200V152Z" fill="url(#goldGradient)" opacity="0.15"/>
-  <!-- Vertical line -->
-  <line x1="176" y1="128" x2="176" y2="384" stroke="url(#goldGradient)" stroke-width="24" stroke-linecap="round"/>
-  <!-- Diamond accent -->
-  <path d="M300 256L316 240L332 256L316 272L300 256Z" fill="url(#goldGradient)"/>
+  <!-- DEAL Icon D - Style officiel avec fond bleu marine arrondi -->
+
+  <!-- Background rounded square -->
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="#1E2144"/>
+
+  <!-- Letter D - outer curve -->
+  <path
+    d="M150 120H280C358.366 120 422 183.634 422 262C422 340.366 358.366 404 280 404H150V120Z"
+    fill="none"
+    stroke="#E8E8E8"
+    stroke-width="40"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Vertical line of D -->
+  <line x1="150" y1="120" x2="150" y2="404" stroke="#E8E8E8" stroke-width="40" stroke-linecap="round"/>
+
+  <!-- Red accent dot -->
+  <circle cx="400" cy="140" r="36" fill="#E85A5A"/>
 </svg>
