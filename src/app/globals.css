@@ -674,3 +674,203 @@ kbd {
   font-size: 0.625rem;
   line-height: 0.875rem;
 }
+
+/* ============================================
+   MODE CHANTIER - Accessibility Mode
+   Interface adaptée conditions terrain
+   ============================================ */
+
+/* CSS Variables for Mode Chantier */
+:root {
+  --button-height: 40px;
+  --touch-target: 44px;
+  --spacing-multiplier: 1;
+  --text-base: 1rem;
+  --text-sm: 0.875rem;
+  --text-lg: 1.125rem;
+}
+
+/* Mode Chantier Active */
+.chantier-mode {
+  --button-height: 64px;
+  --touch-target: 64px;
+  --spacing-multiplier: 1.5;
+  --text-base: 1.125rem;
+  --text-sm: 1rem;
+  --text-lg: 1.375rem;
+}
+
+.chantier-mode * {
+  /* Improve touch targets */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chantier-mode button,
+.chantier-mode [role="button"],
+.chantier-mode a.btn,
+.chantier-mode input[type="submit"],
+.chantier-mode input[type="button"] {
+  min-height: var(--button-height);
+  min-width: var(--touch-target);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+}
+
+.chantier-mode input,
+.chantier-mode select,
+.chantier-mode textarea {
+  min-height: 56px;
+  font-size: var(--text-base);
+  padding: 0.75rem 1rem;
+}
+
+.chantier-mode .card {
+  padding: calc(1rem * var(--spacing-multiplier));
+}
+
+.chantier-mode p,
+.chantier-mode span,
+.chantier-mode li {
+  font-size: var(--text-base);
+  line-height: 1.6;
+}
+
+.chantier-mode h1 { font-size: 2.5rem; }
+.chantier-mode h2 { font-size: 2rem; }
+.chantier-mode h3 { font-size: 1.5rem; }
+.chantier-mode h4 { font-size: 1.25rem; }
+
+/* Mode Chantier Button Styles */
+.chantier-btn {
+  @apply min-h-[64px] min-w-[64px] text-lg font-bold rounded-xl shadow-lg active:scale-95 transition-transform touch-manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chantier-btn-primary {
+  @apply chantier-btn bg-primary text-primary-foreground hover:bg-primary/90;
+}
+
+.chantier-btn-secondary {
+  @apply chantier-btn bg-secondary text-secondary-foreground hover:bg-secondary/90;
+}
+
+.chantier-btn-success {
+  @apply chantier-btn bg-success text-success-foreground hover:bg-success/90;
+}
+
+.chantier-btn-danger {
+  @apply chantier-btn bg-destructive text-destructive-foreground hover:bg-destructive/90;
+}
+
+/* ============================================
+   HIGH CONTRAST MODE - Accessibility
+   ============================================ */
+
+.high-contrast {
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+  --card: 0 0% 5%;
+  --card-foreground: 0 0% 100%;
+  --primary: 217 100% 65%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 0 0% 20%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 0 0% 15%;
+  --muted-foreground: 0 0% 80%;
+  --border: 0 0% 40%;
+  --ring: 217 100% 65%;
+}
+
+.high-contrast * {
+  border-color: hsl(var(--border)) !important;
+}
+
+.high-contrast button,
+.high-contrast [role="button"] {
+  border: 2px solid hsl(var(--foreground));
+}
+
+.high-contrast a {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
+.high-contrast input,
+.high-contrast select,
+.high-contrast textarea {
+  border: 2px solid hsl(var(--foreground));
+  background: hsl(var(--background));
+}
+
+.high-contrast input:focus,
+.high-contrast select:focus,
+.high-contrast textarea:focus {
+  outline: 3px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* ============================================
+   REDUCED MOTION - Accessibility
+   ============================================ */
+
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================
+   DEAL BRAND COLORS - Utility Classes
+   ============================================ */
+
+.bg-deal-navy { background-color: #1E3A5F; }
+.bg-deal-navy-light { background-color: #2D4A6F; }
+.bg-deal-navy-dark { background-color: #0D1B2A; }
+.bg-deal-gold { background-color: #C9A962; }
+.bg-deal-gold-light { background-color: #D4B872; }
+.bg-deal-gold-dark { background-color: #B89952; }
+
+.text-deal-navy { color: #1E3A5F; }
+.text-deal-navy-dark { color: #0D1B2A; }
+.text-deal-gold { color: #C9A962; }
+
+.border-deal-navy { border-color: #1E3A5F; }
+.border-deal-gold { border-color: #C9A962; }
+
+/* DEAL Gradient backgrounds */
+.bg-deal-gradient {
+  background: linear-gradient(135deg, #1E3A5F 0%, #0D1B2A 100%);
+}
+
+.bg-deal-gradient-gold {
+  background: linear-gradient(135deg, #C9A962 0%, #B89952 100%);
+}
+
+.bg-deal-gradient-premium {
+  background: linear-gradient(135deg, #0D1B2A 0%, #1E3A5F 50%, #0D1B2A 100%);
+}
+
+/* DEAL Text gradient */
+.text-deal-gradient {
+  background: linear-gradient(135deg, #C9A962 0%, #1E3A5F 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

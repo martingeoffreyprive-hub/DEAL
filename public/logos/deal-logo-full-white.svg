@@ -1,0 +1,33 @@
+<svg width="400" height="100" viewBox="0 0 400 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="goldAccentWhite" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C9A962"/>
+      <stop offset="100%" stop-color="#B89952"/>
+    </linearGradient>
+  </defs>
+
+  <!-- D -->
+  <path d="M10 15H40C62 15 78 31 78 50C78 69 62 85 40 85H10V15Z" fill="#FFFFFF"/>
+  <path d="M18 23H38C54 23 66 35 66 50C66 65 54 77 38 77H18V23Z" fill="url(#goldAccentWhite)" opacity="0.2"/>
+  <circle cx="52" cy="50" r="4" fill="url(#goldAccentWhite)"/>
+
+  <!-- E -->
+  <path d="M90 15H145V27H102V44H140V56H102V73H145V85H90V15Z" fill="#FFFFFF"/>
+
+  <!-- A -->
+  <path d="M155 85L185 15H205L235 85H220L213 67H177L170 85H155ZM182 55H208L195 25L182 55Z" fill="#FFFFFF"/>
+  <circle cx="195" cy="42" r="3" fill="url(#goldAccentWhite)"/>
+
+  <!-- L -->
+  <path d="M250 15H262V73H310V85H250V15Z" fill="#FFFFFF"/>
+
+  <!-- Underline accent -->
+  <rect x="10" y="92" width="300" height="3" rx="1.5" fill="url(#goldAccentWhite)"/>
+
+  <!-- Tagline -->
+  <text x="320" y="55" font-family="Inter, sans-serif" font-size="10" fill="rgba(255,255,255,0.6)" font-weight="300" letter-spacing="1">
+    <tspan>DIGITAL</tspan>
+    <tspan x="320" dy="12">ESTIMATE</tspan>
+    <tspan x="320" dy="12">PLATFORM</tspan>
+  </text>
+</svg>

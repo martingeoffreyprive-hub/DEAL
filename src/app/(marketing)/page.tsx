@@ -4,7 +4,6 @@
  * Landing Page AIDA - Framework Cognitif Intégré
  * Attention → Intérêt → Désir → Action
  */
-export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";

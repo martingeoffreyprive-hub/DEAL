@@ -9,13 +9,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { SECTORS, SECTOR_CONFIGS, type SectorType, type SubscriptionPlan, PLAN_FEATURES } from "@/types/database";
-import { Check, Loader2, Sparkles, Lock } from "lucide-react";
+import { Check, Loader2, Lock } from "lucide-react";
+import { DealLogo } from "@/components/brand";
 import { cn } from "@/lib/utils";
 
 // Icons pour chaque secteur
 import {
   Zap, Droplets, Flame, Building2, Hammer, PaintBucket,
-  Ruler, Home, TreeDeciduous, Sparkles as SparklesIcon,
+  Ruler, Home, TreeDeciduous, Sparkles,
   Truck, Monitor, Calculator, Scale, Lightbulb, GraduationCap,
   PartyPopper, UtensilsCrossed, Car, Wrench, Shield, Heart,
   Scissors, Camera, Palette, Megaphone, Briefcase
@@ -31,7 +32,7 @@ const SECTOR_ICONS: Record<SectorType, any> = {
   MENUISERIE: Ruler,
   TOITURE: Home,
   JARDINAGE: TreeDeciduous,
-  NETTOYAGE: SparklesIcon,
+  NETTOYAGE: Sparkles,
   DEMENAGEMENT: Truck,
   INFORMATIQUE: Monitor,
   COMPTABILITE: Calculator,
@@ -167,7 +168,7 @@ export default function OnboardingPage() {
 
       toast({
         title: "Configuration terminée",
-        description: "Bienvenue sur QuoteVoice !",
+        description: "Bienvenue sur DEAL !",
       });
 
       router.push("/dashboard");
@@ -199,9 +200,9 @@ export default function OnboardingPage() {
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Sparkles className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">Bienvenue sur QuoteVoice</h1>
+            <DealLogo type="combined" size="lg" variant="primary" />
           </div>
+          <h1 className="text-3xl font-bold">Bienvenue sur DEAL</h1>
           <p className="text-lg text-muted-foreground">
             Sélectionnez votre secteur d'activité pour personnaliser votre expérience
           </p>

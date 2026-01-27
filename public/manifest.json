@@ -10,16 +10,22 @@
   "scope": "/",
   "icons": [
     {
-      "src": "/icons/icon.svg",
+      "src": "/logos/deal-icon-d.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon.svg",
+      "src": "/logos/deal-icon-d.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "maskable"
+    },
+    {
+      "src": "/logos/deal-icon-d-white.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ],
   "categories": ["business", "productivity", "finance"],

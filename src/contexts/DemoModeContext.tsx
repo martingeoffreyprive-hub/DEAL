@@ -104,9 +104,11 @@ export const DEMO_PLANS = {
 
 export function DemoModeProvider({ children }: { children: ReactNode }) {
   const [demoPlan, setDemoPlanState] = useState<DemoPlan>(null);
+  const [mounted, setMounted] = useState(false);
 
   // Charger depuis localStorage au démarrage
   useEffect(() => {
+    setMounted(true);
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("deal_demo_plan");
       if (saved && (saved === "free" || saved === "pro" || saved === "business" || saved === "corporate")) {
@@ -137,8 +139,9 @@ export function DemoModeProvider({ children }: { children: ReactNode }) {
   return (
     <DemoModeContext.Provider
       value={{
-        isDemoMode: demoPlan !== null,
-        demoPlan,
+        // Avant le montage, on retourne des valeurs par défaut cohérentes
+        isDemoMode: mounted ? demoPlan !== null : false,
+        demoPlan: mounted ? demoPlan : null,
         setDemoPlan,
         enableDemoMode,
         disableDemoMode,

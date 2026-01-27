@@ -9,6 +9,7 @@ import { ThemeVariantProvider } from "@/contexts/theme-context";
 import { AccessibilityProvider } from "@/contexts/accessibility-context";
 import { DemoModeProvider } from "@/contexts/DemoModeContext";
 import { DemoModeSwitcher } from "@/components/demo/DemoModeSwitcher";
+import { BrandingProvider } from "@/contexts/branding-context";
 // import { WebVitals } from "@/components/performance/web-vitals"; // Disabled - requires web-vitals package
 
 const inter = Inter({
@@ -53,11 +54,20 @@ export const metadata: Metadata = {
     title: "DEAL - Devis Intelligents pour Artisans",
     description: "Plateforme de gestion et de génération de devis professionnels avec IA. Made in Belgium.",
     siteName: "DEAL",
+    images: [
+      {
+        url: "/logos/og-image.svg",
+        width: 1200,
+        height: 630,
+        alt: "DEAL - Digital Estimate Platform",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "DEAL - Devis Intelligents",
     description: "Plateforme de gestion et de génération de devis professionnels avec IA",
+    images: ["/logos/og-image.svg"],
   },
   robots: {
     index: true,
@@ -74,10 +84,10 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
-      { url: "/icons/icon.svg", type: "image/svg+xml" },
+      { url: "/logos/deal-icon-d.svg", type: "image/svg+xml" },
     ],
     apple: [
-      { url: "/icons/icon.svg" },
+      { url: "/logos/deal-icon-d.svg" },
     ],
   },
   appleWebApp: {
@@ -121,11 +131,13 @@ export default function RootLayout({
           <ThemeVariantProvider>
             <AccessibilityProvider>
               <DemoModeProvider>
-                <LocaleProvider>
-                  {children}
-                  <CommandPalette />
-                  <DemoModeSwitcher />
-                </LocaleProvider>
+                <BrandingProvider>
+                  <LocaleProvider>
+                    {children}
+                    <CommandPalette />
+                    <DemoModeSwitcher />
+                  </LocaleProvider>
+                </BrandingProvider>
               </DemoModeProvider>
             </AccessibilityProvider>
           </ThemeVariantProvider>
