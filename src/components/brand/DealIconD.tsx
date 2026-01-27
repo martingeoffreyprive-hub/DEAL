@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 interface DealIconDProps {
   size?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
-  variant?: "primary" | "white" | "dark" | "gold";
+  variant?: "primary" | "white" | "dark" | "light";
   className?: string;
   animated?: boolean;
 }
@@ -18,22 +18,27 @@ const sizeMap = {
   "2xl": 96,
 };
 
+// New DEAL brand colors
 const colorMap = {
   primary: {
-    main: "#1E3A5F",
-    accent: "#C9A962",
+    background: "#252B4A",
+    letter: "#FFFFFF",
+    accent: "#E85A5A",
   },
   white: {
-    main: "#FFFFFF",
-    accent: "#C9A962",
+    background: "#FFFFFF",
+    letter: "#252B4A",
+    accent: "#E85A5A",
   },
   dark: {
-    main: "#0D1B2A",
-    accent: "#C9A962",
+    background: "#151833",
+    letter: "#FFFFFF",
+    accent: "#E85A5A",
   },
-  gold: {
-    main: "#C9A962",
-    accent: "#1E3A5F",
+  light: {
+    background: "#F8FAFC",
+    letter: "#252B4A",
+    accent: "#E85A5A",
   },
 };
 
@@ -60,60 +65,44 @@ export function DealIconD({
       )}
       aria-label="DEAL Logo"
     >
-      {/* Background Circle with gradient */}
-      <defs>
-        <linearGradient id={`dealGradient-${variant}`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={colors.main} />
-          <stop offset="100%" stopColor={colors.main} stopOpacity="0.85" />
-        </linearGradient>
-        <linearGradient id={`accentGradient-${variant}`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={colors.accent} />
-          <stop offset="100%" stopColor={colors.accent} stopOpacity="0.9" />
-        </linearGradient>
-      </defs>
-
-      {/* Main Circle */}
-      <circle
-        cx="32"
-        cy="32"
-        r="30"
-        fill={`url(#dealGradient-${variant})`}
-        stroke={colors.accent}
-        strokeWidth="1.5"
+      {/* Rounded square background */}
+      <rect
+        x="2"
+        y="2"
+        width="60"
+        height="60"
+        rx="14"
+        fill={colors.background}
       />
 
-      {/* Letter D - Stylized */}
+      {/* Letter D - main shape */}
       <path
-        d="M22 16H34C42.837 16 50 23.163 50 32C50 40.837 42.837 48 34 48H22V16Z"
+        d="M18 16H32C41.941 16 50 24.059 50 34V34C50 43.941 41.941 52 32 52H18V16Z"
         fill="none"
-        stroke={variant === "white" ? "#FFFFFF" : colors.accent}
-        strokeWidth="3"
+        stroke={colors.letter}
+        strokeWidth="5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
 
-      {/* Inner D curve */}
-      <path
-        d="M26 20H34C40.627 20 46 25.373 46 32C46 38.627 40.627 44 34 44H26V20Z"
-        fill={`url(#accentGradient-${variant})`}
-        opacity="0.15"
-      />
-
-      {/* Vertical line accent */}
+      {/* Vertical line of D */}
       <line
-        x1="22"
+        x1="18"
         y1="16"
-        x2="22"
-        y2="48"
-        stroke={variant === "white" ? "#FFFFFF" : colors.accent}
-        strokeWidth="3"
+        x2="18"
+        y2="52"
+        stroke={colors.letter}
+        strokeWidth="5"
         strokeLinecap="round"
       />
 
-      {/* Small diamond accent */}
+      {/* Red/Coral accent stripe */}
       <path
-        d="M38 32L40 30L42 32L40 34L38 32Z"
-        fill={variant === "white" ? "#FFFFFF" : colors.accent}
+        d="M44 26C46.5 29 48 32 48 34C48 36 46.5 39 44 42"
+        fill="none"
+        stroke={colors.accent}
+        strokeWidth="5"
+        strokeLinecap="round"
       />
     </svg>
   );
