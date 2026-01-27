@@ -25,7 +25,6 @@ import {
   Code,
   BookOpen,
 } from "lucide-react";
-import { DealLogo } from "@/components/brand";
 
 interface NavSection {
   title: string;
@@ -95,10 +94,13 @@ export function Sidebar() {
 
   return (
     <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:border-r lg:bg-card">
-      {/* Logo Section */}
+      {/* Logo Section - texte DEAL uniquement */}
       <div className="flex items-center justify-center h-16 border-b px-4">
-        <Link href="/dashboard">
-          <DealLogo type="combined" size="sm" variant="primary" animated />
+        <Link href="/dashboard" className="flex items-baseline gap-0.5">
+          <span className="text-xl font-extrabold tracking-[0.12em] text-foreground" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+            DEAL
+          </span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#E85A5A] mb-0.5"></span>
         </Link>
       </div>
 

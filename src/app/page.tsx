@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Mic, Sparkles, Download, ArrowRight, Check } from "lucide-react";
-import { motion } from "framer-motion";
 
 export default function HomePage() {
   return (
@@ -37,22 +36,12 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <main className="container mx-auto px-4 py-16 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mx-auto max-w-4xl text-center"
-        >
+        <div className="mx-auto max-w-4xl text-center">
           {/* Badge */}
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="badge-deal mb-8"
-          >
+          <div className="badge-deal mb-8">
             <Sparkles className="h-4 w-4" />
             <span>Propulse par l'Intelligence Artificielle</span>
-          </motion.div>
+          </div>
 
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl">
             Votre voix a de la valeur,{" "}
@@ -87,15 +76,10 @@ export default function HomePage() {
               </span>
             ))}
           </div>
-        </motion.div>
+        </div>
 
         {/* Features */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
-          className="mx-auto mt-24 max-w-5xl"
-        >
+        <div className="mx-auto mt-24 max-w-5xl">
           <div className="grid gap-8 md:grid-cols-3">
             <div className="card-deal p-6 transition-colors">
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-deal-coral/20">
@@ -127,15 +111,10 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Sectors */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.6 }}
-          className="mx-auto mt-24 max-w-3xl text-center"
-        >
+        <div className="mx-auto mt-24 max-w-3xl text-center">
           <h2 className="text-2xl font-bold text-white">Adapte a votre metier</h2>
           <p className="mt-4 text-gray-400">
             DEAL s'adapte automatiquement a votre secteur d'activite
@@ -159,15 +138,10 @@ export default function HomePage() {
               </span>
             ))}
           </div>
-        </motion.div>
+        </div>
 
         {/* CTA Section */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.8, duration: 0.6 }}
-          className="mx-auto mt-24 max-w-2xl text-center"
-        >
+        <div className="mx-auto mt-24 max-w-2xl text-center">
           <div className="rounded-3xl border border-deal-coral/30 bg-gradient-to-br from-deal-coral/10 to-transparent p-12 backdrop-blur-sm">
             <div className="mx-auto mb-6 flex items-baseline justify-center gap-1">
               <span className="text-5xl font-extrabold tracking-[0.15em] bg-gradient-to-b from-white to-gray-300 bg-clip-text text-transparent" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
@@ -188,7 +162,7 @@ export default function HomePage() {
               </Button>
             </Link>
           </div>
-        </motion.div>
+        </div>
       </main>
 
       {/* Footer - Logo + Slogan (guidelines branding C) */}
