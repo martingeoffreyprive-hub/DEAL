@@ -58,19 +58,22 @@ const config: Config = {
           DEFAULT: "hsl(var(--info))",
           foreground: "hsl(var(--info-foreground))",
         },
-        // DEAL Brand Colors
+        // DEAL Brand Colors - New 2026 Branding
         deal: {
           navy: {
-            DEFAULT: "#1E3A5F",
-            light: "#2D4A6F",
-            dark: "#0D1B2A",
+            DEFAULT: "#252B4A",
+            light: "#2E3555",
+            dark: "#151833",
+            deeper: "#0D1020",
           },
-          gold: {
-            DEFAULT: "#C9A962",
-            light: "#D4B872",
-            dark: "#B89952",
+          coral: {
+            DEFAULT: "#E85A5A",
+            light: "#F06B6B",
+            dark: "#D14949",
           },
-          dark: "#0D1B2A",
+          // Legacy aliases
+          accent: "#E85A5A",
+          background: "#151833",
         },
         // Tremor colors
         tremor: {
