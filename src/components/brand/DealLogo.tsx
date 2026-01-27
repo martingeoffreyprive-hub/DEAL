@@ -7,7 +7,7 @@ import { DealLogoFull } from "./DealLogoFull";
 interface DealLogoProps {
   type?: "icon" | "wordmark" | "combined";
   size?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
-  variant?: "primary" | "white" | "dark" | "gold";
+  variant?: "primary" | "white" | "dark" | "light";
   className?: string;
   animated?: boolean;
   showTagline?: boolean;
