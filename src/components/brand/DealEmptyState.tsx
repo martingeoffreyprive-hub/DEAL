@@ -89,7 +89,7 @@ export function DealEmptyState({
       >
         {showBrandIcon && (
           <div className="absolute -top-2 -right-2 opacity-30">
-            <DealIconD size="sm" variant="gold" />
+            <DealIconD size="sm" variant="primary" />
           </div>
         )}
         <div className="p-4 rounded-full bg-muted">

@@ -475,7 +475,7 @@ export default function AnalyticsPage() {
           <Card className="border-[#C9A962]/10 shadow-sm overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-[#1E3A5F]/5 to-transparent border-b border-[#C9A962]/10">
               <div className="flex items-center gap-3">
-                <DealIconD size="xs" variant="gold" />
+                <DealIconD size="xs" variant="primary" />
                 <div>
                   <CardTitle className="text-[#1E3A5F]">Répartition par statut</CardTitle>
                   <CardDescription>Distribution des devis</CardDescription>
@@ -585,7 +585,7 @@ export default function AnalyticsPage() {
           <Card className="border-[#C9A962]/10 shadow-sm overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-[#1E3A5F]/5 to-transparent border-b border-[#C9A962]/10">
               <div className="flex items-center gap-3">
-                <DealIconD size="xs" variant="gold" />
+                <DealIconD size="xs" variant="primary" />
                 <div>
                   <CardTitle className="text-[#1E3A5F]">Top secteurs</CardTitle>
                   <CardDescription>Revenus par secteur d'activité</CardDescription>
