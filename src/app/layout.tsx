@@ -11,7 +11,6 @@ import { DemoModeProvider } from "@/contexts/DemoModeContext";
 import { DemoModeSwitcher } from "@/components/demo/DemoModeSwitcher";
 import { BrandingProvider } from "@/contexts/branding-context";
 import { ConstructionModeProvider } from "@/components/settings/construction-mode-toggle";
-import { UIModeProvider } from "@/contexts/ui-mode-context";
 // import { WebVitals } from "@/components/performance/web-vitals"; // Disabled - requires web-vitals package
 
 const inter = Inter({
@@ -138,11 +137,9 @@ export default function RootLayout({
                 <DemoModeProvider>
                   <BrandingProvider>
                     <LocaleProvider>
-                      <UIModeProvider>
-                        {children}
-                        <CommandPalette />
-                        <DemoModeSwitcher />
-                      </UIModeProvider>
+                      {children}
+                      <CommandPalette />
+                      <DemoModeSwitcher />
                     </LocaleProvider>
                   </BrandingProvider>
                 </DemoModeProvider>
