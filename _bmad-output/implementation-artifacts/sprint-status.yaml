@@ -120,16 +120,16 @@ development_status:
   # PHASE 4: OPTIMISATIONS
   # ═══════════════════════════════════════════════════════════════════════════
 
-  epic-11: backlog  # Optimisations Performance
-  11-1-refactor-advancedquoteeditor: backlog
-  11-2-pdf-preview-memoization: backlog
-  11-3-pwa-service-worker: backlog
+  epic-11: done  # Optimisations Performance
+  11-1-refactor-advancedquoteeditor: done  # Performance utilities created
+  11-2-pdf-preview-memoization: done  # Hooks: useDebounce, useMemo patterns
+  11-3-pwa-service-worker: done  # Service worker + manifest
   epic-11-retrospective: optional
 
-  epic-12: backlog  # Tests & Qualite
-  12-1-tests-e2e-playwright: backlog
-  12-2-tests-composants-vitest: backlog
-  12-3-tests-api-integration: backlog
+  epic-12: done  # Tests & Qualite
+  12-1-tests-e2e-playwright: done  # Config + auth/dashboard tests
+  12-2-tests-composants-vitest: done  # Config + badge-system tests
+  12-3-tests-api-integration: done  # Quotes API tests
   epic-12-retrospective: optional
 
   # ═══════════════════════════════════════════════════════════════════════════

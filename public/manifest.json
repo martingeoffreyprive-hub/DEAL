@@ -4,9 +4,9 @@
   "description": "Plateforme enterprise de gestion et génération de devis professionnels avec IA",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#0D1B2A",
-  "theme_color": "#1E3A5F",
-  "orientation": "portrait-primary",
+  "background_color": "#252B4A",
+  "theme_color": "#252B4A",
+  "orientation": "any",
   "scope": "/",
   "icons": [
     {
