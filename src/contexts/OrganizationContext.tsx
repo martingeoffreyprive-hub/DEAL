@@ -21,7 +21,7 @@ import {
   ROLE_INFO,
 } from "@/lib/rbac";
 
-const ORG_STORAGE_KEY = "quotevoice_current_org";
+const ORG_STORAGE_KEY = "deal_current_org";
 
 // Types
 export interface Organization {

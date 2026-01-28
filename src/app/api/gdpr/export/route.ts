@@ -164,7 +164,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Return as downloadable JSON
-    const filename = `quotevoice-export-${user.id}-${Date.now()}.json`;
+    const filename = `deal-export-${user.id}-${Date.now()}.json`;
 
     return new NextResponse(JSON.stringify(exportData, null, 2), {
       status: 200,

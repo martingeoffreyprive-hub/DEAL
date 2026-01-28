@@ -204,7 +204,7 @@ export function CommandPalette() {
       icon: <HelpCircle className="w-4 h-4" />,
       action: () => {
         setOpen(false);
-        window.open("https://help.quotevoice.app", "_blank");
+        window.open("https://help.dealofficialapp.com", "_blank");
       },
       group: "Aide",
       keywords: ["aide", "help", "support", "documentation"],

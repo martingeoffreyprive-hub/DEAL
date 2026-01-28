@@ -1,5 +1,5 @@
 -- ============================================
--- QuoteVoice - Migration v2
+-- DEAL - Migration v2
 -- Ajoute le support des informations bancaires belges,
 -- la signature et les nouveaux statuts
 -- ============================================

@@ -1,6 +1,7 @@
 {
-  "name": "quotevoice",
-  "version": "1.0.0",
+  "name": "deal",
+  "version": "2.0.0",
+  "description": "DEAL - Application de devis professionnels pour artisans et indépendants",
   "private": true,
   "scripts": {
     "dev": "next dev",

@@ -9,7 +9,7 @@ import {
   getTaxRates,
 } from '@/lib/locale-packs';
 
-const LOCALE_STORAGE_KEY = 'quotevoice_locale';
+const LOCALE_STORAGE_KEY = 'deal_locale';
 
 interface UseLocaleReturn {
   locale: LocaleCode;

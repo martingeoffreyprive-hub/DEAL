@@ -49,7 +49,7 @@ export default function PrivacySettingsPage() {
       // Get filename from Content-Disposition header
       const contentDisposition = response.headers.get("Content-Disposition");
       const filenameMatch = contentDisposition?.match(/filename="(.+)"/);
-      const filename = filenameMatch?.[1] || "quotevoice-export.json";
+      const filename = filenameMatch?.[1] || "deal-export.json";
 
       // Download the file
       const blob = await response.blob();

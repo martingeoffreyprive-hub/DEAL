@@ -1,5 +1,5 @@
 -- ============================================
--- QuoteVoice - Schéma SQL Supabase
+-- DEAL - Schéma SQL Supabase
 -- ============================================
 -- Exécuter ce script dans l'éditeur SQL de Supabase
 -- Dashboard > SQL Editor > New Query

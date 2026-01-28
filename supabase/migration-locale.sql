@@ -1,5 +1,5 @@
 -- ============================================
--- QuoteVoice - Migration: Add locale column to quotes
+-- DEAL - Migration: Add locale column to quotes
 -- ============================================
 -- Epic 8 Story 8.7: Migration des devis existants vers nouvelle locale
 --

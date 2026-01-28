@@ -230,6 +230,6 @@ export async function GET() {
     data_anonymized: [
       "Journaux d'audit (conservés pour conformité légale mais anonymisés)",
     ],
-    contact: "Pour toute question, contactez privacy@quotevoice.app",
+    contact: "Pour toute question, contactez privacy@dealofficialapp.com",
   });
 }

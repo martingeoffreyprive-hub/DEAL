@@ -1,6 +1,8 @@
-# QuoteVoice - Générateur de Devis par Transcription Vocale
+# DEAL - Devis Professionnels pour Artisans
 
 Application web mobile pour générer automatiquement des devis et offres commerciales personnalisés à partir de transcriptions vocales, avec validation humaine avant export PDF.
+
+**Production**: [www.dealofficialapp.com](https://www.dealofficialapp.com)
 
 ## Fonctionnalités
 
@@ -10,15 +12,22 @@ Application web mobile pour générer automatiquement des devis et offres commer
 - **Édition** : Modification complète du devis généré (client, prestations, prix)
 - **Export PDF** : Génération d'un PDF professionnel avec logo et mentions légales
 - **Historique** : Gestion complète de tous vos devis
+- **Panel Admin** : Interface d'administration complète
 
-## Secteurs supportés
+## Secteurs supportés (27)
 
 - BTP / Construction
+- Électricité
+- Plomberie
+- Chauffage / HVAC
+- Menuiserie
+- Peinture
+- Carrelage
+- Toiture
+- Jardinage / Paysagisme
 - Services Informatiques / IT
 - Conseil / Consulting
-- Artisanat
-- Services à la personne
-- Autres (détection intelligente)
+- Et plus encore...
 
 ## Stack Technique
 
@@ -28,6 +37,8 @@ Application web mobile pour générer automatiquement des devis et offres commer
 - **Authentification** : Supabase Auth
 - **IA** : API Claude (Anthropic)
 - **PDF** : @react-pdf/renderer
+- **Paiements** : Stripe
+- **Rate Limiting** : Upstash Redis
 
 ---
 
@@ -38,19 +49,28 @@ Application web mobile pour générer automatiquement des devis et offres commer
 - Node.js 18+ installé
 - Compte Supabase (gratuit)
 - Clé API Anthropic (Claude)
+- Compte Stripe (pour les paiements)
+- Compte Upstash (pour le rate limiting)
 
 ### Étapes d'installation
 
-#### 1. Créer un projet Supabase
+#### 1. Cloner le repository
+
+```bash
+git clone https://github.com/martingeoffreyprive-hub/DEAL.git
+cd DEAL
+```
+
+#### 2. Créer un projet Supabase
 
 1. Allez sur [supabase.com](https://supabase.com) et créez un compte
 2. Cliquez sur "New Project"
-3. Donnez un nom à votre projet (ex: "quotevoice")
+3. Donnez un nom à votre projet (ex: "deal")
 4. Choisissez un mot de passe pour la base de données
 5. Sélectionnez la région la plus proche (ex: "West EU")
 6. Attendez que le projet soit créé (~2 minutes)
 
-#### 2. Configurer la base de données
+#### 3. Configurer la base de données
 
 1. Dans votre projet Supabase, allez dans **SQL Editor**
 2. Cliquez sur "New Query"
@@ -58,23 +78,7 @@ Application web mobile pour générer automatiquement des devis et offres commer
 4. Collez-le dans l'éditeur SQL
 5. Cliquez sur "Run" pour exécuter le script
 
-#### 3. Récupérer les clés Supabase
-
-1. Dans Supabase, allez dans **Settings > API**
-2. Copiez :
-   - `Project URL` → `NEXT_PUBLIC_SUPABASE_URL`
-   - `anon public` (sous "Project API keys") → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `service_role` (sous "Project API keys") → `SUPABASE_SERVICE_ROLE_KEY`
-
-#### 4. Obtenir une clé API Anthropic
-
-1. Allez sur [console.anthropic.com](https://console.anthropic.com)
-2. Créez un compte ou connectez-vous
-3. Allez dans **API Keys**
-4. Créez une nouvelle clé API
-5. Copiez la clé → `ANTHROPIC_API_KEY`
-
-#### 5. Configurer les variables d'environnement
+#### 4. Configurer les variables d'environnement
 
 ```bash
 # Copiez le fichier d'exemple
@@ -83,22 +87,15 @@ cp .env.example .env.local
 # Éditez .env.local avec vos clés
 ```
 
-Contenu de `.env.local` :
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://votre-projet.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-ANTHROPIC_API_KEY=sk-ant-api03-...
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
+Voir `.env.example` pour la liste complète des variables requises.
 
-#### 6. Installer les dépendances
+#### 5. Installer les dépendances
 
 ```bash
 npm install
 ```
 
-#### 7. Lancer l'application
+#### 6. Lancer l'application
 
 ```bash
 npm run dev
@@ -108,155 +105,71 @@ L'application sera accessible sur [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## Utilisation
-
-### 1. Créer un compte
-
-1. Accédez à l'application
-2. Cliquez sur "Commencer" ou "Créer un compte"
-3. Entrez votre email et un mot de passe (min. 8 caractères)
-
-### 2. Configurer votre profil entreprise
-
-1. Allez dans "Profil entreprise"
-2. Remplissez les informations de votre entreprise
-3. Uploadez votre logo
-4. Définissez vos mentions légales
-5. Sauvegardez
-
-### 3. Créer un devis
-
-1. Cliquez sur "Nouveau devis"
-2. Collez votre transcription vocale
-3. Sélectionnez le secteur (ou laissez sur "Détection automatique")
-4. Cliquez sur "Générer le devis"
-5. L'IA analyse et génère un devis structuré
-
-### 4. Éditer le devis
-
-1. Modifiez les informations client si nécessaire
-2. Ajustez les prestations (description, quantité, prix)
-3. Ajoutez ou supprimez des lignes
-4. Modifiez le taux de TVA si besoin
-5. Ajoutez des notes ou conditions particulières
-
-### 5. Exporter en PDF
-
-1. Allez dans l'onglet "Aperçu PDF"
-2. Vérifiez le rendu du document
-3. Cliquez sur "Télécharger PDF"
-
----
-
 ## Structure du projet
 
 ```
-quotevoice/
+deal/
 ├── src/
 │   ├── app/                    # Pages Next.js (App Router)
 │   │   ├── (auth)/             # Pages d'authentification
 │   │   ├── (dashboard)/        # Pages du dashboard
+│   │   ├── (admin)/            # Panel d'administration
 │   │   ├── api/                # API Routes
 │   │   └── page.tsx            # Page d'accueil
 │   ├── components/
 │   │   ├── ui/                 # Composants shadcn/ui
 │   │   ├── layout/             # Header, Sidebar
+│   │   ├── brand/              # Composants branding DEAL
 │   │   └── quotes/             # Composants devis
 │   ├── lib/
 │   │   ├── supabase/           # Clients Supabase
+│   │   ├── cors.ts             # Configuration CORS
+│   │   ├── rate-limit.ts       # Rate limiting
 │   │   └── utils.ts            # Fonctions utilitaires
 │   ├── hooks/                  # React hooks
 │   └── types/                  # Types TypeScript
 ├── supabase/
 │   └── schema.sql              # Schéma de base de données
 ├── docs/
-│   └── bmad/                   # Documentation BMAD
+│   ├── bmad/                   # Documentation BMAD
+│   └── generated/              # Documents générés
+├── _bmad-output/               # Artefacts BMM
 └── public/                     # Assets statiques
 ```
 
 ---
 
-## Flux utilisateur
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     Page d'accueil                          │
-│                          │                                   │
-│                          ▼                                   │
-│              ┌──── Connexion ────┐                          │
-│              │                   │                          │
-│              ▼                   ▼                          │
-│        Inscription          Connexion                       │
-│              │                   │                          │
-│              └─────────┬─────────┘                          │
-│                        │                                    │
-│                        ▼                                    │
-│               ┌─── Dashboard ───┐                           │
-│               │                 │                           │
-│    ┌──────────┼─────────────────┼──────────┐               │
-│    │          │                 │          │               │
-│    ▼          ▼                 ▼          ▼               │
-│  Profil   Nouveau devis    Mes devis   Statistiques        │
-│    │          │                 │                          │
-│    │          ▼                 │                          │
-│    │   Coller transcription     │                          │
-│    │          │                 │                          │
-│    │          ▼                 │                          │
-│    │   Génération IA            │                          │
-│    │          │                 │                          │
-│    │          ▼                 │                          │
-│    │   Édition du devis ◄───────┘                          │
-│    │          │                                            │
-│    │          ▼                                            │
-│    │   Aperçu PDF                                          │
-│    │          │                                            │
-│    │          ▼                                            │
-│    │   Téléchargement                                      │
-│    │                                                       │
-│    └───────────────────────────────────────────────────────┘
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Captures d'écran
-
-### Page d'accueil
-La landing page présente les fonctionnalités clés de QuoteVoice avec un design moderne et épuré.
-
-### Dashboard
-Vue d'ensemble de votre activité : nombre de devis, montant total, devis récents.
-
-### Création de devis
-Interface simple pour coller votre transcription et lancer la génération IA.
-
-### Éditeur de devis
-Formulaire complet pour modifier tous les aspects du devis généré.
-
-### Aperçu PDF
-Prévisualisation du document final avant téléchargement.
-
----
-
-## Déploiement en production
+## Déploiement
 
 ### Vercel (recommandé)
 
 1. Poussez votre code sur GitHub
 2. Connectez-vous à [vercel.com](https://vercel.com)
 3. Importez votre repository
-4. Configurez les variables d'environnement
+4. Configurez les variables d'environnement (voir `.env.example`)
 5. Déployez
 
-### Variables d'environnement Vercel
+### Variables d'environnement requises
 
-```
-NEXT_PUBLIC_SUPABASE_URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY
-SUPABASE_SERVICE_ROLE_KEY
-ANTHROPIC_API_KEY
-NEXT_PUBLIC_APP_URL (votre domaine Vercel)
-```
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | URL Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clé publique Supabase |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clé service Supabase |
+| `ANTHROPIC_API_KEY` | Clé API Anthropic |
+| `NEXT_PUBLIC_APP_URL` | URL de l'application |
+| `STRIPE_SECRET_KEY` | Clé secrète Stripe |
+| `STRIPE_WEBHOOK_SECRET` | Secret webhook Stripe |
+| `UPSTASH_REDIS_REST_URL` | URL Redis Upstash |
+| `UPSTASH_REDIS_REST_TOKEN` | Token Redis Upstash |
+
+---
+
+## Branding
+
+- **Couleurs**: Navy (#252B4A) + Coral (#E85A5A)
+- **Police**: Inter
+- **Logo**: Voir `/public/` et composants `/src/components/brand/`
 
 ---
 
@@ -268,4 +181,4 @@ Projet privé - Tous droits réservés
 
 ## Support
 
-Pour toute question ou problème, ouvrez une issue sur le repository GitHub.
+Pour toute question ou problème, contactez l'équipe DEAL.

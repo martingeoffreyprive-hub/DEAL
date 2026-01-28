@@ -11,7 +11,7 @@ import {
   isValidLocaleCode,
 } from '@/lib/locale-packs';
 
-const LOCALE_STORAGE_KEY = 'quotevoice_locale';
+const LOCALE_STORAGE_KEY = 'deal_locale';
 const DEFAULT_LOCALE: LocaleCode = 'fr-BE';
 
 // Safe localStorage helper - graceful fallback if localStorage is unavailable

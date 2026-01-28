@@ -29,7 +29,7 @@ CREATE TABLE plans (
 
 -- Insérer les plans par défaut
 INSERT INTO plans (name, display_name, description, price_monthly, price_yearly, max_sectors, max_quotes_per_month, ai_assistant_enabled, pdf_export_enabled, pdf_protection_enabled, priority_support) VALUES
-  ('free', 'Gratuit', 'Pour découvrir QuoteVoice', 0, 0, 1, 5, false, true, false, false),
+  ('free', 'Gratuit', 'Pour découvrir DEAL', 0, 0, 1, 5, false, true, false, false),
   ('starter', 'Starter', 'Pour les indépendants', 9.99, 99, 3, 30, true, true, false, false),
   ('pro', 'Pro', 'Pour les professionnels actifs', 24.99, 249, 10, 100, true, true, true, false),
   ('ultimate', 'Ultime', 'Accès complet illimité', 49.99, 499, -1, -1, true, true, true, true);

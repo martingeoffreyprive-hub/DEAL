@@ -1,4 +1,4 @@
--- Performance Indexes for QuoteVoice
+-- Performance Indexes for DEAL
 -- Optimizes queries for large datasets
 
 -- =============================================

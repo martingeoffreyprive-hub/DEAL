@@ -1,12 +1,12 @@
-# Politique de Sécurité - QuoteVoice (DEAL)
+# Politique de Sécurité - DEAL
 
 ## 1. Vue d'ensemble
 
-Ce document décrit les politiques et procédures de sécurité de QuoteVoice, conformes aux exigences SOC 2 Type II.
+Ce document décrit les politiques et procédures de sécurité de DEAL, conformes aux exigences SOC 2 Type II.
 
 **Version**: 1.0
 **Date**: 2024-01-27
-**Responsable**: Équipe Sécurité QuoteVoice
+**Responsable**: Équipe Sécurité DEAL
 
 ---
 
@@ -210,7 +210,7 @@ Tous les événements critiques sont enregistrés:
 ## 11. Contact Sécurité
 
 Pour signaler une vulnérabilité:
-- Email: security@quotevoice.com
+- Email: security@dealofficialapp.com
 - Programme de bug bounty: [À venir]
 
 ---

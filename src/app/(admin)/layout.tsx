@@ -29,7 +29,7 @@ const ADMIN_NAV = [
 
 // Admin emails fallback - database role takes precedence
 const ADMIN_EMAILS = [
-  "admin@quotevoice.app",
+  "admin@dealofficialapp.com",
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {

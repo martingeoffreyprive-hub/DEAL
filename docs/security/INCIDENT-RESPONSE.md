@@ -1,8 +1,8 @@
-# Procédure de Réponse aux Incidents - QuoteVoice
+# Procédure de Réponse aux Incidents - DEAL
 
 ## 1. Objectif
 
-Ce document définit la procédure de réponse aux incidents de sécurité pour QuoteVoice, conformément aux exigences SOC 2 et RGPD.
+Ce document définit la procédure de réponse aux incidents de sécurité pour DEAL, conformément aux exigences SOC 2 et RGPD.
 
 ---
 
@@ -234,7 +234,7 @@ Niveau 3: + Direction → décisions critiques (P1/P2)
 
 **Template de notification utilisateur**:
 ```
-Objet: Notification de sécurité importante - QuoteVoice
+Objet: Notification de sécurité importante - DEAL
 
 Cher utilisateur,
 
@@ -257,7 +257,7 @@ Nous vous informons qu'un incident de sécurité a été détecté le [DATE].
 
 Nous nous excusons pour cet incident et restons à votre disposition.
 
-L'équipe QuoteVoice
+L'équipe DEAL
 ```
 
 ---

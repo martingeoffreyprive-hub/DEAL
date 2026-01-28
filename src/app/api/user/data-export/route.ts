@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
 
     // Return as downloadable JSON file
     const jsonString = JSON.stringify(exportData, null, 2);
-    const filename = `quotevoice-export-${user.id.slice(0, 8)}-${new Date().toISOString().split('T')[0]}.json`;
+    const filename = `deal-export-${user.id.slice(0, 8)}-${new Date().toISOString().split('T')[0]}.json`;
 
     return new NextResponse(jsonString, {
       status: 200,

@@ -1,5 +1,5 @@
 -- ============================================================
--- DEAL (QuoteVoice) - FULL ENTERPRISE MIGRATION
+-- DEAL - FULL ENTERPRISE MIGRATION
 -- Exécuter dans Supabase SQL Editor: https://supabase.com/dashboard
 -- ============================================================
 

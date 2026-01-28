@@ -1,8 +1,72 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+import {
+  isAllowedOrigin,
+  getCORSHeaders,
+  PERMISSIVE_CORS_ROUTES,
+  RATE_LIMIT_EXCLUDED_ROUTES,
+  getRateLimiterType,
+} from '@/lib/cors';
 
 // Enable Edge Runtime for faster cold starts and lower latency
 export const runtime = 'experimental-edge';
+
+/**
+ * Rate Limiting Configuration
+ * Uses Upstash Redis for Edge-compatible rate limiting
+ */
+const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+  ? new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    })
+  : null;
+
+// Rate limiters for different route types
+const rateLimiters = redis ? {
+  general: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(100, '1 m'), // 100 req/min
+    analytics: true,
+    prefix: 'rl:general',
+  }),
+  ai: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(10, '1 m'), // 10 req/min for AI
+    analytics: true,
+    prefix: 'rl:ai',
+  }),
+  auth: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(5, '15 m'), // 5 req/15min for auth
+    analytics: true,
+    prefix: 'rl:auth',
+  }),
+  api: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(100, '1 m'), // 100 req/min for public API
+    analytics: true,
+    prefix: 'rl:api',
+  }),
+} : null;
+
+/**
+ * Get client IP from request headers
+ */
+function getClientIP(request: NextRequest): string {
+  const forwarded = request.headers.get('x-forwarded-for');
+  const realIP = request.headers.get('x-real-ip');
+
+  if (forwarded) {
+    return forwarded.split(',')[0].trim();
+  }
+  if (realIP) {
+    return realIP;
+  }
+  return 'unknown';
+}
 
 /**
  * Security Headers Configuration
@@ -180,13 +244,73 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Add API-specific security headers
+  // Add API-specific security headers and rate limiting
   if (isApiRoute) {
-    // CORS headers for API routes
-    response.headers.set('Access-Control-Allow-Origin', process.env.NEXT_PUBLIC_APP_URL || '*');
-    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-API-Key');
-    response.headers.set('Access-Control-Max-Age', '86400');
+    const origin = request.headers.get('origin');
+
+    // Check if this is a permissive CORS route (widget, analytics)
+    const isPermissiveRoute = PERMISSIVE_CORS_ROUTES.some(route => pathname.startsWith(route));
+
+    // Handle CORS preflight
+    if (request.method === 'OPTIONS') {
+      const corsHeaders = getCORSHeaders(origin, isPermissiveRoute);
+      if (!corsHeaders && !isPermissiveRoute) {
+        return new NextResponse('CORS not allowed', { status: 403 });
+      }
+      return new NextResponse(null, {
+        status: 204,
+        headers: corsHeaders || {},
+      });
+    }
+
+    // Apply rate limiting (skip excluded routes)
+    const isRateLimitExcluded = RATE_LIMIT_EXCLUDED_ROUTES.some(route => pathname.startsWith(route));
+
+    if (!isRateLimitExcluded && rateLimiters) {
+      const limiterType = getRateLimiterType(pathname);
+      const limiter = rateLimiters[limiterType];
+
+      // Use user ID if authenticated, otherwise IP
+      const identifier = user?.id || getClientIP(request);
+
+      try {
+        const result = await limiter.limit(identifier);
+
+        // Add rate limit headers
+        response.headers.set('X-RateLimit-Limit', result.limit.toString());
+        response.headers.set('X-RateLimit-Remaining', result.remaining.toString());
+        response.headers.set('X-RateLimit-Reset', result.reset.toString());
+
+        if (!result.success) {
+          return NextResponse.json(
+            { error: 'Trop de requêtes. Veuillez réessayer plus tard.' },
+            {
+              status: 429,
+              headers: {
+                'X-RateLimit-Limit': result.limit.toString(),
+                'X-RateLimit-Remaining': '0',
+                'X-RateLimit-Reset': result.reset.toString(),
+                'Retry-After': Math.ceil((result.reset - Date.now()) / 1000).toString(),
+              },
+            }
+          );
+        }
+      } catch (error) {
+        // Fail open: allow request if rate limiter fails
+        console.error('Rate limit error:', error);
+      }
+    }
+
+    // Apply CORS headers
+    const corsHeaders = getCORSHeaders(origin, isPermissiveRoute);
+    if (corsHeaders) {
+      Object.entries(corsHeaders).forEach(([key, value]) => {
+        response.headers.set(key, value);
+      });
+    } else if (!isPermissiveRoute && origin) {
+      // Block requests from non-allowed origins (except permissive routes)
+      return new NextResponse('CORS not allowed', { status: 403 });
+    }
 
     // Prevent caching of API responses with sensitive data
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
