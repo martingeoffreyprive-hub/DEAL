@@ -644,9 +644,9 @@ export default function AdminUsersPage() {
           <div className="grid grid-cols-2 gap-3 py-4">
             {[
               { id: "free", label: "Free", color: "bg-gray-100 hover:bg-gray-200 border-gray-300" },
-              { id: "starter", label: "Starter", color: "bg-green-100 hover:bg-green-200 border-green-300" },
               { id: "pro", label: "Pro", color: "bg-blue-100 hover:bg-blue-200 border-blue-300" },
-              { id: "ultimate", label: "Ultimate", color: "bg-purple-100 hover:bg-purple-200 border-purple-300" },
+              { id: "business", label: "Business", color: "bg-purple-100 hover:bg-purple-200 border-purple-300" },
+              { id: "corporate", label: "Corporate", color: "bg-amber-100 hover:bg-amber-200 border-amber-300" },
             ].map((plan) => (
               <Button
                 key={plan.id}

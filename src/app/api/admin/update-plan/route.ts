@@ -6,7 +6,7 @@ const ADMIN_EMAILS = [
   "martin.geoffrey.prive@gmail.com",
 ];
 
-const VALID_PLANS = ["free", "starter", "pro", "ultimate"];
+const VALID_PLANS = ["free", "pro", "business", "corporate"];
 
 export async function POST(request: NextRequest) {
   try {
