@@ -123,7 +123,7 @@ export default function RootLayout({
           </>
         )}
       </head>
-      <body className={`${inter.className} ${inter.variable}`} style={{ touchAction: 'pan-y', overscrollBehavior: 'none' }}>
+      <body className={`${inter.className} ${inter.variable}`}>
         {/* <WebVitals /> */}
         <ThemeProvider
           attribute="class"
