@@ -136,11 +136,11 @@ development_status:
   # PHASE 5: POLISH & LAUNCH
   # ═══════════════════════════════════════════════════════════════════════════
 
-  epic-13: backlog  # Polish & Launch
-  13-1-onboarding-wizard-ameliore: backlog
-  13-2-documentation-api-openapi: backlog
-  13-3-monitoring-sentry: backlog
-  13-4-analytics-posthog: backlog
+  epic-13: done  # Polish & Launch
+  13-1-onboarding-wizard-ameliore: done
+  13-2-documentation-api-openapi: done
+  13-3-monitoring-sentry: done
+  13-4-analytics-posthog: done
   epic-13-retrospective: optional
 
 # ═══════════════════════════════════════════════════════════════════════════

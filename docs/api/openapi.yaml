@@ -1,0 +1,645 @@
+openapi: 3.1.0
+info:
+  title: DEAL API
+  description: |
+    API pour la plateforme DEAL - Devis Enterprise Automatisés en Ligne.
+
+    ## Authentification
+    Toutes les requêtes API nécessitent un token Bearer obtenu via Supabase Auth.
+
+    ## Rate Limiting
+    - Free: 100 requêtes/minute
+    - Pro: 500 requêtes/minute
+    - Business: 2000 requêtes/minute
+  version: 2.0.0
+  contact:
+    name: DEAL Support
+    email: support@dealofficialapp.com
+    url: https://dealofficialapp.com/support
+  license:
+    name: Proprietary
+    url: https://dealofficialapp.com/terms
+
+servers:
+  - url: https://dealofficialapp.com/api
+    description: Production
+  - url: http://localhost:3000/api
+    description: Development
+
+tags:
+  - name: Quotes
+    description: Gestion des devis
+  - name: Clients
+    description: Gestion des clients
+  - name: Profile
+    description: Profil utilisateur
+  - name: AI
+    description: Génération IA
+  - name: Tokens
+    description: TokenDEAL Economy
+
+security:
+  - bearerAuth: []
+
+paths:
+  /quotes:
+    get:
+      tags:
+        - Quotes
+      summary: Liste des devis
+      description: Récupère la liste des devis de l'utilisateur avec pagination et filtres
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, sent, signed, rejected, expired]
+        - name: sector
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Recherche par nom client ou numéro de devis
+      responses:
+        '200':
+          description: Liste des devis
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Quote'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Quotes
+      summary: Créer un devis
+      description: Crée un nouveau devis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteCreate'
+      responses:
+        '201':
+          description: Devis créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /quotes/{id}:
+    get:
+      tags:
+        - Quotes
+      summary: Détail d'un devis
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Détail du devis
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - Quotes
+      summary: Modifier un devis
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteUpdate'
+      responses:
+        '200':
+          description: Devis modifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Quotes
+      summary: Supprimer un devis
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Devis supprimé
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /quotes/{id}/send:
+    post:
+      tags:
+        - Quotes
+      summary: Envoyer un devis
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                method:
+                  type: string
+                  enum: [email, link]
+                email:
+                  type: string
+                  format: email
+                message:
+                  type: string
+      responses:
+        '200':
+          description: Devis envoyé
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  shareUrl:
+                    type: string
+                    format: uri
+
+  /quotes/{id}/pdf:
+    get:
+      tags:
+        - Quotes
+      summary: Télécharger le PDF
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: template
+          in: query
+          schema:
+            type: string
+            default: classic-pro
+        - name: locale
+          in: query
+          schema:
+            type: string
+            default: fr-BE
+      responses:
+        '200':
+          description: PDF du devis
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+
+  /ai/generate:
+    post:
+      tags:
+        - AI
+      summary: Générer du contenu avec l'IA
+      description: Utilise les tokens pour générer du contenu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - type
+                - prompt
+              properties:
+                type:
+                  type: string
+                  enum: [quote, description, price]
+                prompt:
+                  type: string
+                sector:
+                  type: string
+                context:
+                  type: object
+      responses:
+        '200':
+          description: Contenu généré
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: string
+                  tokensUsed:
+                    type: integer
+        '402':
+          description: Tokens insuffisants
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /tokens/balance:
+    get:
+      tags:
+        - Tokens
+      summary: Solde de tokens
+      responses:
+        '200':
+          description: Solde actuel
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balance:
+                    type: integer
+                  usedThisMonth:
+                    type: integer
+                  limit:
+                    type: integer
+
+  /tokens/purchase:
+    post:
+      tags:
+        - Tokens
+      summary: Acheter des tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pack
+              properties:
+                pack:
+                  type: string
+                  enum: [100, 500, 1000, 5000]
+      responses:
+        '200':
+          description: Redirection vers paiement
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  checkoutUrl:
+                    type: string
+                    format: uri
+
+  /profile:
+    get:
+      tags:
+        - Profile
+      summary: Profil utilisateur
+      responses:
+        '200':
+          description: Profil
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+
+    put:
+      tags:
+        - Profile
+      summary: Modifier le profil
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdate'
+      responses:
+        '200':
+          description: Profil modifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Quote:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        quote_number:
+          type: string
+        client_name:
+          type: string
+        client_email:
+          type: string
+          format: email
+        sector:
+          type: string
+        status:
+          type: string
+          enum: [draft, sent, signed, rejected, expired]
+        subtotal:
+          type: number
+        tax_rate:
+          type: number
+        tax_amount:
+          type: number
+        total:
+          type: number
+        created_at:
+          type: string
+          format: date-time
+        valid_until:
+          type: string
+          format: date
+
+    QuoteDetail:
+      allOf:
+        - $ref: '#/components/schemas/Quote'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/QuoteItem'
+            notes:
+              type: string
+            client_address:
+              type: string
+            client_postal_code:
+              type: string
+            client_city:
+              type: string
+            client_phone:
+              type: string
+
+    QuoteItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        description:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: string
+        unit_price:
+          type: number
+        total:
+          type: number
+
+    QuoteCreate:
+      type: object
+      required:
+        - client_name
+        - sector
+        - items
+      properties:
+        client_name:
+          type: string
+        client_email:
+          type: string
+          format: email
+        client_phone:
+          type: string
+        client_address:
+          type: string
+        client_postal_code:
+          type: string
+        client_city:
+          type: string
+        sector:
+          type: string
+        tax_rate:
+          type: number
+          default: 21
+        valid_until:
+          type: string
+          format: date
+        notes:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            required:
+              - description
+              - quantity
+              - unit_price
+            properties:
+              description:
+                type: string
+              quantity:
+                type: number
+              unit:
+                type: string
+                default: unité
+              unit_price:
+                type: number
+
+    QuoteUpdate:
+      allOf:
+        - $ref: '#/components/schemas/QuoteCreate'
+        - type: object
+          properties:
+            status:
+              type: string
+              enum: [draft, sent, signed, rejected, expired]
+
+    Profile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        full_name:
+          type: string
+        company_name:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        postal_code:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        siret:
+          type: string
+        iban:
+          type: string
+        bic:
+          type: string
+        bank_name:
+          type: string
+        logo_url:
+          type: string
+          format: uri
+        legal_mentions:
+          type: string
+        sector:
+          type: string
+        role:
+          type: string
+          enum: [user, admin, super_admin]
+
+    ProfileUpdate:
+      type: object
+      properties:
+        full_name:
+          type: string
+        company_name:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        postal_code:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        siret:
+          type: string
+        iban:
+          type: string
+        bic:
+          type: string
+        bank_name:
+          type: string
+        legal_mentions:
+          type: string
+        sector:
+          type: string
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Requête invalide
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: Non authentifié
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Ressource non trouvée
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    RateLimited:
+      description: Limite de requêtes atteinte
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
