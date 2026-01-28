@@ -62,17 +62,17 @@ development_status:
   2-5-gestures-mobile: done
   epic-2-retrospective: optional
 
-  epic-3: backlog  # Dashboard Netflix-Style
-  3-1-hero-section-contextuelle: backlog
-  3-2-carousel-devis-recents: backlog
-  3-3-dashboard-widgets-personnalisables: backlog
-  3-4-cards-visuelles-devis: backlog
+  epic-3: in-progress  # Dashboard Netflix-Style
+  3-1-hero-section-contextuelle: done
+  3-2-carousel-devis-recents: done
+  3-3-dashboard-widgets-personnalisables: backlog  # Deferred - drag & drop not priority
+  3-4-cards-visuelles-devis: done
   epic-3-retrospective: optional
 
-  epic-4: backlog  # Creation Devis Wizard
-  4-1-wizard-multi-etapes: backlog
-  4-2-choix-mode-creation: backlog
-  4-3-mode-chantier: backlog
+  epic-4: done  # Creation Devis Wizard
+  4-1-wizard-multi-etapes: done
+  4-2-choix-mode-creation: done
+  4-3-mode-chantier: done
   epic-4-retrospective: optional
 
   epic-5: backlog  # Microinteractions & Ludification

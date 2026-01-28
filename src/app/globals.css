@@ -916,3 +916,81 @@ kbd {
 .deal-dot {
   @apply w-2 h-2 rounded-full bg-deal-coral;
 }
+
+/* ============================================
+   CONSTRUCTION MODE - High Contrast Accessibility
+   Optimized for construction site use
+   ============================================ */
+
+/* Construction Mode - High Contrast & Large Touch Targets */
+.construction-mode {
+  /* Force high contrast colors */
+  --background: 0 0% 100%;
+  --foreground: 0 0% 0%;
+  --primary: 45 93% 47%;
+  --primary-foreground: 0 0% 0%;
+
+  /* Larger text base */
+  font-size: 18px;
+}
+
+.construction-mode.dark {
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+}
+
+/* Large touch targets - 60px minimum */
+.construction-mode button,
+.construction-mode [role="button"],
+.construction-mode a:not(.no-construction-style) {
+  min-height: 60px !important;
+  min-width: 60px !important;
+  padding: 16px 24px !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+}
+
+/* Input fields larger */
+.construction-mode input,
+.construction-mode select,
+.construction-mode textarea {
+  min-height: 56px !important;
+  font-size: 18px !important;
+  padding: 12px 16px !important;
+}
+
+/* High contrast borders */
+.construction-mode * {
+  border-width: 2px !important;
+}
+
+/* Disable subtle animations for clarity */
+.construction-mode * {
+  transition-duration: 0ms !important;
+  animation-duration: 0ms !important;
+}
+
+/* Force black/white for maximum contrast */
+.construction-mode .text-muted-foreground {
+  color: inherit !important;
+  opacity: 0.8;
+}
+
+/* Cards with strong borders */
+.construction-mode .card {
+  border: 3px solid currentColor !important;
+}
+
+/* Labels larger */
+.construction-mode label {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+}
+
+/* Skip link always visible in construction mode */
+.construction-mode .skip-link {
+  position: fixed !important;
+  top: 10px !important;
+  left: 10px !important;
+  z-index: 9999 !important;
+}
