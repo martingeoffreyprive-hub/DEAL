@@ -139,9 +139,9 @@ export function BottomNavigation() {
 
   return (
     <>
-      {/* Bottom Navigation Bar */}
+      {/* Bottom Navigation Bar - part of flex layout, not fixed */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50 lg:hidden"
+        className="relative z-50 lg:hidden flex-shrink-0"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         {/* Glass morphism background */}

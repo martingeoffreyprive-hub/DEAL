@@ -103,17 +103,29 @@
   html {
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
-    overflow-x: hidden;
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
-    overflow-x: hidden;
-    overscroll-behavior-y: contain;
+    /* Lock the viewport like a native app */
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Prevent all unwanted touch behaviors */
+    touch-action: pan-y;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
-    /* Prevent accidental zoom on double-tap while keeping accessibility */
-    touch-action: manipulation;
   }
 
   /* Prevent iOS auto-zoom on input focus */

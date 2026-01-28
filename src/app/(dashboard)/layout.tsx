@@ -30,15 +30,30 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="fixed inset-0 flex flex-col bg-background overflow-hidden">
       <SkipLink href="#main-content" />
+
+      {/* Header - fixed at top */}
       <Header user={user} profile={profile} />
-      <div className="flex overflow-hidden">
+
+      {/* Content area - fills remaining space */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Sidebar - desktop only */}
         <Sidebar />
-        <main id="main-content" className="flex-1 min-w-0 w-full p-3 pb-20 sm:p-4 sm:pb-24 md:p-6 lg:p-8 lg:pb-8 overflow-x-hidden" tabIndex={-1}>
-          {children}
+
+        {/* Main scrollable content */}
+        <main
+          id="main-content"
+          className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden overscroll-contain"
+          tabIndex={-1}
+        >
+          <div className="p-3 pb-20 sm:p-4 sm:pb-24 md:p-6 lg:p-8 lg:pb-8">
+            {children}
+          </div>
         </main>
       </div>
+
+      {/* Bottom nav - fixed at bottom, mobile only */}
       <BottomNavigation />
     </div>
   );
