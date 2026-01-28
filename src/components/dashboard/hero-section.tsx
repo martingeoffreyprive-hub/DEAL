@@ -124,42 +124,42 @@ export function HeroSection({ userName, companyName, stats }: HeroSectionProps) 
       <div className="absolute -bottom-16 -left-16 w-32 h-32 sm:-bottom-24 sm:-left-24 sm:w-48 sm:h-48 md:-bottom-32 md:-left-32 md:w-64 md:h-64 bg-[#252B4A]/40 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative z-10">
-        {/* Greeting */}
+        {/* Greeting - LARGER for mobile */}
         <motion.div
-          className="flex items-center gap-3 mb-6"
+          className="flex items-center gap-4 mb-6"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <div className="w-12 h-12 rounded-xl bg-[#E85A5A]/20 flex items-center justify-center">
-            <GreetingIcon className="w-6 h-6 text-[#E85A5A]" />
+          <div className="w-14 h-14 rounded-xl bg-[#E85A5A]/20 flex items-center justify-center">
+            <GreetingIcon className="w-7 h-7 text-[#E85A5A]" />
           </div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">
               {greeting}
             </h1>
-            <p className="text-white/70">{message}</p>
+            <p className="text-base text-white/70">{message}</p>
           </div>
         </motion.div>
 
-        {/* Stats Row */}
+        {/* Stats Row - LARGER typography for mobile */}
         <motion.div
-          className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 md:gap-8 mb-6 sm:mb-8 py-4"
+          className="flex flex-wrap items-center justify-center gap-6 md:gap-8 mb-6 py-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
           <div className="text-center">
-            <div className="text-xl sm:text-3xl md:text-4xl font-bold text-[#E85A5A]">
+            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#E85A5A]">
               {formatCurrency(stats.totalAmount)}
             </div>
-            <p className="text-white/60 text-xs sm:text-sm mt-1">Ce mois</p>
+            <p className="text-white/60 text-sm mt-1">Ce mois</p>
           </div>
 
           <div className="hidden md:block w-px h-12 bg-white/20" />
 
           <div className="text-center">
-            <div className="text-2xl md:text-3xl font-bold text-white">
+            <div className="text-2xl sm:text-3xl font-bold text-white">
               {stats.quotesThisMonth}
             </div>
             <p className="text-white/60 text-sm mt-1">Devis créés</p>
@@ -168,7 +168,7 @@ export function HeroSection({ userName, companyName, stats }: HeroSectionProps) 
           <div className="hidden md:block w-px h-12 bg-white/20" />
 
           <div className="text-center">
-            <div className="text-2xl md:text-3xl font-bold text-green-400">
+            <div className="text-2xl sm:text-3xl font-bold text-green-400">
               {stats.acceptedQuotes}
             </div>
             <p className="text-white/60 text-sm mt-1">Acceptés</p>
@@ -178,7 +178,7 @@ export function HeroSection({ userName, companyName, stats }: HeroSectionProps) 
             <>
               <div className="hidden md:block w-px h-12 bg-white/20" />
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-amber-400">
+                <div className="text-2xl sm:text-3xl font-bold text-amber-400">
                   {stats.pendingQuotes}
                 </div>
                 <p className="text-white/60 text-sm mt-1">En attente</p>

@@ -214,13 +214,13 @@ export function BottomNavigation() {
                     transition={{ duration: 0.2 }}
                   >
                     <Icon
-                      className="w-6 h-6"
+                      className="w-7 h-7"
                       fill={active ? "currentColor" : "none"}
                       strokeWidth={active ? 1.5 : 2}
                     />
                   </motion.div>
                   <motion.span
-                    className="text-[10px] font-medium"
+                    className="text-xs font-medium"
                     animate={{
                       color: active ? "#E85A5A" : "#64748B",
                     }}
@@ -230,11 +230,11 @@ export function BottomNavigation() {
                   </motion.span>
                 </motion.div>
 
-                {/* Active indicator */}
+                {/* Active indicator - LARGER */}
                 <AnimatePresence>
                   {active && (
                     <motion.div
-                      className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-[#E85A5A]"
+                      className="absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-[#E85A5A]"
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0, opacity: 0 }}

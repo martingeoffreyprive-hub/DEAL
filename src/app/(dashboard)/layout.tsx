@@ -47,7 +47,7 @@ export default async function DashboardLayout({
           className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden overscroll-contain"
           tabIndex={-1}
         >
-          <div className="p-3 pb-20 sm:p-4 sm:pb-24 md:p-6 lg:p-8 lg:pb-8">
+          <div className="p-4 pb-24 sm:p-5 md:p-6 lg:p-8 lg:pb-8">
             {children}
           </div>
         </main>
