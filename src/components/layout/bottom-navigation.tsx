@@ -148,7 +148,7 @@ export function BottomNavigation() {
         <div className="absolute inset-0 bg-white/85 dark:bg-[#252B4A]/90 backdrop-blur-xl border-t border-gray-200/50 dark:border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]" />
 
         {/* Navigation items */}
-        <div className="relative flex items-center justify-around px-2 h-16">
+        <div className="relative flex items-center justify-around px-1 sm:px-2 h-16">
           {navItems.map((item) => {
             const active = isActive(item.href);
             const Icon = item.icon;
@@ -190,7 +190,7 @@ export function BottomNavigation() {
             return (
               <motion.button
                 key={item.id}
-                className="relative flex flex-col items-center justify-center w-16 h-full"
+                className="relative flex flex-col items-center justify-center flex-1 max-w-[72px] h-full"
                 onTouchStart={() => handleTouchStart(item)}
                 onTouchEnd={() => handleTouchEnd(item)}
                 onTouchCancel={handleTouchCancel}

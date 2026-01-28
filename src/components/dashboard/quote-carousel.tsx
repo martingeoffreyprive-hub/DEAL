@@ -163,17 +163,17 @@ export function QuoteCarousel({
 
         {/* Gradient Overlays */}
         {showLeftArrow && (
-          <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-background to-transparent z-[5] pointer-events-none" />
+          <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-12 md:w-16 bg-gradient-to-r from-background to-transparent z-[5] pointer-events-none" />
         )}
         {showRightArrow && quotes.length > 3 && (
-          <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-background to-transparent z-[5] pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-8 sm:w-12 md:w-16 bg-gradient-to-l from-background to-transparent z-[5] pointer-events-none" />
         )}
 
         {/* Scrollable Container */}
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-4 -mb-4"
+          className="flex gap-2 sm:gap-3 md:gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-4 -mb-4"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {quotes.map((quote, index) => {
@@ -187,7 +187,7 @@ export function QuoteCarousel({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="flex-shrink-0 w-[260px] md:w-[280px]"
+                className="flex-shrink-0 w-[200px] sm:w-[240px] md:w-[280px]"
                 onMouseEnter={() => setHoveredId(quote.id)}
                 onMouseLeave={() => setHoveredId(null)}
               >
@@ -278,7 +278,7 @@ export function QuoteCarousel({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: quotes.length * 0.05 }}
-            className="flex-shrink-0 w-[260px] md:w-[280px]"
+            className="flex-shrink-0 w-[200px] sm:w-[240px] md:w-[280px]"
           >
             <Link href="/quotes/new">
               <Card className="h-full border-2 border-dashed border-[#E85A5A]/30 hover:border-[#E85A5A]/60 transition-colors bg-[#E85A5A]/5 hover:bg-[#E85A5A]/10">

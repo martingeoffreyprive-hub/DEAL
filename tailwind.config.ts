@@ -94,6 +94,26 @@ const config: Config = {
         xl: "calc(var(--radius) + 4px)",
         "2xl": "calc(var(--radius) + 8px)",
       },
+      // Safe area spacing for mobile PWA
+      spacing: {
+        "safe-top": "env(safe-area-inset-top, 0px)",
+        "safe-bottom": "env(safe-area-inset-bottom, 0px)",
+        "safe-left": "env(safe-area-inset-left, 0px)",
+        "safe-right": "env(safe-area-inset-right, 0px)",
+      },
+      // Dynamic viewport height for mobile
+      height: {
+        "screen-dvh": "100dvh",
+        "screen-safe": "calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))",
+      },
+      minHeight: {
+        "screen-dvh": "100dvh",
+        "screen-safe": "calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))",
+      },
+      maxHeight: {
+        "screen-dvh": "100dvh",
+        "screen-safe": "calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))",
+      },
       // Premium typography
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],

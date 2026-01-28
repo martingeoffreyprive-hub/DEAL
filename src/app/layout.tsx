@@ -123,7 +123,7 @@ export default function RootLayout({
           </>
         )}
       </head>
-      <body className={`${inter.className} ${inter.variable}`}>
+      <body className={`${inter.className} ${inter.variable} min-h-screen-dvh overflow-x-hidden`}>
         {/* <WebVitals /> */}
         <ThemeProvider
           attribute="class"

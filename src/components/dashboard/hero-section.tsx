@@ -119,9 +119,9 @@ export function HeroSection({ userName, companyName, stats }: HeroSectionProps) 
         />
       </div>
 
-      {/* Glow Effects */}
-      <div className="absolute -top-32 -right-32 w-64 h-64 bg-[#E85A5A]/20 rounded-full blur-3xl" />
-      <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-[#252B4A]/40 rounded-full blur-3xl" />
+      {/* Glow Effects - responsive sizes to prevent overflow */}
+      <div className="absolute -top-16 -right-16 w-32 h-32 sm:-top-24 sm:-right-24 sm:w-48 sm:h-48 md:-top-32 md:-right-32 md:w-64 md:h-64 bg-[#E85A5A]/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-16 -left-16 w-32 h-32 sm:-bottom-24 sm:-left-24 sm:w-48 sm:h-48 md:-bottom-32 md:-left-32 md:w-64 md:h-64 bg-[#252B4A]/40 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative z-10">
         {/* Greeting */}

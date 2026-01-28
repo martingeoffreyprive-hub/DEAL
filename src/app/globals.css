@@ -97,11 +97,13 @@
 @layer base {
   * {
     @apply border-border;
+    box-sizing: border-box;
   }
 
   html {
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
+    overflow-x: hidden;
   }
 
   body {
@@ -109,11 +111,20 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     overflow-x: hidden;
     overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    /* Prevent accidental zoom on double-tap while keeping accessibility */
+    touch-action: manipulation;
   }
 
   /* Prevent iOS auto-zoom on input focus */
   input, select, textarea {
     font-size: 16px !important;
+  }
+
+  /* Ensure all images and media don't overflow */
+  img, video, iframe, svg {
+    max-width: 100%;
+    height: auto;
   }
 }
 

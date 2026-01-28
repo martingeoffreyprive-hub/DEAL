@@ -35,7 +35,7 @@ export default async function DashboardLayout({
       <Header user={user} profile={profile} />
       <div className="flex overflow-hidden">
         <Sidebar />
-        <main id="main-content" className="flex-1 min-w-0 w-full p-4 pb-24 sm:p-6 lg:p-8 lg:pb-8 overflow-x-hidden" tabIndex={-1}>
+        <main id="main-content" className="flex-1 min-w-0 w-full p-3 pb-20 sm:p-4 sm:pb-24 md:p-6 lg:p-8 lg:pb-8 overflow-x-hidden" tabIndex={-1}>
           {children}
         </main>
       </div>

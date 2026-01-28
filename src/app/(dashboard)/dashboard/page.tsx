@@ -139,58 +139,58 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* Quick Stats Cards */}
-      <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-4" variants={staggerItem}>
+      <motion.div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4" variants={staggerItem}>
         <Card className="bg-gradient-to-br from-[#252B4A]/10 to-transparent border-[#252B4A]/20">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#252B4A]/20 flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-[#252B4A] dark:text-white" />
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#252B4A]/20 flex items-center justify-center flex-shrink-0">
+                <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-[#252B4A] dark:text-white" />
               </div>
-              <div>
-                <p className="text-2xl font-bold text-[#252B4A] dark:text-white">{stats.totalQuotes}</p>
-                <p className="text-xs text-muted-foreground">Total devis</p>
+              <div className="min-w-0">
+                <p className="text-lg sm:text-2xl font-bold text-[#252B4A] dark:text-white">{stats.totalQuotes}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Total devis</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-[#E85A5A]/10 to-transparent border-[#E85A5A]/20">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#E85A5A]/20 flex items-center justify-center">
-                <Send className="w-5 h-5 text-[#E85A5A]" />
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#E85A5A]/20 flex items-center justify-center flex-shrink-0">
+                <Send className="w-4 h-4 sm:w-5 sm:h-5 text-[#E85A5A]" />
               </div>
-              <div>
-                <p className="text-2xl font-bold text-[#E85A5A]">{stats.pendingQuotes}</p>
-                <p className="text-xs text-muted-foreground">En attente</p>
+              <div className="min-w-0">
+                <p className="text-lg sm:text-2xl font-bold text-[#E85A5A]">{stats.pendingQuotes}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">En attente</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-green-500/10 to-transparent border-green-500/20">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                <CheckCircle className="w-5 h-5 text-green-600" />
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
               </div>
-              <div>
-                <p className="text-2xl font-bold text-green-600">{stats.acceptedQuotes}</p>
-                <p className="text-xs text-muted-foreground">Acceptés</p>
+              <div className="min-w-0">
+                <p className="text-lg sm:text-2xl font-bold text-green-600">{stats.acceptedQuotes}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Acceptés</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-primary/10 to-transparent border-primary/20">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                <FileText className="w-5 h-5 text-primary" />
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               </div>
-              <div>
-                <p className="text-2xl font-bold text-primary">{stats.quotesThisMonth}</p>
-                <p className="text-xs text-muted-foreground">Ce mois</p>
+              <div className="min-w-0">
+                <p className="text-lg sm:text-2xl font-bold text-primary">{stats.quotesThisMonth}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Ce mois</p>
               </div>
             </div>
           </CardContent>
@@ -253,7 +253,7 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* Quick Actions - Mobile Optimized */}
-      <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:hidden" variants={staggerItem}>
+      <motion.div className="grid grid-cols-2 gap-2 sm:gap-3 lg:hidden" variants={staggerItem}>
         <Link href="/quotes/new">
           <Card className="hover:border-[#E85A5A]/50 transition-colors">
             <CardContent className="p-4 flex flex-col items-center text-center">

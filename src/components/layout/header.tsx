@@ -66,9 +66,9 @@ export function Header({ user, profile }: HeaderProps) {
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="flex h-16 items-center justify-between px-4 lg:px-6">
         {/* Logo */}
-        <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="flex items-baseline gap-0.5">
-            <span className="text-xl font-extrabold tracking-[0.12em] text-foreground" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+        <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
+          <Link href="/dashboard" className="flex items-baseline gap-0.5 flex-shrink-0">
+            <span className="text-lg sm:text-xl font-extrabold tracking-[0.12em] text-foreground" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
               DEAL
             </span>
             <span className="w-1.5 h-1.5 rounded-full bg-[#E85A5A] mb-0.5"></span>
@@ -104,22 +104,24 @@ export function Header({ user, profile }: HeaderProps) {
         </div>
 
         {/* Command Palette, Locale Selector, Theme Toggle & User Menu */}
-        <div className="flex items-center gap-2">
-          {/* Command Palette Trigger - hidden on mobile */}
-          <div className="hidden md:block">
+        <div className="flex items-center gap-1 sm:gap-2">
+          {/* Command Palette Trigger - hidden on mobile and tablet */}
+          <div className="hidden lg:block">
             <CommandPaletteTrigger />
           </div>
 
-          {/* Locale Selector - hidden on mobile, shown in mobile menu */}
-          <div className="hidden sm:block">
+          {/* Locale Selector - hidden on mobile/tablet */}
+          <div className="hidden md:block">
             <LocaleSelector size="sm" />
           </div>
 
-          {/* Notifications */}
+          {/* Notifications - always visible but smaller on mobile */}
           <NotificationBell />
 
-          {/* Theme Toggle */}
-          <ThemeToggle />
+          {/* Theme Toggle - hidden on small mobile */}
+          <div className="hidden sm:block">
+            <ThemeToggle />
+          </div>
 
           <DropdownMenu>
           <DropdownMenuTrigger asChild>
