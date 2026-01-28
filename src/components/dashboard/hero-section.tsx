@@ -102,7 +102,7 @@ export function HeroSection({ userName, companyName, stats }: HeroSectionProps) 
 
   return (
     <motion.div
-      className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#252B4A] via-[#1E3A5F] to-[#252B4A] p-4 sm:p-6 md:p-8 max-w-full"
+      className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#252B4A] via-[#1E3A5F] to-[#252B4A] p-3 sm:p-5 md:p-6 max-w-full"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -124,64 +124,64 @@ export function HeroSection({ userName, companyName, stats }: HeroSectionProps) 
       <div className="absolute -bottom-16 -left-16 w-32 h-32 sm:-bottom-24 sm:-left-24 sm:w-48 sm:h-48 md:-bottom-32 md:-left-32 md:w-64 md:h-64 bg-[#252B4A]/40 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative z-10">
-        {/* Greeting - LARGER for mobile */}
+        {/* Greeting - BALANCED for mobile */}
         <motion.div
-          className="flex items-center gap-4 mb-6"
+          className="flex items-center gap-3 mb-4"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <div className="w-14 h-14 rounded-xl bg-[#E85A5A]/20 flex items-center justify-center">
-            <GreetingIcon className="w-7 h-7 text-[#E85A5A]" />
+          <div className="w-11 h-11 rounded-xl bg-[#E85A5A]/20 flex items-center justify-center">
+            <GreetingIcon className="w-5 h-5 text-[#E85A5A]" />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">
+            <h1 className="text-xl sm:text-2xl font-bold text-white">
               {greeting}
             </h1>
-            <p className="text-base text-white/70">{message}</p>
+            <p className="text-sm text-white/70">{message}</p>
           </div>
         </motion.div>
 
-        {/* Stats Row - LARGER typography for mobile */}
+        {/* Stats Row - BALANCED for mobile */}
         <motion.div
-          className="flex flex-wrap items-center justify-center gap-6 md:gap-8 mb-6 py-4"
+          className="flex flex-wrap items-center justify-center gap-4 md:gap-6 mb-4 py-3"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
           <div className="text-center">
-            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#E85A5A]">
+            <div className="text-xl sm:text-2xl md:text-3xl font-bold text-[#E85A5A]">
               {formatCurrency(stats.totalAmount)}
             </div>
-            <p className="text-white/60 text-sm mt-1">Ce mois</p>
+            <p className="text-white/60 text-xs mt-0.5">Ce mois</p>
           </div>
 
-          <div className="hidden md:block w-px h-12 bg-white/20" />
+          <div className="hidden md:block w-px h-10 bg-white/20" />
 
           <div className="text-center">
-            <div className="text-2xl sm:text-3xl font-bold text-white">
+            <div className="text-xl sm:text-2xl font-bold text-white">
               {stats.quotesThisMonth}
             </div>
-            <p className="text-white/60 text-sm mt-1">Devis créés</p>
+            <p className="text-white/60 text-xs mt-0.5">Devis créés</p>
           </div>
 
-          <div className="hidden md:block w-px h-12 bg-white/20" />
+          <div className="hidden md:block w-px h-10 bg-white/20" />
 
           <div className="text-center">
-            <div className="text-2xl sm:text-3xl font-bold text-green-400">
+            <div className="text-xl sm:text-2xl font-bold text-green-400">
               {stats.acceptedQuotes}
             </div>
-            <p className="text-white/60 text-sm mt-1">Acceptés</p>
+            <p className="text-white/60 text-xs mt-0.5">Acceptés</p>
           </div>
 
           {stats.pendingQuotes > 0 && (
             <>
-              <div className="hidden md:block w-px h-12 bg-white/20" />
+              <div className="hidden md:block w-px h-10 bg-white/20" />
               <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-amber-400">
+                <div className="text-xl sm:text-2xl font-bold text-amber-400">
                   {stats.pendingQuotes}
                 </div>
-                <p className="text-white/60 text-sm mt-1">En attente</p>
+                <p className="text-white/60 text-xs mt-0.5">En attente</p>
               </div>
             </>
           )}
@@ -195,7 +195,7 @@ export function HeroSection({ userName, companyName, stats }: HeroSectionProps) 
         >
           <Link href={ctaMessage.link}>
             <div
-              className={`flex items-center justify-center gap-3 p-3 rounded-xl mb-6 ${
+              className={`flex items-center justify-center gap-2 p-2.5 rounded-lg mb-4 ${
                 ctaMessage.variant === "warning"
                   ? "bg-amber-500/20 text-amber-300"
                   : ctaMessage.variant === "success"
@@ -203,46 +203,46 @@ export function HeroSection({ userName, companyName, stats }: HeroSectionProps) 
                   : "bg-white/10 text-white/80"
               }`}
             >
-              <ctaMessage.icon className="w-5 h-5" />
-              <span className="text-sm font-medium">{ctaMessage.text}</span>
-              <ArrowRight className="w-4 h-4" />
+              <ctaMessage.icon className="w-4 h-4" />
+              <span className="text-xs font-medium">{ctaMessage.text}</span>
+              <ArrowRight className="w-3 h-3" />
             </div>
           </Link>
         </motion.div>
 
         {/* Main CTAs */}
         <motion.div
-          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          className="flex flex-col sm:flex-row items-center justify-center gap-3"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
           <Link href="/quotes/new">
             <Button
-              size="lg"
+              size="default"
               className="gap-2 bg-[#E85A5A] hover:bg-[#D64545] text-white font-semibold shadow-lg shadow-[#E85A5A]/30"
             >
-              <Sparkles className="w-5 h-5" />
+              <Sparkles className="w-4 h-4" />
               Nouveau devis
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-3 h-3" />
             </Button>
           </Link>
 
           <Link href="/quotes">
             <Button
-              size="lg"
+              size="default"
               variant="outline"
               className="gap-2 border-white/30 text-white hover:bg-white/10"
             >
-              <FileText className="w-4 h-4" />
+              <FileText className="w-3 h-3" />
               Voir mes devis
             </Button>
           </Link>
         </motion.div>
 
-        {/* Keyboard hint */}
+        {/* Keyboard hint - hidden on mobile */}
         <motion.div
-          className="flex items-center justify-center gap-2 mt-6 text-xs text-white/40"
+          className="hidden sm:flex items-center justify-center gap-2 mt-4 text-xs text-white/40"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}

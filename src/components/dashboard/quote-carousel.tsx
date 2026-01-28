@@ -187,7 +187,7 @@ export function QuoteCarousel({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="flex-shrink-0 w-[260px] sm:w-[280px] md:w-[300px]"
+                className="flex-shrink-0 w-[220px] sm:w-[260px] md:w-[280px]"
                 onMouseEnter={() => setHoveredId(quote.id)}
                 onMouseLeave={() => setHoveredId(null)}
               >
@@ -208,21 +208,21 @@ export function QuoteCarousel({
                       )}
                     />
 
-                    <CardContent className="p-5">
+                    <CardContent className="p-4">
                       {/* Header */}
-                      <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-start justify-between mb-3">
                         <div
                           className={cn(
-                            "w-12 h-12 rounded-xl flex items-center justify-center",
+                            "w-10 h-10 rounded-lg flex items-center justify-center",
                             statusConfig.bgColor
                           )}
                         >
-                          <StatusIcon className={cn("w-6 h-6", statusConfig.color)} />
+                          <StatusIcon className={cn("w-5 h-5", statusConfig.color)} />
                         </div>
                         <Badge
                           variant="outline"
                           className={cn(
-                            "text-sm px-3 py-1",
+                            "text-xs px-2 py-0.5",
                             statusConfig.color,
                             statusConfig.borderColor,
                             statusConfig.bgColor
@@ -233,11 +233,11 @@ export function QuoteCarousel({
                       </div>
 
                       {/* Client & Quote Number */}
-                      <div className="mb-4">
-                        <h4 className="font-semibold text-base truncate">
+                      <div className="mb-3">
+                        <h4 className="font-semibold text-sm truncate">
                           {quote.client_name}
                         </h4>
-                        <p className="text-sm text-muted-foreground truncate">
+                        <p className="text-xs text-muted-foreground truncate">
                           {quote.quote_number}
                         </p>
                       </div>
@@ -245,10 +245,10 @@ export function QuoteCarousel({
                       {/* Amount */}
                       <div className="flex items-end justify-between">
                         <div>
-                          <p className="text-3xl font-bold text-[#252B4A] dark:text-white">
+                          <p className="text-2xl font-bold text-[#252B4A] dark:text-white">
                             {formatCurrency(Number(quote.total))}
                           </p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-xs text-muted-foreground">
                             {formatDate(quote.created_at)}
                           </p>
                         </div>
@@ -273,21 +273,21 @@ export function QuoteCarousel({
             );
           })}
 
-          {/* "Create New" Card at the end - LARGER */}
+          {/* "Create New" Card at the end - BALANCED */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: quotes.length * 0.05 }}
-            className="flex-shrink-0 w-[260px] sm:w-[280px] md:w-[300px]"
+            className="flex-shrink-0 w-[220px] sm:w-[260px] md:w-[280px]"
           >
             <Link href="/quotes/new">
               <Card className="h-full border-2 border-dashed border-[#E85A5A]/30 hover:border-[#E85A5A]/60 active:scale-95 transition-all bg-[#E85A5A]/5 hover:bg-[#E85A5A]/10">
-                <CardContent className="p-6 h-full flex flex-col items-center justify-center text-center min-h-[200px]">
-                  <div className="w-16 h-16 rounded-full bg-[#E85A5A]/10 flex items-center justify-center mb-4">
-                    <FileText className="w-8 h-8 text-[#E85A5A]" />
+                <CardContent className="p-4 h-full flex flex-col items-center justify-center text-center min-h-[160px]">
+                  <div className="w-12 h-12 rounded-full bg-[#E85A5A]/10 flex items-center justify-center mb-3">
+                    <FileText className="w-6 h-6 text-[#E85A5A]" />
                   </div>
-                  <p className="font-semibold text-lg text-[#E85A5A]">Nouveau devis</p>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className="font-semibold text-base text-[#E85A5A]">Nouveau devis</p>
+                  <p className="text-xs text-muted-foreground mt-1">
                     Créer un devis rapidement
                   </p>
                 </CardContent>
