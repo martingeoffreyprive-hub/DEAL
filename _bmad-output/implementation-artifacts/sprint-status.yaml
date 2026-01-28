@@ -75,20 +75,20 @@ development_status:
   4-3-mode-chantier: done
   epic-4-retrospective: optional
 
-  epic-5: backlog  # Microinteractions & Ludification
-  5-1-celebration-devis-signe: backlog
-  5-2-system-de-badges: backlog
-  5-3-transitions-fluides: backlog
+  epic-5: done  # Microinteractions & Ludification
+  5-1-celebration-devis-signe: done
+  5-2-system-de-badges: done
+  5-3-transitions-fluides: done
   epic-5-retrospective: optional
 
   # ═══════════════════════════════════════════════════════════════════════════
   # PHASE 3: PANEL ADMINISTRATION
   # ═══════════════════════════════════════════════════════════════════════════
 
-  epic-6: backlog  # Panel Admin - Dashboard
-  6-1-admin-dashboard-kpis: backlog
-  6-2-admin-alertes-systeme: backlog
-  6-3-admin-actions-rapides: backlog
+  epic-6: done  # Panel Admin - Dashboard
+  6-1-admin-dashboard-kpis: done
+  6-2-admin-alertes-systeme: done
+  6-3-admin-actions-rapides: done
   epic-6-retrospective: optional
 
   epic-7: backlog  # Panel Admin - Gestion Users
