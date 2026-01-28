@@ -17,15 +17,15 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  // Get user profile
+  // Get user profile (use maybeSingle to handle missing profiles)
   const { data: profile } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
-  // Vérifier si l'onboarding est complété
-  if (profile && !profile.onboarding_completed) {
+  // Redirect to onboarding if profile doesn't exist or onboarding not completed
+  if (!profile || !profile.onboarding_completed) {
     redirect("/onboarding");
   }
 

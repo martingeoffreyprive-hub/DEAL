@@ -96,9 +96,13 @@ export function LocaleProvider({ children, defaultLocale = DEFAULT_LOCALE }: Loc
         setLocaleState(detected);
         setLocalePack(getLocalePack(detected));
 
-        // Log if we fell back to browser detection
-        if (detected !== DEFAULT_LOCALE) {
-          console.info(`[DEAL] Detected locale from browser: ${detected}`);
+        // Log only once in development (not on every re-render)
+        if (detected !== DEFAULT_LOCALE && process.env.NODE_ENV === 'development') {
+          // Use a flag to prevent duplicate logs
+          if (typeof window !== 'undefined' && !(window as any).__DEAL_LOCALE_LOGGED__) {
+            (window as any).__DEAL_LOCALE_LOGGED__ = true;
+            console.info(`[DEAL] Detected locale from browser: ${detected}`);
+          }
         }
       }
     } catch (error) {

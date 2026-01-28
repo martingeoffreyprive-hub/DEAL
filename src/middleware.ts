@@ -206,6 +206,12 @@ export async function middleware(request: NextRequest) {
   const adminPaths = ['/admin'];
   const isAdminPath = adminPaths.some(path => pathname.startsWith(path));
 
+  // Admin emails allowed to access admin panel
+  const ADMIN_EMAILS = [
+    "admin@dealofficialapp.com",
+    "martin.geoffrey.prive@gmail.com",
+  ];
+
   // Auth routes (login, register) - redirect if already logged in
   const authPaths = ['/login', '/register'];
   const isAuthPath = authPaths.some(path => pathname.startsWith(path));
@@ -218,6 +224,16 @@ export async function middleware(request: NextRequest) {
     const redirectUrl = new URL('/login', request.url);
     redirectUrl.searchParams.set('redirectTo', pathname);
     return NextResponse.redirect(redirectUrl);
+  }
+
+  // Check admin access - redirect non-admins to dashboard
+  if (isAdminPath && user) {
+    const userEmail = user.email?.toLowerCase() || "";
+    const isAdminEmail = ADMIN_EMAILS.map(e => e.toLowerCase()).includes(userEmail);
+
+    if (!isAdminEmail) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
   }
 
   // Redirect to dashboard if authenticated and accessing auth route

@@ -82,7 +82,7 @@ export default function OnboardingPage() {
         .from("profiles")
         .select("onboarding_completed")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
       if (profile?.onboarding_completed) {
         router.push("/dashboard");
@@ -142,7 +142,12 @@ export default function OnboardingPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
-      // Ajouter les secteurs sélectionnés
+      // Supprimer les anciens secteurs puis ajouter les nouveaux
+      await supabase
+        .from("user_sectors")
+        .delete()
+        .eq("user_id", user.id);
+
       const sectorsToInsert = selectedSectors.map((sector, index) => ({
         user_id: user.id,
         sector,
@@ -155,14 +160,17 @@ export default function OnboardingPage() {
 
       if (sectorsError) throw sectorsError;
 
-      // Mettre à jour le profil
+      // Mettre à jour ou créer le profil (upsert)
       const { error: profileError } = await supabase
         .from("profiles")
-        .update({
+        .upsert({
+          id: user.id,
+          email: user.email,
           onboarding_completed: true,
           default_sector: selectedSectors[0],
-        })
-        .eq("id", user.id);
+        }, {
+          onConflict: "id",
+        });
 
       if (profileError) throw profileError;
 

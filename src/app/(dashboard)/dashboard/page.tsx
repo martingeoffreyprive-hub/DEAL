@@ -64,12 +64,12 @@ export default function DashboardPage() {
       }
       setUser(user);
 
-      // Load profile
+      // Load profile (use maybeSingle to handle missing profiles gracefully)
       const { data: profileData } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
       setProfile(profileData);
 
       // Load quotes

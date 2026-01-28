@@ -1,9 +1,4 @@
-"use client";
-
-import { useEffect, useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createBrowserClient } from "@supabase/ssr";
 import {
   LayoutDashboard,
   Users,
@@ -17,103 +12,24 @@ import {
   Coins,
   BarChart3,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 const ADMIN_NAV = [
-  // Dashboard
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-
-  // Users Management (Epic 7)
   { href: "/admin/users", label: "Utilisateurs", icon: Users },
-
-  // Content Management (Epic 8)
   { href: "/admin/sectors", label: "Secteurs", icon: Briefcase },
   { href: "/admin/templates", label: "Templates", icon: FileText },
-
-  // Token Economy (Epic 9 - à venir)
   { href: "/admin/tokens", label: "TokenDEAL", icon: Coins },
-
-  // Analytics (Epic 10 - à venir)
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-
-  // System
   { href: "/admin/subscriptions", label: "Abonnements", icon: CreditCard },
   { href: "/admin/audit-logs", label: "Journaux d'audit", icon: ScrollText },
   { href: "/admin/settings", label: "Paramètres", icon: Settings },
 ];
 
-// Admin emails fallback - database role takes precedence
-const ADMIN_EMAILS = [
-  "admin@dealofficialapp.com",
-];
-
 export default function AdminLayout({ children }: AdminLayoutProps) {
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-
-  // Create Supabase client lazily to avoid SSR issues
-  const supabase = useMemo(() => {
-    if (typeof window === "undefined") return null;
-    return createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-  }, []);
-
-  useEffect(() => {
-    async function checkAdmin() {
-      if (!supabase) return;
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        router.push("/login?redirectTo=/admin");
-        return;
-      }
-
-      // Check if user is admin via database role
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-
-      const hasAdminRole = profile?.role === "admin" || profile?.role === "super_admin";
-      const isAdminEmail = ADMIN_EMAILS.includes(user.email || "");
-
-      if (!hasAdminRole && !isAdminEmail) {
-        router.push("/dashboard");
-        return;
-      }
-
-      setIsAdmin(true);
-      setLoading(false);
-    }
-
-    checkAdmin();
-  }, [router, supabase]);
-
-  // Show nothing during SSR
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  if (loading || isAdmin === null) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="spinner spinner-lg" />
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return null;
-  }
-
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
@@ -133,10 +49,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                  "text-muted-foreground hover:text-foreground hover:bg-muted"
-                )}
+                className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
               >
                 <item.icon className="h-4 w-4" />
                 {item.label}
@@ -158,7 +71,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 p-8 overflow-y-auto">
+      <main className="flex-1 p-8 overflow-y-auto bg-background">
         {children}
       </main>
     </div>

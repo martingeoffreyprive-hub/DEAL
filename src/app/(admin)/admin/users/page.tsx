@@ -109,24 +109,21 @@ export default function AdminUsersPage() {
     setLoading(true);
 
     try {
-      // Fetch profiles with subscriptions
+      // Fetch profiles (simple query without joins)
       let query = supabase
         .from("profiles")
         .select(`
           id,
+          email,
           full_name,
           company_name,
           role,
-          created_at,
-          subscriptions (
-            plan_type,
-            status
-          )
+          created_at
         `, { count: "exact" })
         .order("created_at", { ascending: false });
 
       if (search) {
-        query = query.or(`full_name.ilike.%${search}%,company_name.ilike.%${search}%`);
+        query = query.or(`full_name.ilike.%${search}%,company_name.ilike.%${search}%,email.ilike.%${search}%`);
       }
 
       const from = (page - 1) * pageSize;
@@ -139,7 +136,7 @@ export default function AdminUsersPage() {
       // Transform data to match UserData interface
       const transformedUsers: UserData[] = (data || []).map((profile: any) => ({
         id: profile.id,
-        email: "", // Will be populated from auth if needed
+        email: profile.email || "",
         created_at: profile.created_at,
         last_sign_in_at: null,
         profile: {
@@ -147,7 +144,7 @@ export default function AdminUsersPage() {
           company_name: profile.company_name,
           role: profile.role || "user",
         },
-        subscription: profile.subscriptions?.[0] || { plan_type: "free", status: "active" },
+        subscription: { plan_type: "free", status: "active" },
         is_active: true,
       }));
 
@@ -163,7 +160,7 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase, search, planFilter, statusFilter, page, toast]);
+  }, [supabase, search, page, toast]);
 
   useEffect(() => {
     fetchUsers();

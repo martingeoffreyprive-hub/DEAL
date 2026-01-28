@@ -137,7 +137,7 @@ export default function QuoteEditorPage() {
           .from("profiles")
           .select("*")
           .eq("id", user.id)
-          .single();
+          .maybeSingle();
         setProfile(profileData);
       }
 

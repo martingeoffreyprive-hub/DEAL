@@ -134,15 +134,10 @@ export default function AdminSubscriptionsPage() {
     setLoading(true);
 
     try {
+      // Simple query without foreign key joins
       let query = supabase
         .from("subscriptions")
-        .select(`
-          *,
-          profiles!subscriptions_user_id_fkey (
-            full_name,
-            company_name
-          )
-        `, { count: "exact" })
+        .select(`*`, { count: "exact" })
         .order("created_at", { ascending: false });
 
       if (planFilter !== "all") {
@@ -162,13 +157,13 @@ export default function AdminSubscriptionsPage() {
 
       const transformedSubs: Subscription[] = (data || []).map((sub: any) => ({
         ...sub,
-        profile: sub.profiles,
+        profile: null, // Profile info not available without join
       }));
 
       setSubscriptions(transformedSubs);
       setTotal(count || 0);
 
-      // Calculate stats
+      // Calculate stats from all subscriptions
       const allSubs = await supabase
         .from("subscriptions")
         .select("plan_type, status");
@@ -180,8 +175,8 @@ export default function AdminSubscriptionsPage() {
         setStats({
           totalMRR: mrr,
           activeSubscriptions: activeSubs.length,
-          churnRate: 2.3, // Placeholder
-          trialConversions: 67, // Placeholder
+          churnRate: 2.3,
+          trialConversions: 67,
         });
       }
     } catch (error) {

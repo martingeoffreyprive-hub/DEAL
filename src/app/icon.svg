@@ -1,17 +1,22 @@
-<svg width="32" height="32" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1E3A5F"/>
-      <stop offset="100%" stop-color="#0D1B2A"/>
-    </linearGradient>
-    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#C9A962"/>
-      <stop offset="100%" stop-color="#B89952"/>
-    </linearGradient>
-  </defs>
-  <circle cx="32" cy="32" r="30" fill="url(#bgGrad)" stroke="url(#goldGrad)" stroke-width="1.5"/>
-  <path d="M22 16H34C42.837 16 50 23.163 50 32C50 40.837 42.837 48 34 48H22V16Z" fill="none" stroke="url(#goldGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M26 20H34C40.627 20 46 25.373 46 32C46 38.627 40.627 44 34 44H26V20Z" fill="url(#goldGrad)" opacity="0.15"/>
-  <line x1="22" y1="16" x2="22" y2="48" stroke="url(#goldGrad)" stroke-width="3" stroke-linecap="round"/>
-  <path d="M38 32L40 30L42 32L40 34L38 32Z" fill="url(#goldGrad)"/>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- DEAL Icon D - Style officiel avec fond bleu marine arrondi -->
+
+  <!-- Background rounded square -->
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="#1E2144"/>
+
+  <!-- Letter D - outer curve -->
+  <path
+    d="M150 120H280C358.366 120 422 183.634 422 262C422 340.366 358.366 404 280 404H150V120Z"
+    fill="none"
+    stroke="#E8E8E8"
+    stroke-width="40"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Vertical line of D -->
+  <line x1="150" y1="120" x2="150" y2="404" stroke="#E8E8E8" stroke-width="40" stroke-linecap="round"/>
+
+  <!-- Red accent dot -->
+  <circle cx="400" cy="140" r="36" fill="#E85A5A"/>
 </svg>
