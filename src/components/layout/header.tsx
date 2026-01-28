@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import type { Profile } from "@/types/database";
 import { createClient } from "@/lib/supabase/client";
@@ -16,12 +15,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, User as UserIcon, LogOut, Settings } from "lucide-react";
+import { User as UserIcon, LogOut, Settings, FileText, BarChart3, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { LocaleSelector } from "@/components/locale/locale-selector";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { CommandPalette, CommandPaletteTrigger } from "@/components/command-palette";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import { cn } from "@/lib/utils";
+
+// Desktop navigation items
+const desktopNavItems = [
+  { href: "/dashboard", label: "Accueil" },
+  { href: "/quotes", label: "Devis" },
+  { href: "/analytics", label: "Finance" },
+];
 
 interface HeaderProps {
   user: User;
@@ -29,10 +36,17 @@ interface HeaderProps {
 }
 
 export function Header({ user, profile }: HeaderProps) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
   const supabase = createClient();
   const { toast } = useToast();
+
+  const isActive = (href: string) => {
+    if (href === "/dashboard") {
+      return pathname === "/dashboard";
+    }
+    return pathname.startsWith(href);
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -49,24 +63,44 @@ export function Header({ user, profile }: HeaderProps) {
     : user.email?.slice(0, 2).toUpperCase() || "QV";
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background">
+    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="flex h-16 items-center justify-between px-4 lg:px-6">
         {/* Logo */}
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            <Menu className="h-6 w-6" />
-          </Button>
+        <div className="flex items-center gap-6">
           <Link href="/dashboard" className="flex items-baseline gap-0.5">
             <span className="text-xl font-extrabold tracking-[0.12em] text-foreground" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
               DEAL
             </span>
             <span className="w-1.5 h-1.5 rounded-full bg-[#E85A5A] mb-0.5"></span>
           </Link>
+
+          {/* Desktop Navigation - horizontal links */}
+          <nav className="hidden lg:flex items-center gap-1">
+            {desktopNavItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+                  isActive(item.href)
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+            <Link
+              href="/quotes/new"
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+                "bg-[#E85A5A] text-white hover:bg-[#D64545]"
+              )}
+            >
+              <Plus className="h-4 w-4" />
+              Nouveau
+            </Link>
+          </nav>
         </div>
 
         {/* Command Palette, Locale Selector, Theme Toggle & User Menu */}
@@ -129,48 +163,6 @@ export function Header({ user, profile }: HeaderProps) {
         </DropdownMenu>
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <nav className="border-t bg-background p-4 lg:hidden">
-          <div className="flex flex-col space-y-2">
-            {/* Locale Selector for Mobile */}
-            <div className="px-3 py-2 border-b pb-3 mb-1">
-              <p className="text-xs text-muted-foreground mb-2">Pays / Locale</p>
-              <LocaleSelector size="sm" showLabel />
-            </div>
-
-            <Link
-              href="/dashboard"
-              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Tableau de bord
-            </Link>
-            <Link
-              href="/quotes"
-              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Mes devis
-            </Link>
-            <Link
-              href="/quotes/new"
-              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Nouveau devis
-            </Link>
-            <Link
-              href="/profile"
-              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Profil
-            </Link>
-          </div>
-        </nav>
-      )}
 
       {/* Command Palette (global) */}
       <CommandPalette />

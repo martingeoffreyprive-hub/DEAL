@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
+import { BottomNavigation } from "@/components/layout/bottom-navigation";
 import { SkipLink } from "@/components/ui/skip-link";
 
 export default async function DashboardLayout({
@@ -34,10 +35,11 @@ export default async function DashboardLayout({
       <Header user={user} profile={profile} />
       <div className="flex">
         <Sidebar />
-        <main id="main-content" className="flex-1 p-6 lg:p-8" tabIndex={-1}>
+        <main id="main-content" className="flex-1 p-6 pb-24 lg:p-8 lg:pb-8" tabIndex={-1}>
           {children}
         </main>
       </div>
+      <BottomNavigation />
     </div>
   );
 }
