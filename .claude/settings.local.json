@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(bmad:bmm:workflows:sprint-planning)",
+      "Skill(bmad:bmm:workflows:create-story)"
+    ]
+  }
+}

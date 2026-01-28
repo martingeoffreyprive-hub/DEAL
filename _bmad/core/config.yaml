@@ -1,0 +1,5 @@
+# Configuration Core pour le projet DEAL
+user_name: "Djaijo"
+communication_language: "Francais"
+document_output_language: "Francais"
+output_folder: "{project-root}/_bmad-output"

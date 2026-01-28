@@ -1,0 +1,8 @@
+# BMAD Method Installation Manifest
+version: "6.0.0-Beta.2"
+install_date: "2026-01-27"
+last_modified: "2026-01-27"
+installed_modules:
+  - core
+  - bmm
+bmad_folder: "_bmad"
