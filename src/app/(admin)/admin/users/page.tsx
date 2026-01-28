@@ -450,7 +450,7 @@ export default function AdminUsersPage() {
                               {user.profile?.full_name || "Sans nom"}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {user.id.slice(0, 8)}...
+                              {user.email || "Pas d'email"}
                             </p>
                           </div>
                         </div>
