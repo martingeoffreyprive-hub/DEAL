@@ -104,16 +104,16 @@ development_status:
   8-3-templates-marketplace: done
   epic-8-retrospective: optional
 
-  epic-9: backlog  # Panel Admin - TokenDEAL Economy
-  9-1-dashboard-tokens: backlog
-  9-2-gestion-bonus-tokens: backlog
-  9-3-configuration-prix-tokens: backlog
+  epic-9: done  # Panel Admin - TokenDEAL Economy
+  9-1-dashboard-tokens: done
+  9-2-gestion-bonus-tokens: done
+  9-3-configuration-prix-tokens: done
   epic-9-retrospective: optional
 
-  epic-10: backlog  # Panel Admin - Analytics
-  10-1-rapports-personnalisables: backlog
-  10-2-cohortes-utilisateurs: backlog
-  10-3-funnel-conversion: backlog
+  epic-10: done  # Panel Admin - Analytics
+  10-1-rapports-personnalisables: done
+  10-2-cohortes-utilisateurs: done
+  10-3-funnel-conversion: done
   epic-10-retrospective: optional
 
   # ═══════════════════════════════════════════════════════════════════════════
