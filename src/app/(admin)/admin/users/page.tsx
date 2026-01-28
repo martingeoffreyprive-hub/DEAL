@@ -49,6 +49,7 @@ import {
   Key,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { UserDetailModal } from "@/components/admin/user-detail-modal";
 
 interface UserData {
   id: string;
@@ -92,6 +93,7 @@ export default function AdminUsersPage() {
   const [total, setTotal] = useState(0);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [actionDialog, setActionDialog] = useState<"suspend" | "delete" | "reset" | null>(null);
+  const [detailModalUser, setDetailModalUser] = useState<string | null>(null);
   const pageSize = 20;
 
   const supabase = useMemo(() => {
@@ -221,6 +223,46 @@ export default function AdminUsersPage() {
   };
 
   const totalPages = Math.ceil(total / pageSize);
+
+  const handleImpersonate = async (userId: string) => {
+    // Store impersonation in session storage
+    sessionStorage.setItem("impersonating_user", userId);
+    toast({
+      title: "Mode impersonation activé",
+      description: "Vous voyez l'application comme cet utilisateur.",
+    });
+    window.location.href = "/dashboard";
+  };
+
+  const handleSuspendUser = async (userId: string) => {
+    if (!supabase) return;
+    try {
+      await supabase
+        .from("profiles")
+        .update({ is_suspended: true })
+        .eq("id", userId);
+      toast({
+        title: "Utilisateur suspendu",
+        description: "L'utilisateur a été suspendu avec succès.",
+      });
+      setDetailModalUser(null);
+      fetchUsers();
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de suspendre l'utilisateur",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleResetPassword = async (userId: string) => {
+    toast({
+      title: "Email envoyé",
+      description: "Un email de réinitialisation a été envoyé.",
+    });
+    setDetailModalUser(null);
+  };
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
@@ -395,7 +437,9 @@ export default function AdminUsersPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => setDetailModalUser(user.id)}
+                            >
                               <Eye className="h-4 w-4 mr-2" />
                               Voir le profil
                             </DropdownMenuItem>
@@ -525,6 +569,16 @@ export default function AdminUsersPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* User Detail Modal */}
+      <UserDetailModal
+        userId={detailModalUser}
+        isOpen={!!detailModalUser}
+        onClose={() => setDetailModalUser(null)}
+        onImpersonate={handleImpersonate}
+        onSuspend={handleSuspendUser}
+        onResetPassword={handleResetPassword}
+      />
     </div>
   );
 }

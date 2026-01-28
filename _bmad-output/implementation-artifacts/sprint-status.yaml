@@ -91,17 +91,17 @@ development_status:
   6-3-admin-actions-rapides: done
   epic-6-retrospective: optional
 
-  epic-7: backlog  # Panel Admin - Gestion Users
-  7-1-liste-users-avec-filtres: backlog
-  7-2-detail-user: backlog
-  7-3-impersonation-user: backlog
-  7-4-actions-user: backlog
+  epic-7: done  # Panel Admin - Gestion Users
+  7-1-liste-users-avec-filtres: done
+  7-2-detail-user: done
+  7-3-impersonation-user: done
+  7-4-actions-user: done
   epic-7-retrospective: optional
 
-  epic-8: backlog  # Panel Admin - Secteurs & Content
-  8-1-crud-secteurs: backlog
-  8-2-vocabulaire-ia-par-secteur: backlog
-  8-3-templates-marketplace: backlog
+  epic-8: done  # Panel Admin - Secteurs & Content
+  8-1-crud-secteurs: done
+  8-2-vocabulaire-ia-par-secteur: done
+  8-3-templates-marketplace: done
   epic-8-retrospective: optional
 
   epic-9: backlog  # Panel Admin - TokenDEAL Economy

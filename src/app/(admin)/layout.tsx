@@ -12,6 +12,10 @@ import {
   Settings,
   ArrowLeft,
   Shield,
+  Briefcase,
+  FileText,
+  Coins,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,8 +24,23 @@ interface AdminLayoutProps {
 }
 
 const ADMIN_NAV = [
+  // Dashboard
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+
+  // Users Management (Epic 7)
   { href: "/admin/users", label: "Utilisateurs", icon: Users },
+
+  // Content Management (Epic 8)
+  { href: "/admin/sectors", label: "Secteurs", icon: Briefcase },
+  { href: "/admin/templates", label: "Templates", icon: FileText },
+
+  // Token Economy (Epic 9 - à venir)
+  { href: "/admin/tokens", label: "TokenDEAL", icon: Coins },
+
+  // Analytics (Epic 10 - à venir)
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+
+  // System
   { href: "/admin/subscriptions", label: "Abonnements", icon: CreditCard },
   { href: "/admin/audit-logs", label: "Journaux d'audit", icon: ScrollText },
   { href: "/admin/settings", label: "Paramètres", icon: Settings },
