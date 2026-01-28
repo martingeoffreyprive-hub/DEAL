@@ -47,6 +47,7 @@ import {
   Eye,
   Trash2,
   Key,
+  CreditCard,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { UserDetailModal } from "@/components/admin/user-detail-modal";
@@ -94,6 +95,8 @@ export default function AdminUsersPage() {
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [actionDialog, setActionDialog] = useState<"suspend" | "delete" | "reset" | null>(null);
   const [detailModalUser, setDetailModalUser] = useState<string | null>(null);
+  const [planDialog, setPlanDialog] = useState<{ userId: string; currentPlan: string } | null>(null);
+  const [updatingPlan, setUpdatingPlan] = useState(false);
   const pageSize = 20;
 
   const supabase = useMemo(() => {
@@ -109,7 +112,7 @@ export default function AdminUsersPage() {
     setLoading(true);
 
     try {
-      // Fetch profiles (simple query without joins)
+      // Fetch profiles
       let query = supabase
         .from("profiles")
         .select(`
@@ -129,12 +132,24 @@ export default function AdminUsersPage() {
       const from = (page - 1) * pageSize;
       query = query.range(from, from + pageSize - 1);
 
-      const { data, error, count } = await query;
+      const { data: profiles, error, count } = await query;
 
       if (error) throw error;
 
+      // Fetch subscriptions separately
+      const userIds = (profiles || []).map((p: any) => p.id);
+      const { data: subscriptions } = await supabase
+        .from("subscriptions")
+        .select("user_id, plan_name, status")
+        .in("user_id", userIds);
+
+      // Create a map of subscriptions by user_id
+      const subMap = new Map(
+        (subscriptions || []).map((s: any) => [s.user_id, { plan_type: s.plan_name, status: s.status }])
+      );
+
       // Transform data to match UserData interface
-      const transformedUsers: UserData[] = (data || []).map((profile: any) => ({
+      const transformedUsers: UserData[] = (profiles || []).map((profile: any) => ({
         id: profile.id,
         email: profile.email || "",
         created_at: profile.created_at,
@@ -144,7 +159,7 @@ export default function AdminUsersPage() {
           company_name: profile.company_name,
           role: profile.role || "user",
         },
-        subscription: { plan_type: "free", status: "active" },
+        subscription: subMap.get(profile.id) || { plan_type: "free", status: "active" },
         is_active: true,
       }));
 
@@ -259,6 +274,45 @@ export default function AdminUsersPage() {
       description: "Un email de réinitialisation a été envoyé.",
     });
     setDetailModalUser(null);
+  };
+
+  const handleChangePlan = async (newPlan: string) => {
+    if (!planDialog) return;
+    setUpdatingPlan(true);
+
+    try {
+      const response = await fetch("/api/admin/update-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: planDialog.userId, planName: newPlan }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update plan");
+
+      toast({
+        title: "Plan mis à jour",
+        description: `Le plan a été changé en "${newPlan}" avec succès.`,
+      });
+
+      // Update local state
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === planDialog.userId
+            ? { ...u, subscription: { ...u.subscription, plan_type: newPlan, status: "active" } }
+            : u
+        )
+      );
+
+      setPlanDialog(null);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de changer le plan",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingPlan(false);
+    }
   };
 
   const filteredUsers = useMemo(() => {
@@ -449,6 +503,17 @@ export default function AdminUsersPage() {
                               <Key className="h-4 w-4 mr-2" />
                               Reset mot de passe
                             </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setPlanDialog({
+                                  userId: user.id,
+                                  currentPlan: user.subscription?.plan_type || "free",
+                                });
+                              }}
+                            >
+                              <CreditCard className="h-4 w-4 mr-2" />
+                              Changer le plan
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               onClick={() => {
@@ -563,6 +628,39 @@ export default function AdminUsersPage() {
             <AlertDialogAction onClick={() => handleAction("reset")}>
               Envoyer
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Change Plan Dialog */}
+      <AlertDialog open={!!planDialog} onOpenChange={() => setPlanDialog(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Changer le plan d'abonnement</AlertDialogTitle>
+            <AlertDialogDescription>
+              Plan actuel : <strong className="uppercase">{planDialog?.currentPlan || "free"}</strong>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="grid grid-cols-2 gap-3 py-4">
+            {[
+              { id: "free", label: "Free", color: "bg-gray-100 hover:bg-gray-200 border-gray-300" },
+              { id: "starter", label: "Starter", color: "bg-green-100 hover:bg-green-200 border-green-300" },
+              { id: "pro", label: "Pro", color: "bg-blue-100 hover:bg-blue-200 border-blue-300" },
+              { id: "ultimate", label: "Ultimate", color: "bg-purple-100 hover:bg-purple-200 border-purple-300" },
+            ].map((plan) => (
+              <Button
+                key={plan.id}
+                variant="outline"
+                className={`${plan.color} ${planDialog?.currentPlan === plan.id ? "ring-2 ring-primary" : ""}`}
+                disabled={updatingPlan || planDialog?.currentPlan === plan.id}
+                onClick={() => handleChangePlan(plan.id)}
+              >
+                {updatingPlan ? "..." : plan.label}
+              </Button>
+            ))}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={updatingPlan}>Fermer</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
