@@ -108,63 +108,21 @@ export default function AdminUsersPage() {
   }, []);
 
   const fetchUsers = useCallback(async () => {
-    if (!supabase) return;
     setLoading(true);
 
     try {
-      // Fetch profiles
-      let query = supabase
-        .from("profiles")
-        .select(`
-          id,
-          email,
-          full_name,
-          company_name,
-          role,
-          created_at
-        `, { count: "exact" })
-        .order("created_at", { ascending: false });
+      const params = new URLSearchParams({
+        page: page.toString(),
+        pageSize: pageSize.toString(),
+      });
+      if (search) params.set("search", search);
 
-      if (search) {
-        query = query.or(`full_name.ilike.%${search}%,company_name.ilike.%${search}%,email.ilike.%${search}%`);
-      }
+      const response = await fetch(`/api/admin/users?${params}`);
+      if (!response.ok) throw new Error("Failed to fetch users");
 
-      const from = (page - 1) * pageSize;
-      query = query.range(from, from + pageSize - 1);
-
-      const { data: profiles, error, count } = await query;
-
-      if (error) throw error;
-
-      // Fetch subscriptions separately
-      const userIds = (profiles || []).map((p: any) => p.id);
-      const { data: subscriptions } = await supabase
-        .from("subscriptions")
-        .select("user_id, plan_name, status")
-        .in("user_id", userIds);
-
-      // Create a map of subscriptions by user_id
-      const subMap = new Map(
-        (subscriptions || []).map((s: any) => [s.user_id, { plan_type: s.plan_name, status: s.status }])
-      );
-
-      // Transform data to match UserData interface
-      const transformedUsers: UserData[] = (profiles || []).map((profile: any) => ({
-        id: profile.id,
-        email: profile.email || "",
-        created_at: profile.created_at,
-        last_sign_in_at: null,
-        profile: {
-          full_name: profile.full_name,
-          company_name: profile.company_name,
-          role: profile.role || "user",
-        },
-        subscription: subMap.get(profile.id) || { plan_type: "free", status: "active" },
-        is_active: true,
-      }));
-
-      setUsers(transformedUsers);
-      setTotal(count || 0);
+      const data = await response.json();
+      setUsers(data.users);
+      setTotal(data.total);
     } catch (error) {
       console.error("Error fetching users:", error);
       toast({
@@ -175,7 +133,7 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase, search, page, toast]);
+  }, [search, page, toast]);
 
   useEffect(() => {
     fetchUsers();
