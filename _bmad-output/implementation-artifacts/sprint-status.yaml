@@ -1,0 +1,160 @@
+# generated: 2026-01-28
+# project: DEAL
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts/stories
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog -> in-progress: Automatically when first story is created (via create-story)
+#   - in-progress -> done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-01-28
+project: DEAL
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts/stories
+
+development_status:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # PHASE 1: FONDATIONS & SECURITE
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  epic-1: in-progress  # Fondations & Securite
+  1-1-suppression-endpoint-debug: done
+  1-2-rate-limiting-global: ready-for-dev
+  1-3-audit-secrets-configuration: backlog
+  1-4-configuration-cors-production: backlog
+  1-5-rebranding-quotevoice-deal: backlog
+  epic-1-retrospective: optional
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # PHASE 2: REVOLUTION UX/UI
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  epic-2: backlog  # Navigation Mobile-First
+  2-1-bottom-navigation-mobile: backlog
+  2-2-suppression-sidebar-classique: backlog
+  2-3-top-navigation-desktop: backlog
+  2-4-command-palette-cmd-k: backlog
+  2-5-gestures-mobile: backlog
+  epic-2-retrospective: optional
+
+  epic-3: backlog  # Dashboard Netflix-Style
+  3-1-hero-section-contextuelle: backlog
+  3-2-carousel-devis-recents: backlog
+  3-3-dashboard-widgets-personnalisables: backlog
+  3-4-cards-visuelles-devis: backlog
+  epic-3-retrospective: optional
+
+  epic-4: backlog  # Creation Devis Wizard
+  4-1-wizard-multi-etapes: backlog
+  4-2-choix-mode-creation: backlog
+  4-3-mode-chantier: backlog
+  epic-4-retrospective: optional
+
+  epic-5: backlog  # Microinteractions & Ludification
+  5-1-celebration-devis-signe: backlog
+  5-2-system-de-badges: backlog
+  5-3-transitions-fluides: backlog
+  epic-5-retrospective: optional
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # PHASE 3: PANEL ADMINISTRATION
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  epic-6: backlog  # Panel Admin - Dashboard
+  6-1-admin-dashboard-kpis: backlog
+  6-2-admin-alertes-systeme: backlog
+  6-3-admin-actions-rapides: backlog
+  epic-6-retrospective: optional
+
+  epic-7: backlog  # Panel Admin - Gestion Users
+  7-1-liste-users-avec-filtres: backlog
+  7-2-detail-user: backlog
+  7-3-impersonation-user: backlog
+  7-4-actions-user: backlog
+  epic-7-retrospective: optional
+
+  epic-8: backlog  # Panel Admin - Secteurs & Content
+  8-1-crud-secteurs: backlog
+  8-2-vocabulaire-ia-par-secteur: backlog
+  8-3-templates-marketplace: backlog
+  epic-8-retrospective: optional
+
+  epic-9: backlog  # Panel Admin - TokenDEAL Economy
+  9-1-dashboard-tokens: backlog
+  9-2-gestion-bonus-tokens: backlog
+  9-3-configuration-prix-tokens: backlog
+  epic-9-retrospective: optional
+
+  epic-10: backlog  # Panel Admin - Analytics
+  10-1-rapports-personnalisables: backlog
+  10-2-cohortes-utilisateurs: backlog
+  10-3-funnel-conversion: backlog
+  epic-10-retrospective: optional
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # PHASE 4: OPTIMISATIONS
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  epic-11: backlog  # Optimisations Performance
+  11-1-refactor-advancedquoteeditor: backlog
+  11-2-pdf-preview-memoization: backlog
+  11-3-pwa-service-worker: backlog
+  epic-11-retrospective: optional
+
+  epic-12: backlog  # Tests & Qualite
+  12-1-tests-e2e-playwright: backlog
+  12-2-tests-composants-vitest: backlog
+  12-3-tests-api-integration: backlog
+  epic-12-retrospective: optional
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # PHASE 5: POLISH & LAUNCH
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  epic-13: backlog  # Polish & Launch
+  13-1-onboarding-wizard-ameliore: backlog
+  13-2-documentation-api-openapi: backlog
+  13-3-monitoring-sentry: backlog
+  13-4-analytics-posthog: backlog
+  epic-13-retrospective: optional
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SPRINT PLANNING SUMMARY
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Sprint 1: Epic 1 (Securite & Fondations) - 5 stories
+# Sprint 2: Epic 2 (Navigation Revolution) - 5 stories
+# Sprint 3: Epic 3 + 4 (Dashboard & Wizard) - 7 stories
+# Sprint 4: Epic 5 + 6 (Ludification & Admin Base) - 6 stories
+# Sprint 5: Epic 7 + 8 (Admin Users & Content) - 7 stories
+# Sprint 6: Epic 9 + 10 (Tokens & Analytics) - 6 stories
+# Sprint 7: Epic 11 + 12 (Performance & Tests) - 6 stories
+# Sprint 8: Epic 13 (Launch) - 4 stories
+#
+# TOTAL: 13 Epics, 46 Stories
+# ═══════════════════════════════════════════════════════════════════════════

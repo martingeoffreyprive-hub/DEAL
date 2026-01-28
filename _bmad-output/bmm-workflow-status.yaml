@@ -1,0 +1,108 @@
+# DEAL - Statut du Workflow BMM
+# Genere le: 2026-01-28
+# Phase actuelle: 4 - Implementation
+
+project:
+  name: "DEAL"
+  description: "Application web transformant les descriptions vocales en devis professionnels pour artisans et independants belges"
+  type: "brownfield"
+  level: "medium"
+  deployment: "Vercel"
+  url: "https://www.dealofficialapp.com"
+
+current_phase: 4
+phase_name: "Implementation"
+
+phases:
+  phase_1_analysis:
+    name: "Analyse"
+    status: "completed"
+    artifacts:
+      product_brief:
+        status: "completed"
+        path: "docs/bmad/01-product-brief.md"
+        notes: "Brief produit initial (anciennement QuoteVoice)"
+      research:
+        status: "skipped"
+        notes: "Pas de recherche formelle effectuee"
+
+  phase_2_planning:
+    name: "Planification"
+    status: "completed"
+    artifacts:
+      prd:
+        status: "completed"
+        path: "docs/bmad/02-prd.md"
+        notes: "PRD complet avec user stories et exigences"
+      ux_design:
+        status: "completed"
+        path: "docs/generated/DEAL-UX-Design-Vision.md"
+        notes: "Vision UX 2026 Netflix/Amazon style - Mobile-first"
+
+  phase_3_solutioning:
+    name: "Conception"
+    status: "completed"
+    artifacts:
+      architecture:
+        status: "completed"
+        path: "docs/bmad/03-architecture.md"
+        notes: "Architecture technique documentee"
+      epics_stories:
+        status: "completed"
+        path: "_bmad-output/planning-artifacts/epics-and-stories.md"
+        notes: "13 Epics, 46 Stories - Production Ready v2.0"
+      implementation_readiness:
+        status: "completed"
+        notes: "Plans de production et admin panel generes"
+
+  phase_4_implementation:
+    name: "Implementation"
+    status: "in_progress"
+    artifacts:
+      sprint_planning:
+        status: "completed"
+        path: "_bmad-output/implementation-artifacts/sprint-status.yaml"
+        notes: "Sprint status genere - 8 sprints planifies"
+      sprint_status:
+        status: "in_progress"
+        current_sprint: 1
+        notes: "Pret a demarrer Sprint 1 - Securite & Fondations"
+      stories:
+        status: "pending"
+        location: "_bmad-output/implementation-artifacts/stories"
+        notes: "Stories a creer au fur et a mesure"
+
+production_documents:
+  - path: "docs/generated/DEAL-Production-Action-Plan.md"
+    description: "Plan d'action 5 phases, 8 semaines, 270h"
+  - path: "docs/generated/DEAL-Admin-Panel-Specs.md"
+    description: "Specifications panel admin 16 modules"
+  - path: "docs/generated/DEAL-UX-Design-Vision.md"
+    description: "Vision UX 2026 Netflix/Amazon style"
+
+next_actions:
+  - action: "Demarrer Sprint 1 avec create-story pour 1-1-suppression-endpoint-debug"
+    priority: "high"
+    command: "/bmad:bmm:workflows:create-story"
+  - action: "Implementer les stories de securite (Epic 1)"
+    priority: "high"
+    command: "/bmad:bmm:workflows:dev-story"
+
+security_issues_to_fix:
+  - issue: "Debug endpoint /api/test-supabase exposed"
+    story: "1-1-suppression-endpoint-debug"
+    priority: "P0"
+  - issue: "Missing rate limiting on most API endpoints"
+    story: "1-2-rate-limiting-global"
+    priority: "P0"
+  - issue: "README.md still uses QuoteVoice name"
+    story: "1-5-rebranding-quotevoice-deal"
+    priority: "P0"
+
+notes:
+  - "Le projet a ete rebaptise de QuoteVoice a DEAL"
+  - "Les documents BMAD originaux doivent etre mis a jour avec le nouveau nom"
+  - "L'application a deja du code en place (Next.js, landing page)"
+  - "Projet brownfield - code significatif existe deja"
+  - "Vision UX: Netflix/Amazon style, pas CRM/ERP classique"
+  - "Mobile-first avec gestures, bottom navigation"
