@@ -2,8 +2,8 @@
 
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState, useCallback } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { createBrowserClient } from "@supabase/ssr";
 import {
   Search,
   RefreshCw,
@@ -47,8 +46,6 @@ import {
   Clock,
   ArrowUp,
   ArrowDown,
-  Pause,
-  Play,
   Mail,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -57,6 +54,7 @@ interface Subscription {
   id: string;
   user_id: string;
   plan_type: string;
+  plan_name: string;
   status: string;
   current_period_start: string;
   current_period_end: string;
@@ -67,28 +65,34 @@ interface Subscription {
   profile: {
     full_name: string | null;
     company_name: string | null;
+    email: string | null;
   } | null;
 }
 
 interface SubscriptionStats {
   totalMRR: number;
   activeSubscriptions: number;
-  churnRate: number;
-  trialConversions: number;
 }
 
 const PLAN_PRICES: Record<string, number> = {
   free: 0,
   pro: 29,
   business: 99,
-  enterprise: 299,
+  corporate: 299,
+};
+
+const PLAN_LABELS: Record<string, string> = {
+  free: "Free",
+  pro: "Pro",
+  business: "Business",
+  corporate: "Corporate",
 };
 
 const PLAN_COLORS: Record<string, string> = {
   free: "bg-gray-500/10 text-gray-500 border-gray-500/20",
   pro: "bg-blue-500/10 text-blue-500 border-blue-500/20",
   business: "bg-purple-500/10 text-purple-500 border-purple-500/20",
-  enterprise: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+  corporate: "bg-amber-500/10 text-amber-500 border-amber-500/20",
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -107,6 +111,8 @@ const STATUS_ICONS: Record<string, any> = {
   incomplete: AlertTriangle,
 };
 
+const ALL_PLANS = ["free", "pro", "business", "corporate"];
+
 export default function AdminSubscriptionsPage() {
   const { toast } = useToast();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
@@ -118,67 +124,27 @@ export default function AdminSubscriptionsPage() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [selectedSub, setSelectedSub] = useState<Subscription | null>(null);
-  const [actionDialog, setActionDialog] = useState<"cancel" | "upgrade" | "downgrade" | "remind" | null>(null);
+  const [actionDialog, setActionDialog] = useState<"cancel" | "change-plan" | "remind" | null>(null);
+  const [selectedNewPlan, setSelectedNewPlan] = useState<string>("");
+  const [actionLoading, setActionLoading] = useState(false);
   const pageSize = 20;
 
-  const supabase = useMemo(() => {
-    if (typeof window === "undefined") return null;
-    return createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-  }, []);
-
   const fetchSubscriptions = useCallback(async () => {
-    if (!supabase) return;
     setLoading(true);
-
     try {
-      // Simple query without foreign key joins
-      let query = supabase
-        .from("subscriptions")
-        .select(`*`, { count: "exact" })
-        .order("created_at", { ascending: false });
+      const params = new URLSearchParams();
+      if (planFilter !== "all") params.set("plan", planFilter);
+      if (statusFilter !== "all") params.set("status", statusFilter);
+      params.set("page", String(page));
+      params.set("pageSize", String(pageSize));
 
-      if (planFilter !== "all") {
-        query = query.eq("plan_type", planFilter);
-      }
+      const res = await fetch(`/api/admin/subscriptions?${params}`);
+      if (!res.ok) throw new Error("Failed to fetch");
+      const data = await res.json();
 
-      if (statusFilter !== "all") {
-        query = query.eq("status", statusFilter);
-      }
-
-      const from = (page - 1) * pageSize;
-      query = query.range(from, from + pageSize - 1);
-
-      const { data, error, count } = await query;
-
-      if (error) throw error;
-
-      const transformedSubs: Subscription[] = (data || []).map((sub: any) => ({
-        ...sub,
-        profile: null, // Profile info not available without join
-      }));
-
-      setSubscriptions(transformedSubs);
-      setTotal(count || 0);
-
-      // Calculate stats from all subscriptions
-      const allSubs = await supabase
-        .from("subscriptions")
-        .select("plan_type, status");
-
-      if (allSubs.data) {
-        const activeSubs = allSubs.data.filter((s: any) => s.status === "active");
-        const mrr = activeSubs.reduce((sum: number, s: any) => sum + (PLAN_PRICES[s.plan_type] || 0), 0);
-
-        setStats({
-          totalMRR: mrr,
-          activeSubscriptions: activeSubs.length,
-          churnRate: 2.3,
-          trialConversions: 67,
-        });
-      }
+      setSubscriptions(data.subscriptions || []);
+      setTotal(data.total || 0);
+      setStats(data.stats || null);
     } catch (error) {
       console.error("Error fetching subscriptions:", error);
       toast({
@@ -189,7 +155,7 @@ export default function AdminSubscriptionsPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase, planFilter, statusFilter, page, toast]);
+  }, [planFilter, statusFilter, page, toast]);
 
   useEffect(() => {
     fetchSubscriptions();
@@ -211,44 +177,70 @@ export default function AdminSubscriptionsPage() {
       minimumFractionDigits: 0,
     }).format(value);
 
-  const handleAction = async (action: "cancel" | "upgrade" | "downgrade" | "remind") => {
-    if (!selectedSub) return;
+  const getPlanName = (sub: Subscription) => sub.plan_name || sub.plan_type || "free";
 
+  const handleChangePlan = async () => {
+    if (!selectedSub || !selectedNewPlan) return;
+    setActionLoading(true);
     try {
-      switch (action) {
-        case "cancel":
-          toast({
-            title: "Annulation programmée",
-            description: "L'abonnement sera annulé à la fin de la période.",
-          });
-          break;
-        case "upgrade":
-          toast({
-            title: "Upgrade initié",
-            description: "L'utilisateur sera contacté pour confirmer.",
-          });
-          break;
-        case "downgrade":
-          toast({
-            title: "Downgrade programmé",
-            description: "Sera effectif à la prochaine période.",
-          });
-          break;
-        case "remind":
-          toast({
-            title: "Rappel envoyé",
-            description: "Un email de rappel de paiement a été envoyé.",
-          });
-          break;
-      }
+      const res = await fetch("/api/admin/update-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: selectedSub.user_id,
+          planName: selectedNewPlan,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
+
+      toast({
+        title: "Plan modifié",
+        description: `Plan changé vers ${PLAN_LABELS[selectedNewPlan] || selectedNewPlan}`,
+      });
       fetchSubscriptions();
     } catch (error) {
       toast({
         title: "Erreur",
-        description: "L'action a échoué",
+        description: "Impossible de modifier le plan",
         variant: "destructive",
       });
     } finally {
+      setActionLoading(false);
+      setActionDialog(null);
+      setSelectedSub(null);
+      setSelectedNewPlan("");
+    }
+  };
+
+  const handleCancel = async () => {
+    if (!selectedSub) return;
+    setActionLoading(true);
+    try {
+      // Set plan to free = cancel
+      const res = await fetch("/api/admin/update-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: selectedSub.user_id,
+          planName: "free",
+        }),
+      });
+      if (!res.ok) throw new Error("Failed");
+
+      toast({
+        title: "Abonnement annulé",
+        description: "L'utilisateur est maintenant sur le plan Free.",
+      });
+      fetchSubscriptions();
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'annuler l'abonnement",
+        variant: "destructive",
+      });
+    } finally {
+      setActionLoading(false);
       setActionDialog(null);
       setSelectedSub(null);
     }
@@ -262,7 +254,7 @@ export default function AdminSubscriptionsPage() {
         <div>
           <h1 className="text-2xl font-bold">Gestion des abonnements</h1>
           <p className="text-muted-foreground">
-            Suivi et gestion des abonnements Stripe
+            Suivi et gestion des abonnements
           </p>
         </div>
         <Button onClick={fetchSubscriptions} variant="outline" size="sm">
@@ -272,7 +264,7 @@ export default function AdminSubscriptionsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">MRR</CardTitle>
@@ -297,32 +289,6 @@ export default function AdminSubscriptionsPage() {
             <div className="text-2xl font-bold">{stats?.activeSubscriptions || 0}</div>
             <p className="text-xs text-muted-foreground">
               Abonnements payants
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Taux de churn</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.churnRate || 0}%</div>
-            <p className="text-xs text-muted-foreground">
-              Annulations ce mois
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Conversion trials</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.trialConversions || 0}%</div>
-            <p className="text-xs text-muted-foreground">
-              Trials convertis en payants
             </p>
           </CardContent>
         </Card>
@@ -358,9 +324,10 @@ export default function AdminSubscriptionsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous les plans</SelectItem>
+                <SelectItem value="free">Free</SelectItem>
                 <SelectItem value="pro">Pro</SelectItem>
                 <SelectItem value="business">Business</SelectItem>
-                <SelectItem value="enterprise">Enterprise</SelectItem>
+                <SelectItem value="corporate">Corporate</SelectItem>
               </SelectContent>
             </Select>
             <Select
@@ -424,6 +391,7 @@ export default function AdminSubscriptionsPage() {
                 </thead>
                 <tbody>
                   {subscriptions.map((sub) => {
+                    const plan = getPlanName(sub);
                     const StatusIcon = STATUS_ICONS[sub.status] || CheckCircle;
                     return (
                       <tr key={sub.id} className="border-b border-border hover:bg-muted/30">
@@ -433,16 +401,16 @@ export default function AdminSubscriptionsPage() {
                               {sub.profile?.full_name || "Sans nom"}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {sub.profile?.company_name || sub.user_id.slice(0, 8)}
+                              {sub.profile?.company_name || sub.profile?.email || sub.user_id.slice(0, 8)}
                             </p>
                           </div>
                         </td>
                         <td className="px-4 py-3">
                           <Badge
                             variant="outline"
-                            className={PLAN_COLORS[sub.plan_type]}
+                            className={PLAN_COLORS[plan] || PLAN_COLORS.free}
                           >
-                            {sub.plan_type}
+                            {PLAN_LABELS[plan] || plan}
                           </Badge>
                         </td>
                         <td className="px-4 py-3">
@@ -463,11 +431,6 @@ export default function AdminSubscriptionsPage() {
                                sub.status === "canceled" ? "Annulé" :
                                sub.status}
                             </Badge>
-                            {sub.cancel_at_period_end && (
-                              <Badge variant="outline" className="bg-orange-500/10 text-orange-500">
-                                Fin prévue
-                              </Badge>
-                            )}
                           </div>
                         </td>
                         <td className="px-4 py-3 text-sm text-muted-foreground">
@@ -477,7 +440,7 @@ export default function AdminSubscriptionsPage() {
                           </div>
                         </td>
                         <td className="px-4 py-3 font-medium">
-                          {formatCurrency(PLAN_PRICES[sub.plan_type] || 0)}/mois
+                          {formatCurrency(PLAN_PRICES[plan] || 0)}/mois
                         </td>
                         <td className="px-4 py-3">
                           <DropdownMenu>
@@ -490,20 +453,12 @@ export default function AdminSubscriptionsPage() {
                               <DropdownMenuItem
                                 onClick={() => {
                                   setSelectedSub(sub);
-                                  setActionDialog("upgrade");
+                                  setSelectedNewPlan("");
+                                  setActionDialog("change-plan");
                                 }}
                               >
                                 <ArrowUp className="h-4 w-4 mr-2" />
-                                Upgrader
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setSelectedSub(sub);
-                                  setActionDialog("downgrade");
-                                }}
-                              >
-                                <ArrowDown className="h-4 w-4 mr-2" />
-                                Downgrader
+                                Changer de plan
                               </DropdownMenuItem>
                               {sub.status === "past_due" && (
                                 <DropdownMenuItem
@@ -525,7 +480,7 @@ export default function AdminSubscriptionsPage() {
                                 className="text-red-600"
                               >
                                 <XCircle className="h-4 w-4 mr-2" />
-                                Annuler
+                                Annuler (passer en Free)
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -567,63 +522,72 @@ export default function AdminSubscriptionsPage() {
         </div>
       )}
 
-      {/* Confirmation Dialogs */}
+      {/* Change Plan Dialog */}
+      <AlertDialog open={actionDialog === "change-plan"} onOpenChange={() => setActionDialog(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Changer le plan</AlertDialogTitle>
+            <AlertDialogDescription>
+              {selectedSub && (
+                <>
+                  Utilisateur : <strong>{selectedSub.profile?.full_name || selectedSub.profile?.email || selectedSub.user_id.slice(0, 8)}</strong>
+                  <br />
+                  Plan actuel : <strong>{PLAN_LABELS[getPlanName(selectedSub)] || getPlanName(selectedSub)}</strong>
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="grid grid-cols-2 gap-2 py-4">
+            {ALL_PLANS.map((plan) => (
+              <Button
+                key={plan}
+                variant={selectedNewPlan === plan ? "default" : "outline"}
+                className="justify-start"
+                disabled={selectedSub ? getPlanName(selectedSub) === plan : false}
+                onClick={() => setSelectedNewPlan(plan)}
+              >
+                <span className="font-semibold">{PLAN_LABELS[plan]}</span>
+                <span className="ml-auto text-xs opacity-70">
+                  {PLAN_PRICES[plan]}€/mois
+                </span>
+              </Button>
+            ))}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleChangePlan}
+              disabled={!selectedNewPlan || actionLoading}
+            >
+              {actionLoading ? "Modification..." : "Confirmer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Cancel Dialog */}
       <AlertDialog open={actionDialog === "cancel"} onOpenChange={() => setActionDialog(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Annuler cet abonnement ?</AlertDialogTitle>
             <AlertDialogDescription>
-              L'abonnement sera annulé à la fin de la période de facturation en cours.
-              L'utilisateur conservera l'accès jusqu'à cette date.
+              L'utilisateur sera rétrogradé au plan Free immédiatement.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Conserver</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => handleAction("cancel")}
+              onClick={handleCancel}
+              disabled={actionLoading}
               className="bg-red-600 hover:bg-red-700"
             >
-              Annuler l'abonnement
+              {actionLoading ? "Annulation..." : "Annuler l'abonnement"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={actionDialog === "upgrade"} onOpenChange={() => setActionDialog(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Upgrader cet abonnement ?</AlertDialogTitle>
-            <AlertDialogDescription>
-              L'utilisateur sera contacté pour confirmer le changement de plan.
-              La différence sera facturée au prorata.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleAction("upgrade")}>
-              Confirmer l'upgrade
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={actionDialog === "downgrade"} onOpenChange={() => setActionDialog(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Downgrader cet abonnement ?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Le nouveau plan prendra effet à la prochaine période de facturation.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleAction("downgrade")}>
-              Confirmer le downgrade
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
+      {/* Remind Dialog */}
       <AlertDialog open={actionDialog === "remind"} onOpenChange={() => setActionDialog(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -634,7 +598,11 @@ export default function AdminSubscriptionsPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleAction("remind")}>
+            <AlertDialogAction onClick={() => {
+              toast({ title: "Rappel envoyé", description: "Email de rappel envoyé." });
+              setActionDialog(null);
+              setSelectedSub(null);
+            }}>
               Envoyer le rappel
             </AlertDialogAction>
           </AlertDialogFooter>

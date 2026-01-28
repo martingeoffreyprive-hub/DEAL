@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 const ADMIN_EMAILS = [
   "admin@dealofficialapp.com",
@@ -10,9 +11,8 @@ const VALID_PLANS = ["free", "pro", "business", "corporate"];
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify admin access with user's auth
     const supabase = await createClient();
-
-    // Check if user is admin
     const { data: { user } } = await supabase.auth.getUser();
     if (!user || !ADMIN_EMAILS.includes(user.email?.toLowerCase() || "")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -28,16 +28,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid plan name" }, { status: 400 });
     }
 
+    // Use service role to bypass RLS
+    const serviceClient = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
     // Update or create subscription
-    const { data: existingSubscription } = await supabase
+    const { data: existingSubscription } = await serviceClient
       .from("subscriptions")
       .select("id")
       .eq("user_id", userId)
       .single();
 
     if (existingSubscription) {
-      // Update existing subscription
-      const { error } = await supabase
+      const { error } = await serviceClient
         .from("subscriptions")
         .update({
           plan_name: planName,
@@ -48,8 +53,7 @@ export async function POST(request: NextRequest) {
 
       if (error) throw error;
     } else {
-      // Create new subscription
-      const { error } = await supabase
+      const { error } = await serviceClient
         .from("subscriptions")
         .insert({
           user_id: userId,
