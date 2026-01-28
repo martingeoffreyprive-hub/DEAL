@@ -101,30 +101,34 @@ const securityHeaders = {
  * Note: CSP is disabled in development for hot reload to work
  */
 function getCSPHeader(nonce: string): string | null {
+  // Temporarily disabled CSP - Next.js inline scripts don't support nonce properly
+  // TODO: Re-enable with proper Next.js CSP configuration
+  return null;
+
   // In development, don't apply CSP to allow hot reload and debugging
-  if (process.env.NODE_ENV === 'development') {
-    return null;
-  }
+  // if (process.env.NODE_ENV === 'development') {
+  //   return null;
+  // }
 
-  // Production CSP - strict
-  const directives = [
-    "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' https://js.stripe.com 'unsafe-inline'`,
-    "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://*.supabase.co https://*.stripe.com",
-    "font-src 'self' https://fonts.gstatic.com",
-    `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://api.stripe.com ${
-      process.env.UPSTASH_REDIS_REST_URL || ''
-    }`,
-    "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
-    "object-src 'none'",
-    "base-uri 'self'",
-    "form-action 'self'",
-    "frame-ancestors 'none'",
-    "upgrade-insecure-requests",
-  ];
+  // // Production CSP - strict
+  // const directives = [
+  //   "default-src 'self'",
+  //   `script-src 'self' 'nonce-${nonce}' https://js.stripe.com 'unsafe-inline'`,
+  //   "style-src 'self' 'unsafe-inline'",
+  //   "img-src 'self' data: blob: https://*.supabase.co https://*.stripe.com",
+  //   "font-src 'self' https://fonts.gstatic.com",
+  //   `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://api.stripe.com ${
+  //     process.env.UPSTASH_REDIS_REST_URL || ''
+  //   }`,
+  //   "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
+  //   "object-src 'none'",
+  //   "base-uri 'self'",
+  //   "form-action 'self'",
+  //   "frame-ancestors 'none'",
+  //   "upgrade-insecure-requests",
+  // ];
 
-  return directives.join('; ');
+  // return directives.join('; ');
 }
 
 /**
