@@ -73,7 +73,7 @@ const PLAN_COLORS: Record<string, string> = {
   free: "bg-gray-500/10 text-gray-500 border-gray-500/20",
   pro: "bg-blue-500/10 text-blue-500 border-blue-500/20",
   business: "bg-purple-500/10 text-purple-500 border-purple-500/20",
-  enterprise: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+  corporate: "bg-amber-500/10 text-amber-500 border-amber-500/20",
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -334,7 +334,7 @@ export default function AdminUsersPage() {
                 <SelectItem value="free">Free</SelectItem>
                 <SelectItem value="pro">Pro</SelectItem>
                 <SelectItem value="business">Business</SelectItem>
-                <SelectItem value="enterprise">Enterprise</SelectItem>
+                <SelectItem value="corporate">Corporate</SelectItem>
               </SelectContent>
             </Select>
             <Select

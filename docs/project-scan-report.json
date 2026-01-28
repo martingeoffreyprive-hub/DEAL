@@ -26,12 +26,12 @@
   "statistics": {
     "source_files": 221,
     "lines_of_code": 55500,
-    "api_endpoints": 28,
-    "ui_components": 74,
+    "api_endpoints": 45,
+    "ui_components": 87,
     "page_routes": 39,
     "react_contexts": 7,
-    "lib_modules": 51,
-    "database_tables": 12,
+    "lib_modules": 48,
+    "database_tables": 14,
     "database_migrations": 18,
     "test_files": 9,
     "dependencies": 57

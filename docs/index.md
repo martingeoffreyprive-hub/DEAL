@@ -27,12 +27,12 @@
 |--------|-------|
 | **Source Files (TS/TSX)** | 221 |
 | **Lines of Code** | ~55,500 |
-| **API Endpoints** | 28 |
-| **UI Components** | 74 |
+| **API Endpoints** | 45 |
+| **UI Components** | 87+ |
 | **Page Routes** | 39 |
 | **Contexts (React)** | 7 |
-| **Lib Modules** | 51 |
-| **Database Tables** | 12 |
+| **Lib Modules** | 48+ |
+| **Database Tables** | 14+ |
 | **Database Migrations** | 18 |
 | **Test Files** | 9 |
 | **Dependencies** | 57 |
@@ -256,7 +256,7 @@ src/
 
 ---
 
-## API Endpoints (28 Total)
+## API Endpoints (45 Total)
 
 ### Authentication (4)
 
@@ -293,13 +293,14 @@ src/
 | POST | `/api/stripe/portal` | Portail client Stripe |
 | POST | `/api/stripe/webhook` | Webhooks Stripe |
 
-### Admin (3)
+### Admin (4)
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | GET | `/api/admin/stats` | Admin | Statistiques globales |
 | POST | `/api/admin/update-plan` | Admin | Changer plan utilisateur |
 | GET | `/api/admin/users` | Admin | Liste utilisateurs |
+| GET | `/api/admin/subscriptions` | Admin | Liste abonnements + MRR |
 
 ### GDPR (2)
 

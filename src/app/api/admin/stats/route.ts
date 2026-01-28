@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,12 +29,23 @@ export async function GET(request: NextRequest) {
       .eq("id", user.id)
       .single();
 
-    if (profile?.role !== "admin" && profile?.role !== "super_admin") {
+    const ADMIN_EMAILS = [
+      "admin@dealofficialapp.com",
+      "martin.geoffrey.prive@gmail.com",
+    ];
+
+    if (profile?.role !== "admin" && profile?.role !== "super_admin" && !ADMIN_EMAILS.includes(user.email?.toLowerCase() || "")) {
       return NextResponse.json(
         { error: "Accès refusé - Administrateur requis" },
         { status: 403 }
       );
     }
+
+    // Use service role to bypass RLS
+    const serviceClient = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
 
     // Fetch all stats in parallel
     const [
@@ -44,28 +56,28 @@ export async function GET(request: NextRequest) {
       activeUsersData,
     ] = await Promise.all([
       // Total users
-      supabase
+      serviceClient
         .from("profiles")
         .select("*", { count: "exact", head: true }),
 
       // Total quotes
-      supabase
+      serviceClient
         .from("quotes")
         .select("*", { count: "exact", head: true }),
 
       // Subscriptions breakdown
-      supabase
+      serviceClient
         .from("subscriptions")
-        .select("plan_type, status"),
+        .select("plan_name, status"),
 
       // Recent signups (last 7 days)
-      supabase
+      serviceClient
         .from("profiles")
         .select("*", { count: "exact", head: true })
         .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
 
       // Active users (logged in last 30 days)
-      supabase
+      serviceClient
         .from("profiles")
         .select("*", { count: "exact", head: true })
         .gte("updated_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
@@ -75,23 +87,23 @@ export async function GET(request: NextRequest) {
     const subscriptions = subscriptionsData.data || [];
     const activeSubs = subscriptions.filter((s: any) => s.status === "active");
 
-    const proCount = activeSubs.filter((s: any) => s.plan_type === "pro").length;
-    const businessCount = activeSubs.filter((s: any) => s.plan_type === "business").length;
-    const enterpriseCount = activeSubs.filter((s: any) => s.plan_type === "enterprise").length;
+    const proCount = activeSubs.filter((s: any) => s.plan_name === "pro").length;
+    const businessCount = activeSubs.filter((s: any) => s.plan_name === "business").length;
+    const corporateCount = activeSubs.filter((s: any) => s.plan_name === "corporate").length;
 
     // Calculate MRR (Monthly Recurring Revenue)
     const MRR_PRICES: Record<string, number> = {
       pro: 29,
       business: 99,
-      enterprise: 299,
+      corporate: 299,
     };
 
     const totalMRR = activeSubs.reduce((sum: number, sub: any) => {
-      return sum + (MRR_PRICES[sub.plan_type] || 0);
+      return sum + (MRR_PRICES[sub.plan_name] || 0);
     }, 0);
 
     const totalUsers = usersCount.count || 0;
-    const freeUsers = totalUsers - proCount - businessCount - enterpriseCount;
+    const freeUsers = totalUsers - proCount - businessCount - corporateCount;
 
     const stats = {
       totalUsers,
@@ -100,7 +112,7 @@ export async function GET(request: NextRequest) {
       totalRevenue: totalMRR,
       proSubscriptions: proCount,
       businessSubscriptions: businessCount,
-      enterpriseSubscriptions: enterpriseCount,
+      corporateSubscriptions: corporateCount,
       freeUsers,
       recentSignups: recentSignups.count || 0,
       mrr: totalMRR,
