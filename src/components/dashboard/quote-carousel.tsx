@@ -115,7 +115,7 @@ export function QuoteCarousel({
   }
 
   return (
-    <div className="relative">
+    <div className="relative max-w-full overflow-hidden">
       {/* Title */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold">{title}</h3>

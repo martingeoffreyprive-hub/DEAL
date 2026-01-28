@@ -102,7 +102,7 @@ export function HeroSection({ userName, companyName, stats }: HeroSectionProps) 
 
   return (
     <motion.div
-      className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#252B4A] via-[#1E3A5F] to-[#252B4A] p-6 md:p-8"
+      className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#252B4A] via-[#1E3A5F] to-[#252B4A] p-4 sm:p-6 md:p-8 max-w-full"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -144,16 +144,16 @@ export function HeroSection({ userName, companyName, stats }: HeroSectionProps) 
 
         {/* Stats Row */}
         <motion.div
-          className="flex flex-wrap items-center justify-center gap-6 md:gap-8 mb-8 py-4"
+          className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 md:gap-8 mb-6 sm:mb-8 py-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
           <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold text-[#E85A5A]">
+            <div className="text-xl sm:text-3xl md:text-4xl font-bold text-[#E85A5A]">
               {formatCurrency(stats.totalAmount)}
             </div>
-            <p className="text-white/60 text-sm mt-1">Ce mois</p>
+            <p className="text-white/60 text-xs sm:text-sm mt-1">Ce mois</p>
           </div>
 
           <div className="hidden md:block w-px h-12 bg-white/20" />

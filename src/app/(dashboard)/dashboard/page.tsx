@@ -124,7 +124,7 @@ export default function DashboardPage() {
 
   return (
     <motion.div
-      className="space-y-8"
+      className="space-y-6 sm:space-y-8 max-w-full overflow-hidden"
       initial="initial"
       animate="animate"
       variants={staggerContainer}

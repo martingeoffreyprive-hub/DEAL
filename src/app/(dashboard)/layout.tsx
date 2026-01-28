@@ -30,12 +30,12 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <SkipLink href="#main-content" />
       <Header user={user} profile={profile} />
-      <div className="flex">
+      <div className="flex overflow-hidden">
         <Sidebar />
-        <main id="main-content" className="flex-1 p-6 pb-24 lg:p-8 lg:pb-8" tabIndex={-1}>
+        <main id="main-content" className="flex-1 min-w-0 w-full p-4 pb-24 sm:p-6 lg:p-8 lg:pb-8 overflow-x-hidden" tabIndex={-1}>
           {children}
         </main>
       </div>
