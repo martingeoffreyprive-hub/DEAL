@@ -22,12 +22,14 @@ const inter = Inter({
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+    { media: "(prefers-color-scheme: dark)", color: "#252B4A" },
   ],
   width: "device-width",
   initialScale: 1,
+  minimumScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
@@ -121,7 +123,7 @@ export default function RootLayout({
           </>
         )}
       </head>
-      <body className={`${inter.className} ${inter.variable}`}>
+      <body className={`${inter.className} ${inter.variable}`} style={{ touchAction: 'pan-y', overscrollBehavior: 'none' }}>
         {/* <WebVitals /> */}
         <ThemeProvider
           attribute="class"
