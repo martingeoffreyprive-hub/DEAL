@@ -1,16 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -21,15 +18,32 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/use-subscription";
 import { useLocaleContext } from "@/contexts/locale-context";
-import { SECTORS, PLAN_FEATURES, type SectorType } from "@/types/database";
-import { Sparkles, FileText, AlertTriangle, Lock, ArrowRight, Mic, Plus, Trash2, Zap } from "lucide-react";
+import { SECTORS, PLAN_FEATURES, getSectorConfig, type SectorType } from "@/types/database";
+import {
+  Sparkles,
+  AlertTriangle,
+  ArrowRight,
+  Zap,
+  Mic,
+  FileText,
+} from "lucide-react";
 import Link from "next/link";
 import { DealIconD, DealLoadingSpinner } from "@/components/brand";
-import { staggerContainer, staggerItem, cardHover } from "@/components/animations/page-transition";
-import { QuoteWizard, type WizardStep } from "@/components/quotes/quote-wizard";
+import { staggerContainer, staggerItem } from "@/components/animations/page-transition";
 import { CreationModeSelector, type CreationMode } from "@/components/quotes/creation-mode-selector";
 import { TutorialOverlay } from "@/components/onboarding/tutorial-overlay";
 
+// Copilot components – design 2028
+import {
+  SplitScreenEditor,
+  BottomBar,
+  type LineGroup,
+  type ClientInfo,
+} from "@/components/copilot";
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 interface GeneratedQuote {
   sector: SectorType;
   client: {
@@ -49,25 +63,55 @@ interface GeneratedQuote {
   notes?: string;
 }
 
-interface QuoteItem {
-  description: string;
-  quantity: number;
-  unit: string;
-  unitPrice: number;
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+function buildGroupsFromGenerated(items: GeneratedQuote["items"], sector: SectorType): LineGroup[] {
+  const config = getSectorConfig(sector);
+  return [
+    {
+      id: "main",
+      title: config.defaultSections[0] || "Prestations",
+      collapsed: false,
+      items: items.map((item, idx) => ({
+        id: `gen-${idx}-${Date.now()}`,
+        description: item.description,
+        quantity: item.quantity,
+        unit: item.unit,
+        unitPrice: item.unitPrice,
+        vatRate: config.taxRate,
+      })),
+    },
+  ];
 }
 
-interface ClientInfo {
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  city: string;
-  postalCode: string;
+function defaultGroups(sector: SectorType): LineGroup[] {
+  const config = getSectorConfig(sector);
+  return [
+    {
+      id: "main",
+      title: config.defaultSections[0] || "Prestations",
+      collapsed: false,
+      items: [
+        {
+          id: `line-init-${Date.now()}`,
+          description: "",
+          quantity: 1,
+          unit: config.units[0] || "unité",
+          unitPrice: 0,
+          vatRate: config.taxRate,
+        },
+      ],
+    },
+  ];
 }
 
+// ---------------------------------------------------------------------------
+// Page component
+// ---------------------------------------------------------------------------
 export default function NewQuotePage() {
-  // Wizard state
-  const [currentStep, setCurrentStep] = useState<WizardStep>("mode");
+  // Phase: "mode" → "transcription" → "editor"
+  const [phase, setPhase] = useState<"mode" | "transcription" | "editor">("mode");
   const [selectedMode, setSelectedMode] = useState<CreationMode | null>(null);
 
   // Client info
@@ -80,19 +124,26 @@ export default function NewQuotePage() {
     postalCode: "",
   });
 
-  // Quote details
-  const [transcription, setTranscription] = useState("");
-  const [sector, setSector] = useState<SectorType | "auto">("auto");
+  // Quote data
+  const [sector, setSector] = useState<SectorType>("AUTRE");
+  const [groups, setGroups] = useState<LineGroup[]>(defaultGroups("AUTRE"));
   const [notes, setNotes] = useState("");
+  const [transcription, setTranscription] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(true);
+  const [dirty, setDirty] = useState(false);
 
-  // Items (for manual mode)
-  const [items, setItems] = useState<QuoteItem[]>([
-    { description: "", quantity: 1, unit: "u", unitPrice: 0 }
-  ]);
-
-  // Loading & generation
+  // Loading
   const [loading, setLoading] = useState(false);
-  const [generatedData, setGeneratedData] = useState<GeneratedQuote | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  // Profile data
+  const [profile, setProfile] = useState<{
+    company_name?: string;
+    address?: string;
+    siret?: string;
+    iban?: string | null;
+    bic?: string | null;
+  } | null>(null);
 
   const router = useRouter();
   const { toast } = useToast();
@@ -105,57 +156,76 @@ export default function NewQuotePage() {
     usage,
     loading: subLoading,
     canCreateQuote,
-    canUseSector,
     getRemainingQuotes,
     refresh: refreshSubscription,
   } = useSubscription();
 
   const planInfo = PLAN_FEATURES[plan];
-  const remainingQuotes = getRemainingQuotes();
   const canCreate = canCreateQuote();
   const usedQuotes = usage?.quotes_created ?? 0;
   const maxQuotes = planInfo.maxQuotes;
 
-  // Secteurs disponibles pour l'utilisateur
-  const availableSectors = plan === "business"
-    ? (Object.keys(SECTORS) as SectorType[])
-    : userSectors.map(s => s.sector);
+  const availableSectors = useMemo(
+    () =>
+      plan === "business" || plan === "corporate"
+        ? (Object.keys(SECTORS) as SectorType[])
+        : userSectors.map((s) => s.sector),
+    [plan, userSectors]
+  );
 
-  // Check if can proceed to next step
-  const canProceed = useCallback(() => {
-    switch (currentStep) {
-      case "mode":
-        return selectedMode !== null;
-      case "client":
-        return clientInfo.name.trim().length > 0;
-      case "details":
-        if (selectedMode === "vocal") {
-          return transcription.trim().length > 0;
+  // Fetch profile on mount
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+      if (data) {
+        setProfile(data);
+        if (data.default_sector) {
+          setSector(data.default_sector);
+          setGroups(defaultGroups(data.default_sector));
         }
-        return sector !== "auto" || selectedMode === "manual";
-      case "items":
-        if (selectedMode === "vocal" && generatedData) {
-          return generatedData.items.length > 0;
-        }
-        return items.some(item => item.description.trim().length > 0 && item.unitPrice > 0);
-      case "review":
-        return true;
-      default:
-        return false;
-    }
-  }, [currentStep, selectedMode, clientInfo, transcription, sector, items, generatedData]);
+      }
+    })();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Handle AI generation for vocal mode
+  // Mark dirty on changes
+  const handleGroupsChange = useCallback((g: LineGroup[]) => {
+    setGroups(g);
+    setDirty(true);
+  }, []);
+
+  const handleClientChange = useCallback((info: ClientInfo) => {
+    setClientInfo(info);
+    setDirty(true);
+  }, []);
+
+  const handleNotesChange = useCallback((n: string) => {
+    setNotes(n);
+    setDirty(true);
+  }, []);
+
+  const handleSectorChange = useCallback((s: SectorType) => {
+    setSector(s);
+    // Update default VAT rate on existing items if they still use the old sector rate
+    const oldConfig = getSectorConfig(sector);
+    const newConfig = getSectorConfig(s);
+    setGroups((prev) =>
+      prev.map((g) => ({
+        ...g,
+        items: g.items.map((item) =>
+          item.vatRate === oldConfig.taxRate ? { ...item, vatRate: newConfig.taxRate } : item
+        ),
+      }))
+    );
+    setDirty(true);
+  }, [sector]);
+
+  // ---------------------------------------------------------------------------
+  // AI generation (vocal mode)
+  // ---------------------------------------------------------------------------
   const handleGenerate = async () => {
-    if (!transcription.trim()) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez coller une transcription",
-        variant: "destructive",
-      });
-      return;
-    }
-
+    if (!transcription.trim()) return;
     setLoading(true);
 
     try {
@@ -164,7 +234,7 @@ export default function NewQuotePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           transcription,
-          sector: sector === "auto" ? undefined : sector,
+          sector: sector === "AUTRE" ? undefined : sector,
         }),
       });
 
@@ -175,7 +245,7 @@ export default function NewQuotePage() {
 
       const generated: GeneratedQuote = await response.json();
 
-      // Update client info from generated data
+      // Populate client
       if (generated.client) {
         setClientInfo({
           name: generated.client.name || clientInfo.name,
@@ -187,23 +257,17 @@ export default function NewQuotePage() {
         });
       }
 
-      // Update sector
-      if (generated.sector) {
-        setSector(generated.sector);
-      }
+      // Populate sector & lines
+      if (generated.sector) setSector(generated.sector);
+      const resolvedSector = generated.sector || sector;
+      setGroups(buildGroupsFromGenerated(generated.items, resolvedSector));
+      if (generated.notes) setNotes(generated.notes);
 
-      // Store generated data
-      setGeneratedData(generated);
+      setDirty(true);
+      setPhase("editor");
 
-      // Move to items step
-      setCurrentStep("items");
-
-      toast({
-        title: "Analyse terminée",
-        description: "Les informations ont été extraites avec succès",
-      });
+      toast({ title: "Analyse terminée", description: "Les informations ont été extraites avec succès" });
     } catch (error) {
-      console.error("Error generating quote:", error);
       toast({
         title: "Erreur",
         description: error instanceof Error ? error.message : "Une erreur est survenue",
@@ -214,43 +278,30 @@ export default function NewQuotePage() {
     }
   };
 
-  // Handle final quote creation
-  const handleComplete = async () => {
+  // ---------------------------------------------------------------------------
+  // Save to database
+  // ---------------------------------------------------------------------------
+  const handleSave = async () => {
     if (!canCreate) {
-      toast({
-        title: "Limite atteinte",
-        description: "Vous avez atteint votre limite de devis ce mois.",
-        variant: "destructive",
-      });
+      toast({ title: "Limite atteinte", description: "Vous avez atteint votre limite de devis ce mois.", variant: "destructive" });
       return;
     }
 
-    setLoading(true);
+    setSaving(true);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
-      // Use generated items for vocal mode, or manual items
-      const quoteItems = selectedMode === "vocal" && generatedData
-        ? generatedData.items
-        : items.filter(item => item.description.trim().length > 0);
+      const allItems = groups.flatMap((g) => g.items).filter((i) => i.description.trim().length > 0);
 
-      // Calculate totals
-      const subtotal = quoteItems.reduce(
-        (sum, item) => sum + item.quantity * item.unitPrice,
-        0
-      );
-      const taxRate = localePack.tax.standard;
-      const taxAmount = subtotal * taxRate / 100;
-      const total = subtotal + taxAmount;
+      // Compute totals per-VAT
+      const subtotal = allItems.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
+      // Use weighted average tax rate for the quote record
+      const totalVAT = allItems.reduce((s, i) => s + i.quantity * i.unitPrice * (i.vatRate / 100), 0);
+      const total = subtotal + totalVAT;
+      const avgTaxRate = subtotal > 0 ? (totalVAT / subtotal) * 100 : localePack.tax.standard;
 
-      // Determine sector
-      const finalSector = sector === "auto"
-        ? (generatedData?.sector || availableSectors[0] || "plomberie")
-        : sector;
-
-      // Create quote in database
       const { data: quote, error: quoteError } = await supabase
         .from("quotes")
         .insert({
@@ -261,12 +312,12 @@ export default function NewQuotePage() {
           client_phone: clientInfo.phone || null,
           client_city: clientInfo.city || null,
           client_postal_code: clientInfo.postalCode || null,
-          sector: finalSector,
+          sector,
           transcription: selectedMode === "vocal" ? transcription : null,
-          notes: notes || generatedData?.notes || null,
+          notes: notes || null,
           subtotal,
-          tax_rate: taxRate,
-          tax_amount: taxAmount,
+          tax_rate: Math.round(avgTaxRate * 100) / 100,
+          tax_amount: totalVAT,
           total,
           locale,
         })
@@ -275,71 +326,38 @@ export default function NewQuotePage() {
 
       if (quoteError) throw new Error(`Erreur base de données: ${quoteError.message}`);
 
-      // Create quote items
-      if (quoteItems.length > 0) {
-        const { error: itemsError } = await supabase
-          .from("quote_items")
-          .insert(
-            quoteItems.map((item, index) => ({
-              quote_id: quote.id,
-              description: item.description,
-              quantity: item.quantity,
-              unit: item.unit,
-              unit_price: item.unitPrice,
-              order_index: index,
-            }))
-          );
-
+      if (allItems.length > 0) {
+        const { error: itemsError } = await supabase.from("quote_items").insert(
+          allItems.map((item, index) => ({
+            quote_id: quote.id,
+            description: item.description,
+            quantity: item.quantity,
+            unit: item.unit,
+            unit_price: item.unitPrice,
+            order_index: index,
+          }))
+        );
         if (itemsError) throw itemsError;
       }
 
       refreshSubscription();
-
-      toast({
-        title: "Devis créé",
-        description: "Votre devis a été créé avec succès",
-      });
-
+      setDirty(false);
+      toast({ title: "Devis créé", description: "Votre devis a été créé avec succès" });
       router.push(`/quotes/${quote.id}`);
     } catch (error) {
-      console.error("Error creating quote:", error);
       toast({
         title: "Erreur",
         description: error instanceof Error ? error.message : "Une erreur est survenue",
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  // Add item for manual mode
-  const addItem = () => {
-    setItems([...items, { description: "", quantity: 1, unit: "u", unitPrice: 0 }]);
-  };
-
-  // Remove item
-  const removeItem = (index: number) => {
-    if (items.length > 1) {
-      setItems(items.filter((_, i) => i !== index));
-    }
-  };
-
-  // Update item
-  const updateItem = (index: number, field: keyof QuoteItem, value: string | number) => {
-    const newItems = [...items];
-    newItems[index] = { ...newItems[index], [field]: value };
-    setItems(newItems);
-  };
-
-  // Calculate current total
-  const currentTotal = useCallback(() => {
-    const quoteItems = selectedMode === "vocal" && generatedData
-      ? generatedData.items
-      : items;
-    return quoteItems.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
-  }, [selectedMode, generatedData, items]);
-
+  // ---------------------------------------------------------------------------
+  // Render: Loading
+  // ---------------------------------------------------------------------------
   if (subLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -348,486 +366,215 @@ export default function NewQuotePage() {
     );
   }
 
-  // Render step content
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case "mode":
-        return (
-          <CreationModeSelector
-            selectedMode={selectedMode}
-            onSelectMode={(mode) => {
-              setSelectedMode(mode);
-              // Auto-advance after selection
-              setTimeout(() => setCurrentStep("client"), 300);
-            }}
-            disabled={!canCreate}
-          />
-        );
+  // ---------------------------------------------------------------------------
+  // Render: Mode selection
+  // ---------------------------------------------------------------------------
+  if (phase === "mode") {
+    return (
+      <>
+        <TutorialOverlay />
+        <motion.div className="max-w-4xl mx-auto" initial="initial" animate="animate" variants={staggerContainer}>
+          {/* Quota warning */}
+          {!canCreate && (
+            <motion.div variants={staggerItem} className="mb-6">
+              <Card className="border-red-300 bg-red-50 dark:bg-red-950/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <AlertTriangle className="h-5 w-5 text-red-600" />
+                      <div>
+                        <p className="font-medium text-red-700 dark:text-red-300">Limite atteinte</p>
+                        <p className="text-sm text-red-600 dark:text-red-400">{usedQuotes}/{maxQuotes} devis utilisés ce mois</p>
+                      </div>
+                    </div>
+                    <Button size="sm" className="bg-deal-coral hover:bg-deal-coral/90" asChild>
+                      <Link href="/pricing">Upgrader <ArrowRight className="ml-1 h-4 w-4" /></Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
 
-      case "client":
-        return (
-          <div className="space-y-6">
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-semibold mb-2">Informations client</h2>
+          {/* Mode selector */}
+          <motion.div variants={staggerItem}>
+            <Card className="border-deal-coral/10 shadow-lg overflow-hidden">
+              <div className="h-1 bg-gradient-to-r from-deal-coral to-deal-navy" />
+              <CardContent className="p-6 md:p-8">
+                <CreationModeSelector
+                  selectedMode={selectedMode}
+                  onSelectMode={(mode) => {
+                    setSelectedMode(mode);
+                    if (mode === "vocal") {
+                      setTimeout(() => setPhase("transcription"), 300);
+                    } else if (mode === "manual") {
+                      setTimeout(() => setPhase("editor"), 300);
+                    }
+                  }}
+                  disabled={!canCreate}
+                />
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Tips */}
+          <motion.div variants={staggerItem} className="mt-6">
+            <Card className="border-deal-coral/10">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2 text-deal-navy dark:text-white">
+                  <DealIconD size="xs" variant="primary" />
+                  Conseils DEAL
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <span className="text-deal-coral font-bold">1</span>
+                    La dictée vocale est idéale après un appel client
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-deal-coral font-bold">2</span>
+                    Chaque ligne peut avoir sa propre TVA (6%, 12%, 21%)
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-deal-coral font-bold">3</span>
+                    L'aperçu PDF se met à jour en temps réel
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </motion.div>
+      </>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Render: Transcription (vocal mode)
+  // ---------------------------------------------------------------------------
+  if (phase === "transcription") {
+    return (
+      <motion.div className="max-w-2xl mx-auto" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <Card className="border-deal-coral/10 shadow-lg overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-deal-coral to-deal-navy" />
+          <CardContent className="p-6 md:p-8 space-y-6">
+            <div className="text-center">
+              <Mic className="h-10 w-10 text-deal-coral mx-auto mb-3" />
+              <h2 className="text-xl font-semibold mb-1">Transcription vocale</h2>
               <p className="text-muted-foreground text-sm">
-                Renseignez les coordonnées de votre client
+                Collez votre transcription et laissez l'IA analyser le contenu
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="client-name">Nom / Entreprise *</Label>
-                <Input
-                  id="client-name"
-                  placeholder="Ex: Jean Dupont ou SARL Dupont"
-                  value={clientInfo.name}
-                  onChange={(e) => setClientInfo({ ...clientInfo, name: e.target.value })}
-                />
-              </div>
+            <Textarea
+              placeholder="Collez votre transcription ici…
 
-              <div className="space-y-2">
-                <Label htmlFor="client-email">Email</Label>
-                <Input
-                  id="client-email"
-                  type="email"
-                  placeholder="client@example.com"
-                  value={clientInfo.email}
-                  onChange={(e) => setClientInfo({ ...clientInfo, email: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="client-phone">Téléphone</Label>
-                <Input
-                  id="client-phone"
-                  placeholder="+33 6 12 34 56 78"
-                  value={clientInfo.phone}
-                  onChange={(e) => setClientInfo({ ...clientInfo, phone: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="client-address">Adresse</Label>
-                <Input
-                  id="client-address"
-                  placeholder="15 rue des Lilas"
-                  value={clientInfo.address}
-                  onChange={(e) => setClientInfo({ ...clientInfo, address: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="client-city">Ville</Label>
-                <Input
-                  id="client-city"
-                  placeholder="Paris"
-                  value={clientInfo.city}
-                  onChange={(e) => setClientInfo({ ...clientInfo, city: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="client-postal">Code postal</Label>
-                <Input
-                  id="client-postal"
-                  placeholder="75001"
-                  value={clientInfo.postalCode}
-                  onChange={(e) => setClientInfo({ ...clientInfo, postalCode: e.target.value })}
-                />
-              </div>
-            </div>
-          </div>
-        );
-
-      case "details":
-        return (
-          <div className="space-y-6">
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-semibold mb-2">
-                {selectedMode === "vocal" ? "Transcription vocale" : "Détails du devis"}
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                {selectedMode === "vocal"
-                  ? "Collez votre transcription et laissez l'IA analyser"
-                  : "Sélectionnez le secteur d'activité"
-                }
-              </p>
-            </div>
-
-            {selectedMode === "vocal" ? (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="transcription">Transcription</Label>
-                  <Textarea
-                    id="transcription"
-                    placeholder="Collez votre transcription ici...
-
-Exemple :
+Exemple:
 'Bonjour, je suis M. Dupont, j'aurais besoin de faire installer une nouvelle chaudière gaz.
 L'ancienne a 15 ans et consomme beaucoup. Je voudrais aussi faire vérifier les radiateurs.'"
-                    value={transcription}
-                    onChange={(e) => setTranscription(e.target.value)}
-                    className="min-h-[200px] resize-y"
-                  />
-                  <p className="text-xs text-muted-foreground text-right">
-                    {transcription.length} caractères
-                  </p>
-                </div>
+              value={transcription}
+              onChange={(e) => setTranscription(e.target.value)}
+              className="min-h-[200px] resize-y"
+            />
 
-                <div className="space-y-2">
-                  <Label htmlFor="sector">Secteur (optionnel)</Label>
-                  <Select
-                    value={sector}
-                    onValueChange={(value) => setSector(value as SectorType | "auto")}
-                  >
-                    <SelectTrigger id="sector">
-                      <SelectValue placeholder="Détection automatique" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="auto">Détection automatique</SelectItem>
-                      {availableSectors.map((key) => (
-                        <SelectItem key={key} value={key}>
-                          {SECTORS[key]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+            <div className="flex items-center gap-3">
+              <Select
+                value={sector}
+                onValueChange={(v) => setSector(v as SectorType)}
+              >
+                <SelectTrigger className="w-56">
+                  <SelectValue placeholder="Secteur (auto)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="AUTRE">Détection auto</SelectItem>
+                  {availableSectors.map((s) => (
+                    <SelectItem key={s} value={s}>{SECTORS[s]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-                <Button
-                  onClick={handleGenerate}
-                  disabled={loading || !transcription.trim()}
-                  className="w-full gap-2 bg-[#E85A5A] hover:bg-[#D64545] text-white"
-                  size="lg"
-                >
-                  {loading ? (
-                    <>
-                      <DealLoadingSpinner size="sm" />
-                      Analyse en cours...
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="h-5 w-5" />
-                      Analyser avec l'IA
-                    </>
-                  )}
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="sector-manual">Secteur d'activité</Label>
-                  <Select
-                    value={sector === "auto" ? "" : sector}
-                    onValueChange={(value) => setSector(value as SectorType)}
-                  >
-                    <SelectTrigger id="sector-manual">
-                      <SelectValue placeholder="Sélectionnez un secteur" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableSectors.map((key) => (
-                        <SelectItem key={key} value={key}>
-                          {SECTORS[key]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="flex-1" />
 
-                <div className="space-y-2">
-                  <Label htmlFor="notes">Notes / Observations</Label>
-                  <Textarea
-                    id="notes"
-                    placeholder="Ajoutez des notes pour ce devis..."
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    className="min-h-[100px]"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        );
+              <Button variant="outline" onClick={() => setPhase("mode")}>
+                Retour
+              </Button>
 
-      case "items":
-        const displayItems = selectedMode === "vocal" && generatedData
-          ? generatedData.items
-          : items;
-
-        return (
-          <div className="space-y-6">
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-semibold mb-2">Prestations</h2>
-              <p className="text-muted-foreground text-sm">
-                {selectedMode === "vocal"
-                  ? "Vérifiez et ajustez les lignes générées"
-                  : "Ajoutez les lignes de votre devis"
-                }
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              {displayItems.map((item, index) => (
-                <Card key={index} className="p-4">
-                  <div className="grid grid-cols-12 gap-3 items-end">
-                    <div className="col-span-12 md:col-span-5 space-y-1">
-                      <Label className="text-xs">Description</Label>
-                      <Input
-                        placeholder="Description de la prestation"
-                        value={item.description}
-                        onChange={(e) => updateItem(index, "description", e.target.value)}
-                        readOnly={selectedMode === "vocal"}
-                      />
-                    </div>
-                    <div className="col-span-4 md:col-span-2 space-y-1">
-                      <Label className="text-xs">Quantité</Label>
-                      <Input
-                        type="number"
-                        min="1"
-                        value={item.quantity}
-                        onChange={(e) => updateItem(index, "quantity", parseInt(e.target.value) || 1)}
-                        readOnly={selectedMode === "vocal"}
-                      />
-                    </div>
-                    <div className="col-span-4 md:col-span-2 space-y-1">
-                      <Label className="text-xs">Unité</Label>
-                      <Input
-                        placeholder="u"
-                        value={item.unit}
-                        onChange={(e) => updateItem(index, "unit", e.target.value)}
-                        readOnly={selectedMode === "vocal"}
-                      />
-                    </div>
-                    <div className="col-span-4 md:col-span-2 space-y-1">
-                      <Label className="text-xs">Prix unitaire</Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={item.unitPrice}
-                        onChange={(e) => updateItem(index, "unitPrice", parseFloat(e.target.value) || 0)}
-                        readOnly={selectedMode === "vocal"}
-                      />
-                    </div>
-                    {selectedMode !== "vocal" && (
-                      <div className="col-span-12 md:col-span-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeItem(index)}
-                          disabled={items.length === 1}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                  <div className="text-right mt-2 text-sm text-muted-foreground">
-                    Sous-total: {formatCurrency(item.quantity * item.unitPrice)}
-                  </div>
-                </Card>
-              ))}
-
-              {selectedMode !== "vocal" && (
-                <Button
-                  variant="outline"
-                  onClick={addItem}
-                  className="w-full gap-2 border-dashed"
-                >
-                  <Plus className="h-4 w-4" />
-                  Ajouter une ligne
-                </Button>
-              )}
-
-              <Card className="p-4 bg-[#252B4A]/5 border-[#252B4A]/20">
-                <div className="flex justify-between items-center text-lg font-semibold">
-                  <span>Total HT</span>
-                  <span className="text-[#E85A5A]">{formatCurrency(currentTotal())}</span>
-                </div>
-              </Card>
-            </div>
-          </div>
-        );
-
-      case "review":
-        const reviewItems = selectedMode === "vocal" && generatedData
-          ? generatedData.items
-          : items.filter(item => item.description.trim().length > 0);
-        const subtotal = currentTotal();
-        const taxRate = localePack.tax.standard;
-        const taxAmount = subtotal * taxRate / 100;
-        const total = subtotal + taxAmount;
-
-        return (
-          <div className="space-y-6">
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-semibold mb-2">Récapitulatif</h2>
-              <p className="text-muted-foreground text-sm">
-                Vérifiez les informations avant de créer le devis
-              </p>
-            </div>
-
-            {/* Client */}
-            <Card className="p-4">
-              <h3 className="font-semibold mb-3 text-[#252B4A] dark:text-white">Client</h3>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Nom:</span>
-                  <span className="ml-2 font-medium">{clientInfo.name || "Non renseigné"}</span>
-                </div>
-                {clientInfo.email && (
-                  <div>
-                    <span className="text-muted-foreground">Email:</span>
-                    <span className="ml-2">{clientInfo.email}</span>
-                  </div>
+              <Button
+                onClick={handleGenerate}
+                disabled={loading || !transcription.trim()}
+                className="gap-2 bg-deal-coral hover:bg-deal-coral/90 text-white min-w-[180px]"
+              >
+                {loading ? (
+                  <>
+                    <DealLoadingSpinner size="sm" />
+                    Analyse en cours…
+                  </>
+                ) : (
+                  <>
+                    <Zap className="h-5 w-5" />
+                    Analyser avec l'IA
+                  </>
                 )}
-                {clientInfo.phone && (
-                  <div>
-                    <span className="text-muted-foreground">Tél:</span>
-                    <span className="ml-2">{clientInfo.phone}</span>
-                  </div>
-                )}
-                {clientInfo.city && (
-                  <div>
-                    <span className="text-muted-foreground">Ville:</span>
-                    <span className="ml-2">{clientInfo.postalCode} {clientInfo.city}</span>
-                  </div>
-                )}
-              </div>
-            </Card>
-
-            {/* Items */}
-            <Card className="p-4">
-              <h3 className="font-semibold mb-3 text-[#252B4A] dark:text-white">
-                Prestations ({reviewItems.length})
-              </h3>
-              <div className="space-y-2">
-                {reviewItems.map((item, index) => (
-                  <div key={index} className="flex justify-between text-sm py-2 border-b last:border-0">
-                    <div>
-                      <span className="font-medium">{item.description}</span>
-                      <span className="text-muted-foreground ml-2">
-                        ({item.quantity} {item.unit})
-                      </span>
-                    </div>
-                    <span>{formatCurrency(item.quantity * item.unitPrice)}</span>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            {/* Totals */}
-            <Card className="p-4 bg-[#252B4A] text-white">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Sous-total HT</span>
-                  <span>{formatCurrency(subtotal)}</span>
-                </div>
-                <div className="flex justify-between text-white/70">
-                  <span>TVA ({taxRate}%)</span>
-                  <span>{formatCurrency(taxAmount)}</span>
-                </div>
-                <div className="flex justify-between text-xl font-bold pt-2 border-t border-white/20">
-                  <span>Total TTC</span>
-                  <span className="text-[#E85A5A]">{formatCurrency(total)}</span>
-                </div>
-              </div>
-            </Card>
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <>
-    <TutorialOverlay />
-    <motion.div
-      className="max-w-4xl mx-auto"
-      initial="initial"
-      animate="animate"
-      variants={staggerContainer}
-    >
-      {/* Usage Warning */}
-      {!canCreate && (
-        <motion.div variants={staggerItem} className="mb-6">
-          <Card className="border-red-300 bg-red-50 dark:bg-red-950/20">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <AlertTriangle className="h-5 w-5 text-red-600" />
-                  <div>
-                    <p className="font-medium text-red-700 dark:text-red-300">
-                      Limite atteinte
-                    </p>
-                    <p className="text-sm text-red-600 dark:text-red-400">
-                      {usedQuotes}/{maxQuotes} devis utilisés ce mois
-                    </p>
-                  </div>
-                </div>
-                <Button size="sm" className="bg-[#E85A5A] hover:bg-[#D64545]" asChild>
-                  <Link href="/pricing">
-                    Upgrader <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
-
-      {/* Wizard */}
-      <motion.div variants={staggerItem}>
-        <Card className="border-[#E85A5A]/10 shadow-lg overflow-hidden">
-          <div className="h-1 bg-gradient-to-r from-[#E85A5A] to-[#252B4A]" />
-          <CardContent className="p-6 md:p-8">
-            <QuoteWizard
-              currentStep={currentStep}
-              onStepChange={setCurrentStep}
-              canProceed={canProceed()}
-              isLoading={loading}
-              onComplete={handleComplete}
-              hideStepIndicator={currentStep === "mode"}
-            >
-              {renderStepContent()}
-            </QuoteWizard>
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </motion.div>
+    );
+  }
 
-      {/* Tips - Only show on mode selection */}
-      {currentStep === "mode" && (
-        <motion.div variants={staggerItem} className="mt-6">
-          <Card className="border-[#E85A5A]/10">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2 text-[#252B4A] dark:text-white">
-                <DealIconD size="xs" variant="primary" />
-                Conseils DEAL
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <span className="text-[#E85A5A] font-bold">1</span>
-                  La dictée vocale est idéale après un appel client
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#E85A5A] font-bold">2</span>
-                  Les templates accélèrent la création pour les travaux récurrents
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#E85A5A] font-bold">3</span>
-                  Vous pouvez toujours modifier le devis après génération
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
-    </motion.div>
+  // ---------------------------------------------------------------------------
+  // Render: Split-screen editor (main phase)
+  // ---------------------------------------------------------------------------
+  return (
+    <>
+      <TutorialOverlay />
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-0">
+        {/* Top bar with back + title */}
+        <div className="flex items-center gap-3 mb-4">
+          <Button variant="ghost" size="sm" onClick={() => setPhase("mode")}>
+            ← Mode
+          </Button>
+          <Sparkles className="h-4 w-4 text-deal-coral" />
+          <h1 className="text-lg font-semibold">Nouveau devis</h1>
+          {selectedMode && (
+            <Badge variant="secondary" className="text-2xs">
+              {selectedMode === "vocal" ? "IA" : "Manuel"}
+            </Badge>
+          )}
+        </div>
+
+        {/* Split-screen editor */}
+        <SplitScreenEditor
+          clientInfo={clientInfo}
+          onClientInfoChange={handleClientChange}
+          sector={sector}
+          onSectorChange={handleSectorChange}
+          groups={groups}
+          onGroupsChange={handleGroupsChange}
+          notes={notes}
+          onNotesChange={handleNotesChange}
+          formatCurrency={formatCurrency}
+          availableSectors={availableSectors}
+          companyName={profile?.company_name}
+          companyAddress={profile?.address}
+          companyVat={profile?.siret}
+          iban={profile?.iban}
+          bic={profile?.bic}
+        />
+
+        {/* Persistent bottom bar */}
+        <BottomBar
+          groups={groups}
+          formatCurrency={formatCurrency}
+          onSave={handleSave}
+          onPreviewToggle={() => setPreviewOpen((p) => !p)}
+          onExportPDF={() => toast({ title: "PDF", description: "Sauvegardez d'abord pour exporter en PDF" })}
+          saving={saving}
+          previewOpen={previewOpen}
+          dirty={dirty}
+        />
+      </motion.div>
     </>
   );
 }
