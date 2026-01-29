@@ -1,7 +1,5 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-import { Ratelimit } from '@upstash/ratelimit';
-import { Redis } from '@upstash/redis';
 import {
   isAllowedOrigin,
   getCORSHeaders,
@@ -15,42 +13,43 @@ export const runtime = 'experimental-edge';
 
 /**
  * Rate Limiting Configuration
- * Uses Upstash Redis for Edge-compatible rate limiting
+ * Lazily initialised — imports @upstash/* only when env vars are present
+ * so the middleware never crashes when Redis is not configured.
  */
-const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-  ? new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN,
-    })
-  : null;
+let _rateLimitersPromise: Promise<Record<string, any> | null> | null = null;
 
-// Rate limiters for different route types
-const rateLimiters = redis ? {
-  general: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(100, '1 m'), // 100 req/min
-    analytics: true,
-    prefix: 'rl:general',
-  }),
-  ai: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(10, '1 m'), // 10 req/min for AI
-    analytics: true,
-    prefix: 'rl:ai',
-  }),
-  auth: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(5, '15 m'), // 5 req/15min for auth
-    analytics: true,
-    prefix: 'rl:auth',
-  }),
-  api: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(100, '1 m'), // 100 req/min for public API
-    analytics: true,
-    prefix: 'rl:api',
-  }),
-} : null;
+function getRateLimiters(): Promise<Record<string, any> | null> {
+  if (_rateLimitersPromise !== null) return _rateLimitersPromise;
+
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+    _rateLimitersPromise = Promise.resolve(null);
+    return _rateLimitersPromise;
+  }
+
+  _rateLimitersPromise = (async () => {
+    try {
+      const { Redis } = await import('@upstash/redis');
+      const { Ratelimit } = await import('@upstash/ratelimit');
+
+      const redis = new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL!,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+      });
+
+      return {
+        general: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(100, '1 m'), analytics: true, prefix: 'rl:general' }),
+        ai: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1 m'), analytics: true, prefix: 'rl:ai' }),
+        auth: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, '15 m'), analytics: true, prefix: 'rl:auth' }),
+        api: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(100, '1 m'), analytics: true, prefix: 'rl:api' }),
+      };
+    } catch (error) {
+      console.warn('Upstash Redis not available, rate limiting disabled:', error);
+      return null;
+    }
+  })();
+
+  return _rateLimitersPromise;
+}
 
 /**
  * Get client IP from request headers
@@ -286,6 +285,7 @@ export async function middleware(request: NextRequest) {
     // Apply rate limiting (skip excluded routes)
     const isRateLimitExcluded = RATE_LIMIT_EXCLUDED_ROUTES.some(route => pathname.startsWith(route));
 
+    const rateLimiters = await getRateLimiters();
     if (!isRateLimitExcluded && rateLimiters) {
       const limiterType = getRateLimiterType(pathname);
       const limiter = rateLimiters[limiterType];
