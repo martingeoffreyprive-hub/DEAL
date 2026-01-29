@@ -107,7 +107,7 @@ export function SplitScreenEditor({
   const totalTTC = subtotalHT + totalVAT;
 
   return (
-    <div className="flex h-[calc(100vh-180px)] gap-0 rounded-xl border overflow-hidden bg-background">
+    <div className="flex h-[calc(100vh-280px)] gap-0 rounded-xl border overflow-hidden bg-background">
       {/* ==================== LEFT PANEL: Editor ==================== */}
       <div className={`flex flex-col transition-all duration-300 ${previewOpen ? "w-1/2 xl:w-[55%]" : "w-full"}`}>
         {/* Left header */}

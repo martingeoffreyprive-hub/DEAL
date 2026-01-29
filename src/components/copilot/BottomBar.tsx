@@ -62,7 +62,7 @@ export function BottomBar({
     <motion.div
       initial={{ y: 80 }}
       animate={{ y: 0 }}
-      className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 backdrop-blur-md shadow-2xl"
+      className="sticky bottom-0 left-0 right-0 z-40 border-t bg-card/95 backdrop-blur-md shadow-2xl -mx-4 sm:-mx-5 md:-mx-6 lg:-mx-8 mt-4"
     >
       <div className="max-w-screen-2xl mx-auto px-4 py-2.5 flex items-center gap-4">
         {/* Line count */}
