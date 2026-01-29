@@ -110,6 +110,7 @@ function defaultGroups(sector: SectorType): LineGroup[] {
 // Page component
 // ---------------------------------------------------------------------------
 export default function NewQuotePage() {
+  console.log("[DEAL] NewQuotePage loaded — design 2028 copilot");
   // Phase: "mode" → "transcription" → "editor"
   const [phase, setPhase] = useState<"mode" | "transcription" | "editor">("mode");
   const [selectedMode, setSelectedMode] = useState<CreationMode | null>(null);
