@@ -1,7 +1,7 @@
 // Locale Pack Type Definitions
 // Système de localisation pour FR-BE, FR-FR, FR-CH
 
-export type LocaleCode = 'fr-BE' | 'fr-FR' | 'fr-CH';
+export type LocaleCode = 'fr-BE' | 'fr-FR' | 'fr-CH' | 'nl-BE' | 'de-BE';
 
 export interface TaxConfig {
   standard: number;

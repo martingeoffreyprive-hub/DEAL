@@ -15,24 +15,26 @@ const isEnabled = !!(
 );
 
 /**
- * General rate limiter: 10 requests per minute per user/IP
+ * General rate limiter: 100 requests per minute per user/IP
+ * Aligned with middleware.ts configuration
  */
 export const generalRateLimiter = isEnabled
   ? new Ratelimit({
       redis,
-      limiter: Ratelimit.slidingWindow(10, "1 m"),
+      limiter: Ratelimit.slidingWindow(100, "1 m"),
       analytics: true,
       prefix: "ratelimit:general",
     })
   : null;
 
 /**
- * AI rate limiter: 5 requests per minute per user (more restrictive for expensive operations)
+ * AI rate limiter: 10 requests per minute per user (restrictive for expensive operations)
+ * Aligned with middleware.ts configuration
  */
 export const aiRateLimiter = isEnabled
   ? new Ratelimit({
       redis,
-      limiter: Ratelimit.slidingWindow(5, "1 m"),
+      limiter: Ratelimit.slidingWindow(10, "1 m"),
       analytics: true,
       prefix: "ratelimit:ai",
     })

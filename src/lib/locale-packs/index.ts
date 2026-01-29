@@ -4,18 +4,24 @@
 import { frBE } from './fr-be';
 import { frFR } from './fr-fr';
 import { frCH } from './fr-ch';
+import { nlBE } from './nl-be';
+import { deBE } from './de-be';
 import type { LocalePack, LocaleCode } from './types';
 
 export * from './types';
 export { frBE } from './fr-be';
 export { frFR } from './fr-fr';
 export { frCH } from './fr-ch';
+export { nlBE } from './nl-be';
+export { deBE } from './de-be';
 
 // Registry de tous les packs disponibles
 const LOCALE_PACKS: Record<LocaleCode, LocalePack> = {
   'fr-BE': frBE,
   'fr-FR': frFR,
   'fr-CH': frCH,
+  'nl-BE': nlBE,
+  'de-BE': deBE,
 };
 
 // Pack par défaut
@@ -87,9 +93,13 @@ export function detectLocale(options: {
   // Détection par locale du navigateur
   if (browserLocale) {
     const locale = browserLocale.toLowerCase();
+    if (locale.startsWith('nl') && locale.includes('be')) return 'nl-BE';
+    if (locale.startsWith('de') && locale.includes('be')) return 'de-BE';
     if (locale.includes('be')) return 'fr-BE';
     if (locale.includes('ch')) return 'fr-CH';
-    if (locale.includes('fr')) return 'fr-FR'; // France par défaut pour fr
+    if (locale.startsWith('nl')) return 'nl-BE';
+    if (locale.startsWith('de')) return 'de-BE';
+    if (locale.includes('fr')) return 'fr-FR';
   }
 
   return DEFAULT_LOCALE;

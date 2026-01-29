@@ -28,6 +28,7 @@ import { DealIconD, DealLoadingSpinner } from "@/components/brand";
 import { staggerContainer, staggerItem, cardHover } from "@/components/animations/page-transition";
 import { QuoteWizard, type WizardStep } from "@/components/quotes/quote-wizard";
 import { CreationModeSelector, type CreationMode } from "@/components/quotes/creation-mode-selector";
+import { TutorialOverlay } from "@/components/onboarding/tutorial-overlay";
 
 interface GeneratedQuote {
   sector: SectorType;
@@ -742,6 +743,8 @@ L'ancienne a 15 ans et consomme beaucoup. Je voudrais aussi faire vérifier les 
   };
 
   return (
+    <>
+    <TutorialOverlay />
     <motion.div
       className="max-w-4xl mx-auto"
       initial="initial"
@@ -825,5 +828,6 @@ L'ancienne a 15 ans et consomme beaucoup. Je voudrais aussi faire vérifier les 
         </motion.div>
       )}
     </motion.div>
+    </>
   );
 }

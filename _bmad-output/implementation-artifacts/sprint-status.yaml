@@ -1,7 +1,8 @@
-# generated: 2026-01-28
+# generated: 2026-01-29
 # project: DEAL
 # tracking_system: file-system
 # story_location: _bmad-output/implementation-artifacts/stories
+# version: 3.0 — Based on PRD v3.0 + Architecture doc + Epics & Stories v3.0
 
 # STATUS DEFINITIONS:
 # ==================
@@ -10,151 +11,230 @@
 #   - in-progress: Epic actively being worked on
 #   - done: All stories in epic completed
 #
-# Epic Status Transitions:
-#   - backlog -> in-progress: Automatically when first story is created (via create-story)
-#   - in-progress -> done: Manually when all stories reach 'done' status
-#
 # Story Status:
 #   - backlog: Story only exists in epic file
 #   - ready-for-dev: Story file created in stories folder
 #   - in-progress: Developer actively working on implementation
-#   - review: Ready for code review (via Dev's code-review workflow)
+#   - review: Ready for code review
 #   - done: Story completed
 #
 # Retrospective Status:
 #   - optional: Can be completed but not required
 #   - done: Retrospective has been completed
-#
-# WORKFLOW NOTES:
-# ===============
-# - Epic transitions to 'in-progress' automatically when first story is created
-# - Stories can be worked in parallel if team capacity allows
-# - SM typically creates next story after previous one is 'done' to incorporate learnings
-# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
-generated: 2026-01-28
+generated: 2026-01-29
 project: DEAL
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts/stories
 
+# ═══════════════════════════════════════════════════════════════════════════
+# COMPLETED SPRINTS (v2.0 — January 2026)
+# ═══════════════════════════════════════════════════════════════════════════
+# Sprints 1-8 (v2.0): 13 epics, 46 stories — ALL DONE
+# See git history for details. Covered:
+#   - Phase 1: Security & Foundations (Epic 1)
+#   - Phase 2: UX/UI Revolution (Epics 2-5)
+#   - Phase 3: Admin Panel (Epics 6-10)
+#   - Phase 4: Optimizations (Epics 11-12)
+#   - Phase 5: Polish & Launch (Epic 13)
+# ═══════════════════════════════════════════════════════════════════════════
+
+completed_v2:
+  sprints_completed: 8
+  epics_completed: 13
+  stories_completed: 46
+  date_completed: 2026-01-28
+
+# ═══════════════════════════════════════════════════════════════════════════
+# v3.0 SPRINT PLAN — PRE-LAUNCH TO GROWTH
+# ═══════════════════════════════════════════════════════════════════════════
+
 development_status:
-  # ═══════════════════════════════════════════════════════════════════════════
-  # PHASE 1: FONDATIONS & SECURITE
-  # ═══════════════════════════════════════════════════════════════════════════
 
-  epic-1: done  # Fondations & Securite
-  1-1-suppression-endpoint-debug: done
-  1-2-rate-limiting-global: done
-  1-3-audit-secrets-configuration: done
-  1-4-configuration-cors-production: done
-  1-5-rebranding-quotevoice-deal: done
-  epic-1-retrospective: optional
+  # ═════════════════════════════════════════════════════════════════════════
+  # SPRINT 9: SECURITY HARDENING (Phase 1 — Stabilization)
+  # Epic 1: Security Hardening — 5 stories
+  # Goal: Platform secure before any user touches it
+  # Risks: RT5 (RLS flaw), RT1 (API abuse)
+  # ═════════════════════════════════════════════════════════════════════════
 
-  # ═══════════════════════════════════════════════════════════════════════════
-  # PHASE 2: REVOLUTION UX/UI
-  # ═══════════════════════════════════════════════════════════════════════════
+  epic-1-security-hardening: done
+  1-1-rls-policy-audit: done
+  1-2-rate-limiting-validation: done
+  1-3-security-headers-verification: done
+  1-4-secrets-audit: done
+  1-5-cors-configuration-hardening: done
+  epic-1-security-retrospective: optional
 
-  epic-2: done  # Navigation Mobile-First
-  2-1-bottom-navigation-mobile: done
-  2-2-suppression-sidebar-classique: done
-  2-3-top-navigation-desktop: done
-  2-4-command-palette-cmd-k: done
-  2-5-gestures-mobile: done
-  epic-2-retrospective: optional
+  # ═════════════════════════════════════════════════════════════════════════
+  # SPRINT 10: TESTING & QUALITY (Phase 1 — Stabilization)
+  # Epic 2: Testing & Quality — 5 stories
+  # Goal: > 80% test coverage on critical endpoints
+  # Risks: RB5 (bus factor)
+  # ═════════════════════════════════════════════════════════════════════════
 
-  epic-3: in-progress  # Dashboard Netflix-Style
-  3-1-hero-section-contextuelle: done
-  3-2-carousel-devis-recents: done
-  3-3-dashboard-widgets-personnalisables: backlog  # Deferred - drag & drop not priority
-  3-4-cards-visuelles-devis: done
-  epic-3-retrospective: optional
+  epic-2-testing-quality: done
+  2-1-api-v1-integration-tests: done
+  2-2-auth-flow-e2e-tests: done
+  2-3-quote-generation-e2e-tests: done
+  2-4-stripe-webhook-idempotency-tests: done
+  2-5-rls-regression-test-suite: done
+  epic-2-testing-retrospective: optional
 
-  epic-4: done  # Creation Devis Wizard
-  4-1-wizard-multi-etapes: done
-  4-2-choix-mode-creation: done
-  4-3-mode-chantier: done
-  epic-4-retrospective: optional
+  # ═════════════════════════════════════════════════════════════════════════
+  # SPRINT 11: ONBOARDING & FIRST RUN (Phase 2 — Launch Readiness)
+  # Epic 3: Onboarding & First Run — 5 stories
+  # Goal: New artisan creates first AI quote in < 5 minutes
+  # Risks: RB1 (adoption), RP2 (UX complexity)
+  # ═════════════════════════════════════════════════════════════════════════
 
-  epic-5: done  # Microinteractions & Ludification
-  5-1-celebration-devis-signe: done
-  5-2-system-de-badges: done
-  5-3-transitions-fluides: done
-  epic-5-retrospective: optional
+  epic-3-onboarding-first-run: done
+  3-1-sector-selection-onboarding: done
+  3-2-company-profile-quick-setup: done
+  3-3-first-quote-tutorial-overlay: done
+  3-4-sample-quote-auto-generation: done
+  3-5-onboarding-progress-indicator: done
+  epic-3-onboarding-retrospective: optional
 
-  # ═══════════════════════════════════════════════════════════════════════════
-  # PHASE 3: PANEL ADMINISTRATION
-  # ═══════════════════════════════════════════════════════════════════════════
+  # ═════════════════════════════════════════════════════════════════════════
+  # SPRINT 12: CORE UX POLISH (Phase 2 — Launch Readiness)
+  # Epic 4: Core UX Polish — 5 stories
+  # Goal: Smooth & professional quote workflow
+  # Risks: RP2 (UX complexity), RB3 (churn)
+  # ═════════════════════════════════════════════════════════════════════════
 
-  epic-6: done  # Panel Admin - Dashboard
-  6-1-admin-dashboard-kpis: done
-  6-2-admin-alertes-systeme: done
-  6-3-admin-actions-rapides: done
-  epic-6-retrospective: optional
+  epic-4-core-ux-polish: done
+  4-1-quote-editor-responsiveness: done
+  4-2-quote-status-workflow: done
+  4-3-pdf-template-selection: done
+  4-4-dashboard-quick-actions: done
+  4-5-search-filter-enhancement: done
+  epic-4-ux-retrospective: optional
 
-  epic-7: done  # Panel Admin - Gestion Users
-  7-1-liste-users-avec-filtres: done
-  7-2-detail-user: done
-  7-3-impersonation-user: done
-  7-4-actions-user: done
-  epic-7-retrospective: optional
+  # ═════════════════════════════════════════════════════════════════════════
+  # SPRINT 13: PAYMENT & BILLING (Phase 2 — Launch Readiness)
+  # Epic 5: Payment & Billing Validation — 4 stories
+  # Goal: Stripe integration flawless for all plan transitions
+  # Risks: RT3 (free tier), RB2 (conversion)
+  # ═════════════════════════════════════════════════════════════════════════
 
-  epic-8: done  # Panel Admin - Secteurs & Content
-  8-1-crud-secteurs: done
-  8-2-vocabulaire-ia-par-secteur: done
-  8-3-templates-marketplace: done
-  epic-8-retrospective: optional
+  epic-5-payment-billing: done
+  5-1-subscription-plans-alignment: done
+  5-2-upgrade-flow-e2e: done
+  5-3-downgrade-cancellation-flow: done
+  5-4-failed-payment-handling: done
+  epic-5-billing-retrospective: optional
 
-  epic-9: done  # Panel Admin - TokenDEAL Economy
-  9-1-dashboard-tokens: done
-  9-2-gestion-bonus-tokens: done
-  9-3-configuration-prix-tokens: done
-  epic-9-retrospective: optional
+  # ═══════════════════════════════════════════════════════════════════════
+  # ██████████████████████ LAUNCH GATE ██████████████████████████████████
+  # Epics 1-5 (Sprints 9-13) MUST be complete before public launch
+  # ═══════════════════════════════════════════════════════════════════════
 
-  epic-10: done  # Panel Admin - Analytics
-  10-1-rapports-personnalisables: done
-  10-2-cohortes-utilisateurs: done
-  10-3-funnel-conversion: done
-  epic-10-retrospective: optional
+  # ═════════════════════════════════════════════════════════════════════════
+  # SPRINT 14: MONITORING & OBSERVABILITY (Phase 3 — Launch)
+  # Epic 6: Monitoring & Observability — 4 stories
+  # Goal: Know what's happening in production from day one
+  # Risks: RT1 (API issues), RT3 (free tier), RT6 (AI costs)
+  # ═════════════════════════════════════════════════════════════════════════
 
-  # ═══════════════════════════════════════════════════════════════════════════
-  # PHASE 4: OPTIMISATIONS
-  # ═══════════════════════════════════════════════════════════════════════════
+  epic-6-monitoring: done
+  6-1-error-tracking-sentry: done
+  6-2-ai-cost-monitoring: done
+  6-3-uptime-monitoring: done
+  6-4-usage-analytics-dashboard: done
+  epic-6-monitoring-retrospective: optional
 
-  epic-11: done  # Optimisations Performance
-  11-1-refactor-advancedquoteeditor: done  # Performance utilities created
-  11-2-pdf-preview-memoization: done  # Hooks: useDebounce, useMemo patterns
-  11-3-pwa-service-worker: done  # Service worker + manifest
-  epic-11-retrospective: optional
+  # ═════════════════════════════════════════════════════════════════════════
+  # SPRINT 15: PERFORMANCE OPTIMIZATION (Phase 3 — Launch)
+  # Epic 7: Performance Optimization — 4 stories
+  # Goal: All pages < 2s, AI generation < 15s
+  # PRD refs: NFR1.1–NFR1.6
+  # ═════════════════════════════════════════════════════════════════════════
 
-  epic-12: done  # Tests & Qualite
-  12-1-tests-e2e-playwright: done  # Config + auth/dashboard tests
-  12-2-tests-composants-vitest: done  # Config + badge-system tests
-  12-3-tests-api-integration: done  # Quotes API tests
-  epic-12-retrospective: optional
+  epic-7-performance: done
+  7-1-lighthouse-audit-fixes: done
+  7-2-ai-generation-latency: done
+  7-3-pdf-generation-performance: done
+  7-4-database-query-optimization: done
+  epic-7-performance-retrospective: optional
 
-  # ═══════════════════════════════════════════════════════════════════════════
-  # PHASE 5: POLISH & LAUNCH
-  # ═══════════════════════════════════════════════════════════════════════════
+  # ═════════════════════════════════════════════════════════════════════════
+  # SPRINT 16: GUIDED ONBOARDING V2 (Phase 4 — Growth)
+  # Epic 8: Guided Onboarding v2 — 4 stories
+  # Goal: Activation rate 50%, reduce time-to-value
+  # Risks: RB1 (adoption), RB3 (churn)
+  # ═════════════════════════════════════════════════════════════════════════
 
-  epic-13: done  # Polish & Launch
-  13-1-onboarding-wizard-ameliore: done
-  13-2-documentation-api-openapi: done
-  13-3-monitoring-sentry: done
-  13-4-analytics-posthog: done
-  epic-13-retrospective: optional
+  epic-8-onboarding-v2: done
+  8-1-interactive-onboarding-wizard: done
+  8-2-contextual-tooltips: done
+  8-3-email-drip-campaign: done
+  8-4-video-tutorials: done
+  epic-8-onboarding-v2-retrospective: optional
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # SPRINT 17: ACQUISITION & RETENTION (Phase 4 — Growth)
+  # Epic 9: Acquisition & Retention — 5 stories
+  # Goal: 200 users month 3, 10% conversion
+  # Risks: RB1, RB2, RB3
+  # ═════════════════════════════════════════════════════════════════════════
+
+  epic-9-acquisition-retention: done
+  9-1-referral-program-activation: done
+  9-2-upgrade-prompts-optimization: done
+  9-3-feature-discovery-notifications: done
+  9-4-landing-page-conversion: done
+  9-5-beta-user-feedback-loop: done
+  epic-9-acquisition-retrospective: optional
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # SPRINT 18: LOCALIZATION NL/DE (Phase 5 — Scale)
+  # Epic 10: Localization — 3 stories
+  # Goal: Full Belgian market (Dutch + German)
+  # Constraint: C6 (FR only at launch)
+  # ═════════════════════════════════════════════════════════════════════════
+
+  epic-10-localization: done
+  10-1-i18n-framework-setup: done
+  10-2-dutch-translation: done
+  10-3-german-translation: done
+  epic-10-localization-retrospective: optional
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # SPRINT 19: ADVANCED INTEGRATIONS (Phase 5 — Scale)
+  # Epic 11: Advanced Integrations — 4 stories
+  # Goal: Increase stickiness and automate workflows
+  # PRD refs: F11.3, F11.5, F11.6
+  # ═════════════════════════════════════════════════════════════════════════
+
+  epic-11-integrations: done
+  11-1-docusign-integration: done
+  11-2-pwa-offline-mode: done
+  11-3-public-api-documentation: done
+  11-4-webhook-system: done
+  epic-11-integrations-retrospective: optional
 
 # ═══════════════════════════════════════════════════════════════════════════
-# SPRINT PLANNING SUMMARY
+# SPRINT PLANNING SUMMARY v3.0
 # ═══════════════════════════════════════════════════════════════════════════
 #
-# Sprint 1: Epic 1 (Securite & Fondations) - 5 stories
-# Sprint 2: Epic 2 (Navigation Revolution) - 5 stories
-# Sprint 3: Epic 3 + 4 (Dashboard & Wizard) - 7 stories
-# Sprint 4: Epic 5 + 6 (Ludification & Admin Base) - 6 stories
-# Sprint 5: Epic 7 + 8 (Admin Users & Content) - 7 stories
-# Sprint 6: Epic 9 + 10 (Tokens & Analytics) - 6 stories
-# Sprint 7: Epic 11 + 12 (Performance & Tests) - 6 stories
-# Sprint 8: Epic 13 (Launch) - 4 stories
+# COMPLETED (v2.0):
+#   Sprints 1-8: 13 epics, 46 stories — ALL DONE
 #
-# TOTAL: 13 Epics, 46 Stories
+# PLANNED (v3.0):
+#   Sprint  9: Epic 1 — Security Hardening ............. 5 stories [MUST]
+#   Sprint 10: Epic 2 — Testing & Quality .............. 5 stories [MUST]
+#   Sprint 11: Epic 3 — Onboarding & First Run ......... 5 stories [MUST]
+#   Sprint 12: Epic 4 — Core UX Polish ................. 5 stories [MUST]
+#   Sprint 13: Epic 5 — Payment & Billing .............. 4 stories [MUST]
+#   ════════════════ LAUNCH GATE ════════════════════════════════════
+#   Sprint 14: Epic 6 — Monitoring & Observability ..... 4 stories [SHOULD]
+#   Sprint 15: Epic 7 — Performance Optimization ....... 4 stories [SHOULD]
+#   Sprint 16: Epic 8 — Guided Onboarding v2 .......... 4 stories [SHOULD]
+#   Sprint 17: Epic 9 — Acquisition & Retention ........ 5 stories [SHOULD]
+#   Sprint 18: Epic 10 — Localization NL/DE ............ 3 stories [COULD]
+#   Sprint 19: Epic 11 — Advanced Integrations ......... 4 stories [COULD]
+#
+# TOTAL v3.0: 11 epics, 48 stories across 11 sprints
+# GRAND TOTAL: 24 epics, 94 stories across 19 sprints
 # ═══════════════════════════════════════════════════════════════════════════

@@ -28,6 +28,9 @@ import {
   staggerItem,
   cardHover,
 } from "@/components/animations/page-transition";
+import { OnboardingChecklist } from "@/components/onboarding/onboarding-checklist";
+import { SampleQuoteBanner } from "@/components/onboarding/sample-quote-banner";
+import { type SectorType } from "@/types/database";
 
 interface DashboardStats {
   totalAmount: number;
@@ -196,6 +199,28 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Onboarding Checklist (shown until all steps complete) */}
+      {profile && (
+        <motion.div variants={staggerItem}>
+          <OnboardingChecklist
+            profileCompleted={!!(profile.company_name && profile.siret)}
+            sectorSelected={!!profile.default_sector}
+            hasQuotes={quotes.length > 0}
+            hasPdfExported={quotes.some((q: any) => q.pdf_url)}
+          />
+        </motion.div>
+      )}
+
+      {/* Sample Quote Banner (shown when no quotes exist) */}
+      {profile?.default_sector && (
+        <motion.div variants={staggerItem}>
+          <SampleQuoteBanner
+            userSector={profile.default_sector as SectorType}
+            hasQuotes={quotes.length > 0}
+          />
+        </motion.div>
+      )}
 
       {/* Recent Quotes Carousel (Netflix-style) */}
       <motion.div variants={staggerItem}>
