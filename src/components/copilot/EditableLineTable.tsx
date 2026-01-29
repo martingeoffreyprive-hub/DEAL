@@ -395,7 +395,7 @@ export function EditableLineTable({
   readOnly = false,
 }: EditableLineTableProps) {
   const sectorConfig = getSectorConfig(sector);
-  const sectorUnits = [...new Set([...sectorConfig.units, ...UNITS.slice(0, 10)])];
+  const sectorUnits = Array.from(new Set([...sectorConfig.units, ...UNITS.slice(0, 10)]));
   const defaultVat = sectorConfig.taxRate;
 
   const [activeItem, setActiveItem] = useState<LineItem | null>(null);
